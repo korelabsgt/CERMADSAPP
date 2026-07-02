@@ -46,6 +46,13 @@
   --border: oklch(40% 0 0);
   --input: oklch(45% 0 0);
   --ring: oklch(55.6% 0 0);
+
+  /* Toastify (ventas): tonos un poco más oscuros en tema oscuro */
+  --toastify-color-success: #047857;
+  --toastify-color-error: #b91c1c;
+  --toastify-color-progress-success: #047857;
+  --toastify-color-progress-error: #b91c1c;
+  --toastify-toast-shadow: 0px 4px 14px rgba(0, 0, 0, 0.45);
 }
 
 @theme inline {

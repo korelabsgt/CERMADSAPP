@@ -145,8 +145,17 @@ export default function SaleModal({
     return estado === "entregado";
   }, [ventaToEdit, isAnulado, soloPagoEditable, effectiveRole]);
 
+  const isPendiente = useMemo(() => {
+    if (!ventaToEdit) return true;
+    return (
+      String(ventaToEdit.estado || "Pendiente").trim().toLowerCase() ===
+      "pendiente"
+    );
+  }, [ventaToEdit]);
+
   const camposDeshabilitados = isAnulado || isReadOnly || soloPagoEditable;
-  const pagoDeshabilitado = isAnulado || (isReadOnly && !soloPagoEditable);
+  const pagoDeshabilitado =
+    isAnulado || (!isPendiente && isReadOnly && !soloPagoEditable);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -342,18 +351,47 @@ export default function SaleModal({
     if (!ventaToEdit?.id || camposDeshabilitados || soloPagoEditable) return;
 
     const isDark = document.documentElement.classList.contains("dark");
+    let countdownInterval: ReturnType<typeof setInterval> | null = null;
 
     const result = await Swal.fire({
-      title: "¿Estás seguro?",
-      text: "Se anulará la venta y se devolverá el stock.",
+      title: "¿Anular venta?",
+      text: "Se anulará la venta y se devolverá el stock. Esta acción no se puede deshacer.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#ef4444",
       cancelButtonColor: "#6b7280",
-      confirmButtonText: "Sí, anular venta",
-      cancelButtonText: "No, volver",
+      confirmButtonText: "Espera 5s",
+      cancelButtonText: "Cancelar",
       background: isDark ? "#1c1c1e" : undefined,
       color: isDark ? "#f5f5f5" : undefined,
+      didOpen: () => {
+        const confirmBtn = Swal.getConfirmButton();
+        if (!confirmBtn) return;
+
+        confirmBtn.disabled = true;
+        confirmBtn.style.opacity = "0.55";
+        confirmBtn.style.cursor = "not-allowed";
+
+        let seconds = 5;
+        confirmBtn.textContent = `Espera ${seconds}s`;
+
+        countdownInterval = setInterval(() => {
+          seconds -= 1;
+          if (seconds > 0) {
+            confirmBtn.textContent = `Espera ${seconds}s`;
+          } else {
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = null;
+            confirmBtn.disabled = false;
+            confirmBtn.style.opacity = "1";
+            confirmBtn.style.cursor = "pointer";
+            confirmBtn.textContent = "Sí, Anular venta";
+          }
+        }, 1000);
+      },
+      willClose: () => {
+        if (countdownInterval) clearInterval(countdownInterval);
+      },
     });
 
     if (result.isConfirmed) {
@@ -485,7 +523,7 @@ export default function SaleModal({
                       <button
                         type="button"
                         onClick={() => setModals({ ...modals, client: true })}
-                        className="size-10 flex items-center justify-center bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shrink-0"
+                        className="size-10 flex items-center justify-center rounded-lg border border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors cursor-pointer shrink-0"
                       >
                         <Plus className="size-5" />
                       </button>
@@ -542,19 +580,10 @@ export default function SaleModal({
               </div>
 
               <div className="space-y-3">
-                <div className="flex justify-between items-end border-b pb-2">
+                <div className="border-b pb-2">
                   <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider">
                     Detalle de la Venta
                   </h3>
-                  {!isReadOnly && (
-                    <button
-                      type="button"
-                      onClick={() => setModals({ ...modals, product: true })}
-                      className="text-xs font-bold flex items-center gap-1 text-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
-                    >
-                      <Plus className="size-4" /> AGREGAR PRODUCTO
-                    </button>
-                  )}
                 </div>
 
                 <div className="border rounded-xl overflow-hidden shadow-sm bg-card">
@@ -660,13 +689,30 @@ export default function SaleModal({
                       ))
                     )}
                   </div>
-                  <div className="bg-muted/30 border-t p-4 flex justify-end items-center gap-4">
-                    <span className="text-xs font-bold text-muted-foreground uppercase">
-                      Total
-                    </span>
-                    <span className="text-2xl font-black text-primary tracking-tight">
-                      Q{watch("total")?.toFixed(2)}
-                    </span>
+                  <div
+                    className={`bg-muted/30 border-t p-4 flex items-center gap-4 ${
+                      isReadOnly ? "justify-end" : "justify-between"
+                    }`}
+                  >
+                    {!isReadOnly && (
+                      <button
+                        type="button"
+                        onClick={() => setModals({ ...modals, product: true })}
+                        className="text-[10px] md:text-xs font-bold flex items-center gap-1.5 px-4 py-2 rounded-lg border border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors cursor-pointer shrink-0"
+                      >
+                        <Plus className="size-4" />
+                        <span className="md:hidden">AGREGAR</span>
+                        <span className="hidden md:inline">AGREGAR PRODUCTO</span>
+                      </button>
+                    )}
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs font-bold text-muted-foreground uppercase">
+                        Total
+                      </span>
+                      <span className="text-2xl font-black text-primary tracking-tight">
+                        Q{watch("total")?.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -800,71 +846,143 @@ export default function SaleModal({
           </div>
 
           <div className="shrink-0 p-4 border-t bg-muted/30">
-            <div className="mx-auto w-full max-w-5xl flex justify-between items-center gap-3">
-              <div>
-                {ventaToEdit && !camposDeshabilitados && !isAnulado && (
+            <div className="mx-auto w-full max-w-5xl">
+              {/* Móvil */}
+              <div className="flex flex-col gap-3 md:hidden">
+                {isAnulado || (isReadOnly && !soloPagoEditable) ? (
                   <button
                     type="button"
-                    onClick={handleCancelOrder}
-                    className="px-6 py-2 rounded-lg bg-red-500/10 text-red-600 border border-red-500 font-bold text-sm hover:bg-red-500/20 cursor-pointer transition-colors flex items-center gap-2"
+                    onClick={onClose}
+                    className="w-full py-2.5 rounded-lg border bg-background font-bold text-sm hover:bg-muted cursor-pointer transition-colors"
                   >
-                    Anular Venta
+                    CERRAR VISTA
                   </button>
+                ) : soloPagoEditable ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="w-full py-2.5 rounded-lg border bg-background font-bold text-sm hover:bg-muted cursor-pointer transition-colors"
+                    >
+                      CANCELAR
+                    </button>
+                    <button
+                      type="button"
+                      disabled={
+                        isSubmitting ||
+                        updatePagoMutation.isPending ||
+                        tipoVenta !== "Contado"
+                      }
+                      onClick={async () => {
+                        const res = await guardarPago();
+                        if (res?.success) onClose();
+                      }}
+                      className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 disabled:opacity-50 cursor-pointer transition-all"
+                    >
+                      GUARDAR PAGO
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        className="w-full py-2.5 rounded-lg bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500 font-bold text-sm hover:bg-gray-500/20 cursor-pointer transition-colors"
+                      >
+                        CANCELAR
+                      </button>
+                      <button
+                        type="submit"
+                        form="venta-form"
+                        disabled={isSubmitting || fields.length === 0}
+                        className="w-full py-2.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500 font-bold text-sm hover:bg-blue-500/20 disabled:opacity-50 cursor-pointer transition-colors"
+                      >
+                        {ventaToEdit ? "ACTUALIZAR" : "GUARDAR"}
+                      </button>
+                    </div>
+                    {ventaToEdit && !camposDeshabilitados && !isAnulado && (
+                      <div className="pt-3 border-t border-border">
+                        <button
+                          type="button"
+                          onClick={handleCancelOrder}
+                          className="w-full py-2.5 rounded-lg bg-red-500/10 text-red-600 border border-red-500 font-bold text-sm hover:bg-red-500/20 cursor-pointer transition-colors"
+                        >
+                          Anular Venta
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
-              {isAnulado || (isReadOnly && !soloPagoEditable) ? (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-8 py-2 rounded-lg border bg-background font-bold text-sm hover:bg-muted cursor-pointer transition-colors"
-                >
-                  CERRAR VISTA
-                </button>
-              ) : soloPagoEditable ? (
-                <div className="flex items-center gap-3">
+              {/* Escritorio */}
+              <div className="hidden md:flex justify-between items-center gap-3">
+                <div>
+                  {ventaToEdit && !camposDeshabilitados && !isAnulado && (
+                    <button
+                      type="button"
+                      onClick={handleCancelOrder}
+                      className="px-6 py-2 rounded-lg bg-red-500/10 text-red-600 border border-red-500 font-bold text-sm hover:bg-red-500/20 cursor-pointer transition-colors flex items-center gap-2"
+                    >
+                      Anular Venta
+                    </button>
+                  )}
+                </div>
+
+                {isAnulado || (isReadOnly && !soloPagoEditable) ? (
                   <button
                     type="button"
                     onClick={onClose}
                     className="px-8 py-2 rounded-lg border bg-background font-bold text-sm hover:bg-muted cursor-pointer transition-colors"
                   >
-                    CANCELAR
+                    CERRAR VISTA
                   </button>
-                  <button
-                    type="button"
-                    disabled={
-                      isSubmitting ||
-                      updatePagoMutation.isPending ||
-                      tipoVenta !== "Contado"
-                    }
-                    onClick={async () => {
-                      const res = await guardarPago();
-                      if (res?.success) onClose();
-                    }}
-                    className="px-8 py-2 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 disabled:opacity-50 cursor-pointer transition-all flex items-center gap-2"
-                  >
-                    GUARDAR PAGO
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="px-8 py-2 rounded-lg border bg-background font-bold text-sm hover:bg-muted cursor-pointer transition-colors"
-                  >
-                    CANCELAR
-                  </button>
-                  <button
-                    type="submit"
-                    form="venta-form"
-                    disabled={isSubmitting || fields.length === 0}
-                    className="px-8 py-2 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 disabled:opacity-50 cursor-pointer transition-all flex items-center gap-2"
-                  >
-                    {ventaToEdit ? "ACTUALIZAR" : "GUARDAR"}
-                  </button>
-                </div>
-              )}
+                ) : soloPagoEditable ? (
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="px-8 py-2 rounded-lg border bg-background font-bold text-sm hover:bg-muted cursor-pointer transition-colors"
+                    >
+                      CANCELAR
+                    </button>
+                    <button
+                      type="button"
+                      disabled={
+                        isSubmitting ||
+                        updatePagoMutation.isPending ||
+                        tipoVenta !== "Contado"
+                      }
+                      onClick={async () => {
+                        const res = await guardarPago();
+                        if (res?.success) onClose();
+                      }}
+                      className="px-8 py-2 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 disabled:opacity-50 cursor-pointer transition-all flex items-center gap-2"
+                    >
+                      GUARDAR PAGO
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="px-8 py-2 rounded-lg bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500 font-bold text-sm hover:bg-gray-500/20 cursor-pointer transition-colors"
+                    >
+                      CANCELAR
+                    </button>
+                    <button
+                      type="submit"
+                      form="venta-form"
+                      disabled={isSubmitting || fields.length === 0}
+                      className="px-8 py-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500 font-bold text-sm hover:bg-blue-500/20 disabled:opacity-50 cursor-pointer transition-colors"
+                    >
+                      {ventaToEdit ? "ACTUALIZAR" : "GUARDAR"}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
