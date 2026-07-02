@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import AnimatedIcon from "@/components/ui/AnimatedIcon";
-import Swal from "sweetalert2";
 import StatsModal from "../modals/stats-modal";
 import {
   Popover,
@@ -233,6 +232,9 @@ export default function ListView({
   const current = useMemo(() => getGuatemalaDateParts(), []);
 
   const [filtroEstado, setFiltroEstado] = useState("");
+  const [filtroMetodoPago, setFiltroMetodoPago] = useState<
+    "" | "Efectivo" | "Transferencia"
+  >("");
   const [filtroAnio, setFiltroAnio] = useState<number>(current.year);
   const [filtroMes, setFiltroMes] = useState<number>(current.month);
   const [filtroSemana, setFiltroSemana] = useState<number | "Todas">("Todas");
@@ -254,6 +256,12 @@ export default function ListView({
         .toLowerCase();
       const matchEstado =
         filtroEstado === "" || estadoActual === filtroEstado.toLowerCase();
+
+      const metodoPagoActual = String(order.metodo_pago || "Efectivo").trim();
+      const matchMetodoPago =
+        filtroEstado.toLowerCase() !== "entregado" ||
+        filtroMetodoPago === "" ||
+        metodoPagoActual === filtroMetodoPago;
 
       const orderDate = getGuatemalaDateParts(getOrderDateString(order));
       const matchAnio = orderDate.year === filtroAnio;
@@ -282,11 +290,12 @@ export default function ListView({
 
       return (
         matchEstado &&
+        matchMetodoPago &&
         matchSearch &&
         (estadoActual === "pendiente" || matchFecha)
       );
     });
-  }, [data, filtroEstado, filtroAnio, filtroMes, filtroSemana, searchTerm]);
+  }, [data, filtroEstado, filtroMetodoPago, filtroAnio, filtroMes, filtroSemana, searchTerm]);
 
   const counts = useMemo(() => {
     const c = { Pendiente: 0, Entregado: 0, Anulado: 0 };
@@ -322,6 +331,7 @@ export default function ListView({
     setCurrentPage(1);
   }, [
     filtroEstado,
+    filtroMetodoPago,
     filtroAnio,
     filtroMes,
     filtroSemana,
@@ -361,54 +371,110 @@ export default function ListView({
     setFiltroSemana("Todas");
   };
 
-  const estadoOptions = [
-    { v: "Pendiente", c: "amber" },
-    { v: "Entregado", c: "green" },
-    { v: "Anulado", c: "red" },
-  ].filter((item) => counts[item.v as keyof typeof counts] > 0);
+  const pagoOpciones = [
+    { v: "Efectivo" as const, label: "Efectivo", c: "purple" },
+    { v: "Transferencia" as const, label: "Transferencia", c: "blue" },
+  ];
 
-  const renderEstadoFilters = (
-    className = "",
-    layout: "inline" | "stacked" = "inline",
-  ) => {
-    const count = estadoOptions.length;
-    const gridCols = count === 3 ? "grid-cols-3" : "grid-cols-2";
+  const filterChipClass = (color: string, selected: boolean) =>
+    cn(
+      "flex items-center justify-center border-2 rounded-xl cursor-pointer transition-all font-semibold px-4 py-2 min-h-9 text-xs sm:text-sm shrink-0 whitespace-nowrap",
+      `bg-${color}-500/10 text-${color}-600 dark:text-${color}-400`,
+      `border-${color}-500/40`,
+      selected
+        ? `border-${color}-500 opacity-100 shadow-sm`
+        : "opacity-65 hover:opacity-100",
+    );
 
-    const buttons = estadoOptions.map((item) => (
+  const renderFiltrosVenta = () => {
+    const chips: React.ReactNode[] = [];
+
+    const toggleEstado = (estado: "Pendiente" | "Entregado" | "Anulado") => {
+      if (filtroEstado === estado && filtroMetodoPago === "") {
+        setFiltroEstado("");
+      } else {
+        setFiltroEstado(estado);
+        setFiltroMetodoPago("");
+      }
+    };
+
+    chips.push(
       <button
-        key={item.v}
-        onClick={() => setFiltroEstado(filtroEstado === item.v ? "" : item.v)}
-        className={`flex items-center justify-center border-2 rounded-lg cursor-pointer transition-all font-bold bg-${item.c}-500/10 text-${item.c}-600 ${
-          layout === "stacked"
-            ? "w-full px-2 py-2 text-[10px] sm:text-xs"
-            : "px-3 py-1 text-xs"
-        } ${
-          filtroEstado === item.v
-            ? `border-${item.c}-500`
-            : "border-transparent hover:opacity-70"
-        }`}
+        key="estado-Pendiente"
+        type="button"
+        onClick={() => toggleEstado("Pendiente")}
+        className={filterChipClass(
+          "amber",
+          filtroEstado === "Pendiente" && filtroMetodoPago === "",
+        )}
       >
-        {item.v} ({counts[item.v as keyof typeof counts]})
-      </button>
-    ));
+        Pendiente ({counts.Pendiente})
+      </button>,
+    );
 
-    if (layout === "stacked") {
-      return (
-        <div className={cn("w-full flex flex-col gap-2", className)}>
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-            Estado:
-          </span>
-          <div className={cn("grid w-full gap-2", gridCols)}>{buttons}</div>
-        </div>
+    chips.push(
+      <button
+        key="estado-Entregado"
+        type="button"
+        onClick={() => toggleEstado("Entregado")}
+        className={filterChipClass(
+          "green",
+          filtroEstado === "Entregado" && filtroMetodoPago === "",
+        )}
+      >
+        Entregado ({counts.Entregado})
+      </button>,
+    );
+
+    for (const pago of pagoOpciones) {
+      chips.push(
+        <button
+          key={`pago-${pago.v}`}
+          type="button"
+          onClick={() => {
+            if (
+              filtroEstado === "Entregado" &&
+              filtroMetodoPago === pago.v
+            ) {
+              setFiltroEstado("");
+              setFiltroMetodoPago("");
+            } else {
+              setFiltroEstado("Entregado");
+              setFiltroMetodoPago(pago.v);
+            }
+          }}
+          className={filterChipClass(
+            pago.c,
+            filtroEstado === "Entregado" && filtroMetodoPago === pago.v,
+          )}
+        >
+          {pago.label}
+        </button>,
       );
     }
 
+    chips.push(
+      <button
+        key="estado-Anulado"
+        type="button"
+        onClick={() => toggleEstado("Anulado")}
+        className={filterChipClass(
+          "red",
+          filtroEstado === "Anulado" && filtroMetodoPago === "",
+        )}
+      >
+        Anulado ({counts.Anulado})
+      </button>,
+    );
+
     return (
-      <div className={cn("flex flex-wrap gap-2 items-center", className)}>
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+      <div className="flex flex-nowrap items-center gap-3 sm:gap-4 w-full min-w-0">
+        <span className="w-[4.5rem] sm:w-20 shrink-0 text-[11px] font-bold text-muted-foreground uppercase tracking-wide">
           Estado:
         </span>
-        {buttons}
+        <div className="flex flex-nowrap gap-2.5 sm:gap-3 items-center min-w-0 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {chips}
+        </div>
       </div>
     );
   };
@@ -422,63 +488,62 @@ export default function ListView({
 
   return (
     <div className="flex flex-col gap-4 animate-in fade-in duration-300">
-      {/* Top filter bar - row 1 */}
+      {/* Top filter bar */}
       <div className="flex flex-col gap-3 p-4 bg-card border rounded-xl shadow-sm">
-        <div className="flex flex-col xl:flex-row gap-3 items-start xl:items-center w-full">
-          <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center w-full xl:flex-1 min-w-0">
-            <div className="flex items-center gap-2 bg-background border rounded-lg px-3 py-2 w-full lg:w-72 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all h-10 shrink-0">
-              <Search className="size-4 text-muted-foreground shrink-0" />
-              <input
-                type="text"
-                placeholder="Buscar por Cliente, recibo o NIT"
-                className="bg-transparent outline-none text-xs w-full font-medium"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            {renderEstadoFilters("hidden xl:flex")}
+        {/* Fila 1: búsqueda + fecha + acciones */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between w-full">
+          <div className="flex items-center gap-2 bg-background border rounded-lg px-3 py-2 w-full sm:max-w-xs lg:max-w-sm focus-within:ring-2 focus-within:ring-orange-500/20 transition-all h-10 shrink-0">
+            <Search className="size-4 text-muted-foreground shrink-0" />
+            <input
+              type="text"
+              placeholder="Buscar por Cliente, recibo o NIT"
+              className="bg-transparent outline-none text-xs w-full font-medium"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto shrink-0 sm:items-center">
-            <div className="flex flex-row gap-2 w-full sm:w-auto items-center">
-              <MonthYearPicker
-                year={filtroAnio}
-                month={filtroMes}
-                onChange={handleMonthYearChange}
-              />
+          <div className="flex flex-row gap-2 w-full sm:w-auto items-center shrink-0">
+            <MonthYearPicker
+              year={filtroAnio}
+              month={filtroMes}
+              onChange={handleMonthYearChange}
+            />
 
-              <select
-                value={filtroSemana}
-                onChange={(e) =>
-                  setFiltroSemana(
-                    e.target.value === "Todas"
-                      ? "Todas"
-                      : Number(e.target.value),
-                  )
-                }
-                className="flex-1 sm:flex-none sm:w-auto h-10 px-2 sm:px-3 border rounded-lg bg-background font-bold text-[10px] sm:text-xs outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer truncate"
-              >
-                <option value="Todas">Semana</option>
-                {semanasDelMes.map((s) => (
-                  <option key={s.week} value={s.week}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={filtroSemana}
+              onChange={(e) =>
+                setFiltroSemana(
+                  e.target.value === "Todas"
+                    ? "Todas"
+                    : Number(e.target.value),
+                )
+              }
+              className="flex-1 sm:flex-none h-10 px-2 sm:px-3 border rounded-lg bg-background font-bold text-[10px] sm:text-xs outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer truncate min-w-24"
+            >
+              <option value="Todas">Semana</option>
+              {semanasDelMes.map((s) => (
+                <option key={s.week} value={s.week}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
 
             <button
               onClick={() => setShowStats(true)}
-              className="w-full sm:w-auto h-10 flex items-center justify-center gap-2 px-4 border rounded-lg bg-orange-500/10 text-orange-600 font-bold text-xs hover:bg-orange-500/20 transition-all cursor-pointer whitespace-nowrap border-orange-500/30 shrink-0"
+              className="h-10 flex items-center justify-center gap-2 px-4 border rounded-lg bg-orange-500/10 text-orange-600 font-bold text-xs hover:bg-orange-500/20 transition-all cursor-pointer whitespace-nowrap border-orange-500/30 shrink-0"
             >
               <BarChart2 className="size-4" />
-              Ventas por Vendedor
+              <span className="hidden sm:inline">Ventas por Vendedor</span>
+              <span className="sm:hidden">Vendedor</span>
             </button>
           </div>
         </div>
 
-        {renderEstadoFilters("xl:hidden", "stacked")}
+        {/* Fila 2: estado · Fila 3: tipo de pago */}
+        <div className="rounded-lg bg-muted/25 border border-border/40 p-3 sm:px-4 sm:py-3">
+          {renderFiltrosVenta()}
+        </div>
       </div>
 
       {/* Results */}
@@ -543,15 +608,6 @@ export default function ListView({
                     }
 
                     const handleEditAreaClick = () => {
-                      if (tieneFacturaCertificada && !isAnulada) {
-                        Swal.fire({
-                          title: "⚠️ Venta Bloqueada",
-                          text: "Esta venta ya tiene una factura electrónica generada. Para poder modificarla, primero debe anular la factura correspondiente.",
-                          icon: "info",
-                          confirmButtonColor: "#10b981",
-                        });
-                        return;
-                      }
                       onEditClick(venta);
                     };
 

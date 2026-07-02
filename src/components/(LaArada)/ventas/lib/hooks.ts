@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { getVentas, createVenta, getCatalogos, updateVenta, getVendedores } from "./actions";
-import { VentaFormValues } from "./zod";
+import { getVentas, createVenta, getCatalogos, updateVenta, updateVentaPago, getVendedores } from "./actions";
+import { VentaFormValues, PagoVentaValues } from "./zod";
 import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 
 export function useVentas(vendedorId?: string) {
   const queryClient = useQueryClient();
@@ -102,6 +103,25 @@ export function useUpdateVenta() {
           title: "Venta actualizada correctamente",
           timer: 1500,
           showConfirmButton: false,
+        });
+      }
+    },
+  });
+}
+
+export function useUpdateVentaPago() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: PagoVentaValues }) =>
+      updateVentaPago(id, data),
+    onSuccess: (res) => {
+      if (res?.error) {
+        toast.error(res.error, { theme: "colored", autoClose: 3000 });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["ventas"] });
+        toast.success("Forma de pago actualizada", {
+          theme: "colored",
+          autoClose: 2000,
         });
       }
     },

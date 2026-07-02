@@ -21,6 +21,11 @@ export const VentaSchema = z.object({
   fecha_entrega: z.string().optional().or(z.literal("")),
   tipo_venta: z.enum(["Contado", "Crédito"]),
   tipo_comprobante: z.enum(["Recibo", "NIT", "C/F"]).default("Recibo"),
+  metodo_pago: z.enum(["Efectivo", "Transferencia"]).default("Efectivo"),
+  numero_boleta: z.string().optional().or(z.literal("")),
+  banco: z.string().optional().or(z.literal("")),
+  fecha_transferencia: z.string().optional().or(z.literal("")),
+  img_comprobante_url: z.string().nullable().optional(),
   observaciones: z.string().optional(),
   total: z.coerce.number().min(0, "El total no puede ser negativo"),
   detalles: z.array(DetalleSchema).min(1, "Debe agregar al menos un producto"),
@@ -28,6 +33,16 @@ export const VentaSchema = z.object({
 
 export type VentaFormValues = z.infer<typeof VentaSchema>;
 export type DetalleVentaValues = z.infer<typeof DetalleSchema>;
+
+export const PagoVentaSchema = z.object({
+  metodo_pago: z.enum(["Efectivo", "Transferencia"]),
+  numero_boleta: z.string().optional().or(z.literal("")),
+  banco: z.string().optional().or(z.literal("")),
+  fecha_transferencia: z.string().optional().or(z.literal("")),
+  img_comprobante_url: z.string().nullable().optional(),
+});
+
+export type PagoVentaValues = z.infer<typeof PagoVentaSchema>;
 
 export type ProductoCatalogo = {
   id: string;

@@ -1,8 +1,20 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { VentaSchema, VentaFormValues } from "./zod";
+import { VentaSchema, VentaFormValues, PagoVentaSchema, PagoVentaValues } from "./zod";
 import { revalidatePath } from "next/cache";
+
+const BUCKET_COMPROBANTES = "ventas-comprobantes";
+
+async function removeComprobanteIfReplaced(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  pathAnterior: string | null | undefined,
+  pathNuevo: string | null | undefined,
+) {
+  if (pathAnterior && pathAnterior !== pathNuevo) {
+    await supabase.storage.from(BUCKET_COMPROBANTES).remove([pathAnterior]);
+  }
+}
 
 export async function getCatalogos() {
   const supabase = await createClient();
@@ -107,6 +119,9 @@ export async function createVenta(data: VentaFormValues) {
 
   if (!user) return { error: "Sesión expirada" };
 
+  const esContado = cabecera.tipo_venta === "Contado";
+  const metodoPago = esContado ? cabecera.metodo_pago || "Efectivo" : null;
+
   const { data: venta, error: errVenta } = await supabase
     .from("ven_ventas")
     .insert({
@@ -118,6 +133,23 @@ export async function createVenta(data: VentaFormValues) {
       observaciones: cabecera.observaciones,
       usuario_id: user.id,
       estado: "Pendiente",
+      metodo_pago: metodoPago,
+      numero_boleta:
+        esContado && metodoPago === "Transferencia"
+          ? cabecera.numero_boleta || null
+          : null,
+      banco:
+        esContado && metodoPago === "Transferencia"
+          ? cabecera.banco || null
+          : null,
+      fecha_transferencia:
+        esContado && metodoPago === "Transferencia" && cabecera.fecha_transferencia
+          ? cabecera.fecha_transferencia
+          : null,
+      img_comprobante_url:
+        esContado && metodoPago === "Transferencia"
+          ? cabecera.img_comprobante_url || null
+          : null,
     })
     .select()
     .single();
@@ -161,11 +193,11 @@ export async function createVenta(data: VentaFormValues) {
     }
   }
 
-  if (cabecera.tipo_venta === "Contado") {
+  if (esContado) {
     const { error: errPago } = await supabase.from("ven_pagos").insert({
       venta_id: venta.id,
       monto: cabecera.total,
-      metodo_pago: "Efectivo",
+      metodo_pago: metodoPago || "Efectivo",
     });
 
     if (errPago) {
@@ -184,6 +216,25 @@ export async function updateVenta(id: string, data: VentaFormValues) {
   const supabase = await createClient();
   const { detalles, ...cabecera } = result.data;
 
+  const esContado = cabecera.tipo_venta === "Contado";
+  const metodoPago = esContado ? cabecera.metodo_pago || "Efectivo" : null;
+  const nuevoComprobante =
+    esContado && metodoPago === "Transferencia"
+      ? cabecera.img_comprobante_url || null
+      : null;
+
+  const { data: ventaActual } = await supabase
+    .from("ven_ventas")
+    .select("img_comprobante_url")
+    .eq("id", id)
+    .maybeSingle();
+
+  await removeComprobanteIfReplaced(
+    supabase,
+    ventaActual?.img_comprobante_url,
+    nuevoComprobante,
+  );
+
   const { error: errVenta } = await supabase
     .from("ven_ventas")
     .update({
@@ -193,6 +244,20 @@ export async function updateVenta(id: string, data: VentaFormValues) {
       observaciones: cabecera.observaciones,
       total: cabecera.total,
       fecha_entrega: cabecera.fecha_entrega || new Date().toISOString(),
+      metodo_pago: metodoPago,
+      numero_boleta:
+        esContado && metodoPago === "Transferencia"
+          ? cabecera.numero_boleta || null
+          : null,
+      banco:
+        esContado && metodoPago === "Transferencia"
+          ? cabecera.banco || null
+          : null,
+      fecha_transferencia:
+        esContado && metodoPago === "Transferencia" && cabecera.fecha_transferencia
+          ? cabecera.fecha_transferencia
+          : null,
+      img_comprobante_url: nuevoComprobante,
     })
     .eq("id", id);
 
@@ -214,7 +279,95 @@ export async function updateVenta(id: string, data: VentaFormValues) {
 
   if (errDetalle) return { error: "Error al actualizar productos" };
 
+  if (esContado) {
+    const { data: pagoExistente } = await supabase
+      .from("ven_pagos")
+      .select("id")
+      .eq("venta_id", id)
+      .limit(1)
+      .maybeSingle();
+
+    if (pagoExistente) {
+      await supabase
+        .from("ven_pagos")
+        .update({ metodo_pago: metodoPago || "Efectivo", monto: cabecera.total })
+        .eq("id", pagoExistente.id);
+    } else {
+      await supabase.from("ven_pagos").insert({
+        venta_id: id,
+        monto: cabecera.total,
+        metodo_pago: metodoPago || "Efectivo",
+      });
+    }
+  }
+
   revalidatePath("/cermadsa/laarada/pedidos");
+  return { success: true };
+}
+
+export async function updateVentaPago(id: string, data: PagoVentaValues) {
+  const result = PagoVentaSchema.safeParse(data);
+  if (!result.success) return { error: "Datos de pago inválidos" };
+
+  const supabase = await createClient();
+  const { metodo_pago, numero_boleta, banco, fecha_transferencia, img_comprobante_url } =
+    result.data;
+
+  const esTransferencia = metodo_pago === "Transferencia";
+  const nuevoComprobante = esTransferencia ? img_comprobante_url || null : null;
+
+  const { data: ventaActual } = await supabase
+    .from("ven_ventas")
+    .select("img_comprobante_url")
+    .eq("id", id)
+    .maybeSingle();
+
+  await removeComprobanteIfReplaced(
+    supabase,
+    ventaActual?.img_comprobante_url,
+    nuevoComprobante,
+  );
+
+  const { data: venta, error: errVenta } = await supabase
+    .from("ven_ventas")
+    .update({
+      metodo_pago,
+      numero_boleta: esTransferencia ? numero_boleta || null : null,
+      banco: esTransferencia ? banco || null : null,
+      fecha_transferencia:
+        esTransferencia && fecha_transferencia ? fecha_transferencia : null,
+      img_comprobante_url: nuevoComprobante,
+    })
+    .eq("id", id)
+    .select("id, total, tipo_venta")
+    .single();
+
+  if (errVenta || !venta) return { error: errVenta?.message || "Error al actualizar pago" };
+
+  if (venta.tipo_venta === "Contado") {
+    const { data: pagoExistente } = await supabase
+      .from("ven_pagos")
+      .select("id")
+      .eq("venta_id", id)
+      .limit(1)
+      .maybeSingle();
+
+    if (pagoExistente) {
+      await supabase
+        .from("ven_pagos")
+        .update({ metodo_pago })
+        .eq("id", pagoExistente.id);
+    } else {
+      await supabase.from("ven_pagos").insert({
+        venta_id: id,
+        monto: venta.total,
+        metodo_pago,
+      });
+    }
+  }
+
+  revalidatePath("/cermadsa/laarada/pedidos");
+  revalidatePath("/cermadsa/laarada/ventas");
   return { success: true };
 }
 

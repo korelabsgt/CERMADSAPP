@@ -135,9 +135,11 @@ export default function ListadoVentas() {
                 onChange={(e) => setSelectedVendedor(e.target.value)}
                 className="bg-transparent text-xs font-bold outline-none cursor-pointer w-full sm:w-auto"
               >
-                <option value="all">TODOS LOS VENDEDORES</option>
+                <option value="all">TODOS</option>
                 {vendedores.map((v: any) => (
-                  <option key={v.id} value={v.id}>{v.nombre}</option>
+                  <option key={v.id} value={v.id}>
+                    {v.nombre}
+                  </option>
                 ))}
               </select>
             </div>
@@ -217,7 +219,6 @@ export default function ListadoVentas() {
           onStatusClick={setStatusVenta}
         />
       )}
-
 
       {canManage && (
         <SaleModal
