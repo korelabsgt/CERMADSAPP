@@ -8,13 +8,22 @@ import {
   ChevronLeft,
   ChevronRight,
   ShoppingCart,
+  Trash2,
+  Pencil,
 } from "lucide-react";
-import { useClients } from "./lib/hooks";
+import { useClients, useDeleteClient } from "./lib/hooks";
 import ClientModal from "./modals/client-modal";
 import ClientSalesModal from "./modals/client-sales-modal";
+import { useUser } from "@/components/(base)/providers/UserProvider";
+import { showConfirm } from "@/lib/notifications";
 
 export default function ListadoClientes() {
   const { data: clientes = [], isLoading } = useClients();
+  const deleteMutation = useDeleteClient();
+  const user = useUser();
+  const metadata = user?.user_metadata || {};
+  const userRole = (metadata.rol || user?.role || "user") as string;
+  const canDeleteClient = userRole === "super" || userRole === "admin";
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
@@ -44,7 +53,8 @@ export default function ListadoClientes() {
     setCurrentPage(1);
   }, [searchTerm, itemsPerPage]);
 
-  const handleEdit = (client: any) => {
+  const handleEdit = (e: React.MouseEvent, client: any) => {
+    e.stopPropagation();
     setSelectedClient(client);
     setIsModalOpen(true);
   };
@@ -58,6 +68,21 @@ export default function ListadoClientes() {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
+  };
+
+  const handleDeleteClient = async (e: React.MouseEvent, client: any) => {
+    e.stopPropagation();
+
+    const result = await showConfirm({
+      title: "¿Eliminar cliente?",
+      html: `Se eliminará permanentemente a <strong>${client.nombre}</strong>. Esta acción no se puede deshacer.`,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) return;
+
+    await deleteMutation.mutateAsync(client.id);
   };
 
   return (
@@ -146,13 +171,14 @@ export default function ListadoClientes() {
                   Email
                 </th>
                 <th className="w-[10%] px-4 py-4 text-center">Ventas</th>
+                <th className="w-[12%] px-4 py-4 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {isLoading ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={7}
                     className="px-6 py-8 text-center text-muted-foreground italic"
                   >
                     Cargando clientes...
@@ -161,7 +187,7 @@ export default function ListadoClientes() {
               ) : currentItems.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={7}
                     className="px-6 py-8 text-center text-muted-foreground"
                   >
                     No hay resultados.
@@ -171,8 +197,7 @@ export default function ListadoClientes() {
                 currentItems.map((client: any) => (
                   <tr
                     key={client.id}
-                    onClick={() => handleEdit(client)}
-                    className="hover:bg-muted/50 transition-colors cursor-pointer group"
+                    className="hover:bg-muted/50 transition-colors group"
                   >
                     <td className="px-4 py-4 font-semibold uppercase truncate text-primary">
                       {client.nombre}
@@ -208,9 +233,31 @@ export default function ListadoClientes() {
                           setIsSalesModalOpen(true);
                         }}
                         className="p-2 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 rounded-lg transition-colors cursor-pointer inline-flex"
+                        title="Ver ventas"
                       >
                         <ShoppingCart className="size-4" />
                       </button>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={(e) => handleEdit(e, client)}
+                          className="p-2 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 rounded-lg transition-colors cursor-pointer inline-flex"
+                          title="Editar cliente"
+                        >
+                          <Pencil className="size-4" />
+                        </button>
+                        {canDeleteClient && (
+                          <button
+                            onClick={(e) => handleDeleteClient(e, client)}
+                            disabled={deleteMutation.isPending}
+                            className="p-2 bg-red-500/10 text-red-600 hover:bg-red-500/20 rounded-lg transition-colors cursor-pointer inline-flex disabled:opacity-50"
+                            title="Eliminar cliente"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

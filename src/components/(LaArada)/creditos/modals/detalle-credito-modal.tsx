@@ -11,11 +11,13 @@ import {
   ChevronUp,
   Printer,
   MessageCircle,
+  Trash2,
 } from "lucide-react";
 import { ClienteCredito, VentaCredito } from "../lib/zod";
-import { useProcesarPago } from "../lib/hooks";
+import { useProcesarPago, useEliminarAbono } from "../lib/hooks";
 import { cn } from "@/lib/utils";
-import { showToast } from "@/lib/notifications";
+import { showToast, showConfirm } from "@/lib/notifications";
+import { useUser } from "@/components/(base)/providers/UserProvider";
 
 interface DetalleCreditoModalProps {
   isOpen: boolean;
@@ -43,8 +45,15 @@ export default function DetalleCreditoModal({
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [whatsappVentaId, setWhatsappVentaId] = useState<string | null>(null);
   const [whatsappPhone, setWhatsappPhone] = useState("");
+  const [deletingPagoId, setDeletingPagoId] = useState<string | null>(null);
+
+  const user = useUser();
+  const metadata = user?.user_metadata || {};
+  const userRole = (metadata.rol || user?.role || "user") as string;
+  const canDeleteAbono = userRole === "super" || userRole === "admin";
 
   const { mutateAsync: procesarPago } = useProcesarPago();
+  const { mutateAsync: eliminarAbono } = useEliminarAbono();
 
   useEffect(() => {
     if (isOpen) {
@@ -109,6 +118,32 @@ export default function DetalleCreditoModal({
       detail: { pago, venta, cliente },
     });
     window.dispatchEvent(event);
+  };
+
+  const handleEliminarAbono = async (
+    e: React.MouseEvent,
+    pago: PagoHistorial,
+  ) => {
+    e.stopPropagation();
+    if (!pago.id) return;
+
+    const result = await showConfirm({
+      title: "¿Eliminar abono?",
+      html: `Se eliminará el abono de <strong>Q${Number(pago.monto).toLocaleString("en-US", { minimumFractionDigits: 2 })}</strong> y se recalculará el saldo pendiente.`,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setDeletingPagoId(pago.id);
+    try {
+      await eliminarAbono(pago.id);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setDeletingPagoId(null);
+    }
   };
 
   return (
@@ -374,7 +409,8 @@ export default function DetalleCreditoModal({
                                         </span>
                                       </div>
                                       <span className="text-sm text-muted-foreground font-medium w-full pb-3">
-                                        Cobró: {pago.cajero_nombre}
+                                        Cobró:{" "}
+                                        {pago.cajero_nombre || "Desconocido"}
                                       </span>
                                       <div className="grid grid-cols-2 items-center w-full pt-3 border-t border-border/50">
                                         <span className="font-black text-emerald-600 text-lg">
@@ -384,7 +420,7 @@ export default function DetalleCreditoModal({
                                             { minimumFractionDigits: 2 },
                                           )}
                                         </span>
-                                        <div className="flex justify-end">
+                                        <div className="flex justify-end gap-2">
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
@@ -394,6 +430,25 @@ export default function DetalleCreditoModal({
                                           >
                                             <Printer className="size-5" />
                                           </button>
+                                          {canDeleteAbono && pago.id && (
+                                            <button
+                                              onClick={(e) =>
+                                                handleEliminarAbono(e, pago)
+                                              }
+                                              disabled={
+                                                deletingPagoId === pago.id ||
+                                                processingId !== null
+                                              }
+                                              className="p-2.5 bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white rounded-lg transition-all cursor-pointer disabled:opacity-50"
+                                              title="Eliminar abono"
+                                            >
+                                              {deletingPagoId === pago.id ? (
+                                                <Loader2 className="size-5 animate-spin" />
+                                              ) : (
+                                                <Trash2 className="size-5" />
+                                              )}
+                                            </button>
+                                          )}
                                         </div>
                                       </div>
                                     </div>

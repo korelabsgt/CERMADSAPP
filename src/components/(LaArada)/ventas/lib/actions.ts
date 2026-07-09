@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { VentaSchema, VentaFormValues, PagoVentaSchema, PagoVentaValues } from "./zod";
 import { revalidatePath } from "next/cache";
+import { requireAuthenticatedCajero } from "@/utils/require-authenticated-cajero";
 
 const BUCKET_COMPROBANTES = "ventas-comprobantes";
 
@@ -122,6 +123,15 @@ export async function createVenta(data: VentaFormValues) {
   const esContado = cabecera.tipo_venta === "Contado";
   const metodoPago = esContado ? cabecera.metodo_pago || "Efectivo" : null;
 
+  let cajeroId: string | null = null;
+  if (esContado) {
+    const cajero = await requireAuthenticatedCajero(supabase);
+    if (!cajero.ok) {
+      return { error: cajero.error };
+    }
+    cajeroId = cajero.userId;
+  }
+
   const { data: venta, error: errVenta } = await supabase
     .from("ven_ventas")
     .insert({
@@ -193,15 +203,16 @@ export async function createVenta(data: VentaFormValues) {
     }
   }
 
-  if (esContado) {
+  if (esContado && cajeroId) {
     const { error: errPago } = await supabase.from("ven_pagos").insert({
       venta_id: venta.id,
       monto: cabecera.total,
       metodo_pago: metodoPago || "Efectivo",
+      usuario_id: cajeroId,
     });
 
     if (errPago) {
-      console.error("Error al registrar el pago automático:", errPago.message);
+      return { error: "Error al registrar el pago automático." };
     }
   }
 
@@ -280,6 +291,11 @@ export async function updateVenta(id: string, data: VentaFormValues) {
   if (errDetalle) return { error: "Error al actualizar productos" };
 
   if (esContado) {
+    const cajero = await requireAuthenticatedCajero(supabase);
+    if (!cajero.ok) {
+      return { error: cajero.error };
+    }
+
     const { data: pagoExistente } = await supabase
       .from("ven_pagos")
       .select("id")
@@ -290,13 +306,18 @@ export async function updateVenta(id: string, data: VentaFormValues) {
     if (pagoExistente) {
       await supabase
         .from("ven_pagos")
-        .update({ metodo_pago: metodoPago || "Efectivo", monto: cabecera.total })
+        .update({
+          metodo_pago: metodoPago || "Efectivo",
+          monto: cabecera.total,
+          usuario_id: cajero.userId,
+        })
         .eq("id", pagoExistente.id);
     } else {
       await supabase.from("ven_pagos").insert({
         venta_id: id,
         monto: cabecera.total,
         metodo_pago: metodoPago || "Efectivo",
+        usuario_id: cajero.userId,
       });
     }
   }
@@ -345,6 +366,11 @@ export async function updateVentaPago(id: string, data: PagoVentaValues) {
   if (errVenta || !venta) return { error: errVenta?.message || "Error al actualizar pago" };
 
   if (venta.tipo_venta === "Contado") {
+    const cajero = await requireAuthenticatedCajero(supabase);
+    if (!cajero.ok) {
+      return { error: cajero.error };
+    }
+
     const { data: pagoExistente } = await supabase
       .from("ven_pagos")
       .select("id")
@@ -355,13 +381,14 @@ export async function updateVentaPago(id: string, data: PagoVentaValues) {
     if (pagoExistente) {
       await supabase
         .from("ven_pagos")
-        .update({ metodo_pago })
+        .update({ metodo_pago, usuario_id: cajero.userId })
         .eq("id", pagoExistente.id);
     } else {
       await supabase.from("ven_pagos").insert({
         venta_id: id,
         monto: venta.total,
         metodo_pago,
+        usuario_id: cajero.userId,
       });
     }
   }

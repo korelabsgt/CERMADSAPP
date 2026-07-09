@@ -3,6 +3,21 @@
 import { createClient } from "@/utils/supabase/server";
 import { PagoCreditoSchema, PagoCreditoValues } from "./zod";
 import { revalidatePath } from "next/cache";
+import { requireAuthenticatedCajero } from "@/utils/require-authenticated-cajero";
+
+async function getUserRole() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const metadata = user.user_metadata || {};
+  return (metadata.rol || user.role || "user") as string;
+}
+
+function isSuperOrAdmin(role: string | null) {
+  return role === "super" || role === "admin";
+}
 
 export async function getVentasCredito() {
   const supabase = await createClient();
@@ -62,12 +77,24 @@ export async function procesarPagoCredito(data: PagoCreditoValues) {
   }
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const cajero = await requireAuthenticatedCajero(supabase);
 
-  if (!user) {
-    return { error: "No se encontró una sesión de usuario activa." };
+  if (!cajero.ok) {
+    return { error: cajero.error };
+  }
+
+  const { data: venta, error: ventaError } = await supabase
+    .from("ven_ventas")
+    .select("id, tipo_venta, total, ven_pagos(monto)")
+    .eq("id", result.data.venta_id)
+    .single();
+
+  if (ventaError || !venta) {
+    return { error: ventaError?.message || "Venta no encontrada." };
+  }
+
+  if (venta.tipo_venta !== "Crédito") {
+    return { error: "Solo se pueden registrar abonos en ventas a crédito." };
   }
 
   const { error: pagoError } = await supabase.from("ven_pagos").insert({
@@ -75,27 +102,17 @@ export async function procesarPagoCredito(data: PagoCreditoValues) {
     monto: result.data.monto,
     metodo_pago: result.data.metodo_pago,
     referencia: result.data.observaciones || null,
-    usuario_id: user.id,
+    usuario_id: cajero.userId,
   });
 
   if (pagoError) {
     return { error: pagoError.message };
   }
 
-  const { data: venta, error: ventaError } = await supabase
-    .from("ven_ventas")
-    .select("total, ven_pagos(monto)")
-    .eq("id", result.data.venta_id)
-    .single();
-
-  if (ventaError) {
-    return { error: ventaError.message };
-  }
-
-  const totalPagado = venta.ven_pagos.reduce(
+  const totalPagado = (venta.ven_pagos ?? []).reduce(
     (acc: number, pago: { monto: number }) => acc + Number(pago.monto),
     0,
-  );
+  ) + Number(result.data.monto);
 
   if (totalPagado >= Number(venta.total)) {
     await supabase
@@ -106,6 +123,59 @@ export async function procesarPagoCredito(data: PagoCreditoValues) {
 
   revalidatePath("/cermadsa/laarada/creditos");
   revalidatePath("/cermadsa/laarada/pedidos");
+
+  return { success: true };
+}
+
+export async function eliminarAbonoCredito(pagoId: string) {
+  const role = await getUserRole();
+  if (!isSuperOrAdmin(role)) {
+    return { error: "No tienes permisos para eliminar abonos." };
+  }
+
+  const supabase = await createClient();
+
+  const { data: pago, error: pagoFetchError } = await supabase
+    .from("ven_pagos")
+    .select("id, venta_id")
+    .eq("id", pagoId)
+    .single();
+
+  if (pagoFetchError || !pago) {
+    return { error: "Abono no encontrado." };
+  }
+
+  const { error: deleteError } = await supabase
+    .from("ven_pagos")
+    .delete()
+    .eq("id", pagoId);
+
+  if (deleteError) {
+    return { error: deleteError.message };
+  }
+
+  const { data: venta } = await supabase
+    .from("ven_ventas")
+    .select("total, estado, ven_pagos(monto)")
+    .eq("id", pago.venta_id)
+    .single();
+
+  if (venta) {
+    const totalPagado = (venta.ven_pagos ?? []).reduce(
+      (acc: number, p: { monto: number }) => acc + Number(p.monto),
+      0,
+    );
+    if (totalPagado < Number(venta.total) && venta.estado === "Pagado") {
+      await supabase
+        .from("ven_ventas")
+        .update({ estado: "Entregado" })
+        .eq("id", pago.venta_id);
+    }
+  }
+
+  revalidatePath("/cermadsa/laarada/creditos");
+  revalidatePath("/cermadsa/laarada/pedidos");
+  revalidatePath("/cermadsa/laarada/clientes");
 
   return { success: true };
 }

@@ -12,15 +12,24 @@ import {
   ShoppingBag,
   User,
   UserCheck,
+  Trash2,
 } from "lucide-react";
-import { useCreditos } from "./lib/hooks";
+import { useCreditos, useEliminarAbono } from "./lib/hooks";
 import { ClienteCredito } from "./lib/zod";
 import CreditosList from "./components/creditos-list";
 import DetalleCreditoModal from "./modals/detalle-credito-modal";
 import ReciboAbonoPrint from "./components/recibo-abono-print";
+import { useUser } from "@/components/(base)/providers/UserProvider";
+import { showConfirm } from "@/lib/notifications";
 
 export default function Creditos() {
   const { clientesConCredito, creditosTotales, isLoading } = useCreditos();
+  const { mutateAsync: eliminarAbono, isPending: isDeletingAbono } =
+    useEliminarAbono();
+  const user = useUser();
+  const metadata = user?.user_metadata || {};
+  const userRole = (metadata.rol || user?.role || "user") as string;
+  const canDeleteAbono = userRole === "super" || userRole === "admin";
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCliente, setSelectedCliente] = useState<ClienteCredito | null>(
     null,
@@ -68,6 +77,22 @@ export default function Creditos() {
       (v) => v.cliente_id === selectedCliente.cliente_id,
     );
   }, [selectedCliente, creditosTotales]);
+
+  const handleEliminarAbonoBuscado = async () => {
+    if (!pagoEncontrado?.pago?.id) return;
+
+    const result = await showConfirm({
+      title: "¿Eliminar abono?",
+      html: `Se eliminará el abono de <strong>Q${Number(pagoEncontrado.pago.monto).toLocaleString("en-US", { minimumFractionDigits: 2 })}</strong>.`,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) return;
+
+    await eliminarAbono(pagoEncontrado.pago.id);
+    setSearchTerm("");
+  };
 
   if (isLoading) {
     return (
@@ -256,6 +281,16 @@ export default function Creditos() {
                 <Printer className="size-4" />
                 Imprimir Recibo
               </button>
+              {canDeleteAbono && (
+                <button
+                  onClick={handleEliminarAbonoBuscado}
+                  disabled={isDeletingAbono}
+                  className="mt-3 w-full flex items-center justify-center gap-3 py-4 bg-red-500 text-white font-black rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 uppercase tracking-widest text-xs cursor-pointer disabled:opacity-50"
+                >
+                  <Trash2 className="size-4" />
+                  Eliminar Abono
+                </button>
+              )}
             </div>
           </div>
         </div>

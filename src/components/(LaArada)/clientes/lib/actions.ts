@@ -73,6 +73,20 @@ export async function updateClientAction(id: string, data: ClientFormValues) {
 
 export async function deleteClientAction(id: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "No se encontró una sesión de usuario activa." };
+  }
+
+  const metadata = user.user_metadata || {};
+  const role = (metadata.rol || user.role || "user") as string;
+  if (role !== "super" && role !== "admin") {
+    return { error: "No tienes permisos para eliminar clientes." };
+  }
+
   const { error } = await supabase.from("ven_clientes").delete().eq("id", id);
 
   if (error) return { error: error.message };
