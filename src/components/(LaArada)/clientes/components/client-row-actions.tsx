@@ -66,76 +66,44 @@ export default function ClientRowActions({
   };
 
   return (
-    <>
-      <div className="hidden md:flex items-center justify-center gap-2">
-        <button
-          type="button"
-          onClick={onViewSales}
-          className="p-2 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 rounded-lg transition-colors cursor-pointer inline-flex"
-          title="Ver ventas"
-        >
-          <ShoppingCart className="size-4" />
-        </button>
-        <button
-          type="button"
-          onClick={onEdit}
-          className="p-2 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 rounded-lg transition-colors cursor-pointer inline-flex"
-          title="Editar cliente"
-        >
-          <Pencil className="size-4" />
-        </button>
-        {canDelete && (
+    <div className="flex justify-center">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
           <button
             type="button"
-            onClick={onDelete}
-            disabled={isDeleting}
-            className="p-2 bg-red-500/10 text-red-600 hover:bg-red-500/20 rounded-lg transition-colors cursor-pointer inline-flex disabled:opacity-50"
-            title="Eliminar cliente"
+            className="p-2 rounded-lg border bg-background hover:bg-muted transition-colors cursor-pointer inline-flex"
+            aria-label="Opciones del cliente"
           >
-            <Trash2 className="size-4" />
+            <MoreVertical className="size-4" />
           </button>
-        )}
-      </div>
-
-      <div className="md:hidden flex justify-center">
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              className="p-2 rounded-lg border bg-background hover:bg-muted transition-colors cursor-pointer inline-flex"
-              aria-label="Opciones del cliente"
-            >
-              <MoreVertical className="size-4" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            side="top"
-            align="end"
-            sideOffset={8}
-            className="z-[10050] w-52 p-1.5 rounded-xl shadow-lg"
-          >
+        </PopoverTrigger>
+        <PopoverContent
+          side="top"
+          align="end"
+          sideOffset={8}
+          className="z-[10050] w-52 p-1.5 rounded-xl border border-border !bg-background text-foreground shadow-xl"
+        >
+          <ActionItem
+            icon={ShoppingCart}
+            label="Ver ventas"
+            onClick={() => runAction(onViewSales)}
+          />
+          <ActionItem
+            icon={Pencil}
+            label="Editar"
+            onClick={() => runAction(onEdit)}
+          />
+          {canDelete && (
             <ActionItem
-              icon={ShoppingCart}
-              label="Ver ventas"
-              onClick={() => runAction(onViewSales)}
+              icon={Trash2}
+              label="Eliminar"
+              onClick={() => runAction(onDelete)}
+              variant="danger"
+              disabled={isDeleting}
             />
-            <ActionItem
-              icon={Pencil}
-              label="Editar"
-              onClick={() => runAction(onEdit)}
-            />
-            {canDelete && (
-              <ActionItem
-                icon={Trash2}
-                label="Eliminar"
-                onClick={() => runAction(onDelete)}
-                variant="danger"
-                disabled={isDeleting}
-              />
-            )}
-          </PopoverContent>
-        </Popover>
-      </div>
-    </>
+          )}
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }

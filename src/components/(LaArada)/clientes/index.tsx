@@ -227,8 +227,8 @@ export default function ListadoClientes() {
                 <th className="hidden md:table-cell md:w-[18%] px-4 py-4">
                   Email
                 </th>
-                <th className="w-12 md:w-[14%] px-1 md:px-4 py-3 md:py-4 text-center">
-                  <span className="hidden md:inline">Acciones</span>
+                <th className="w-12 md:w-[8%] px-1 md:px-4 py-3 md:py-4 text-center">
+                  Acciones
                 </th>
               </tr>
             </thead>
