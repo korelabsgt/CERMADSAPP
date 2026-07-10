@@ -7,15 +7,21 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  ShoppingCart,
-  Trash2,
-  Pencil,
 } from "lucide-react";
-import { useClients, useDeleteClient } from "./lib/hooks";
+import {
+  useClients,
+  useDeleteClient,
+  getClientDeletionPreview,
+} from "./lib/hooks";
 import ClientModal from "./modals/client-modal";
 import ClientSalesModal from "./modals/client-sales-modal";
+import ClientRowActions from "./components/client-row-actions";
 import { useUser } from "@/components/(base)/providers/UserProvider";
-import { showConfirm } from "@/lib/notifications";
+import {
+  showConfirm,
+  showReassignClientDialog,
+  showAlert,
+} from "@/lib/notifications";
 
 export default function ListadoClientes() {
   const { data: clientes = [], isLoading } = useClients();
@@ -29,6 +35,7 @@ export default function ListadoClientes() {
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
   const [clientForSales, setClientForSales] = useState<any>(null);
+  const [deletingClientId, setDeletingClientId] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -53,8 +60,7 @@ export default function ListadoClientes() {
     setCurrentPage(1);
   }, [searchTerm, itemsPerPage]);
 
-  const handleEdit = (e: React.MouseEvent, client: any) => {
-    e.stopPropagation();
+  const handleEdit = (client: any) => {
     setSelectedClient(client);
     setIsModalOpen(true);
   };
@@ -70,24 +76,77 @@ export default function ListadoClientes() {
     }
   };
 
-  const handleDeleteClient = async (e: React.MouseEvent, client: any) => {
-    e.stopPropagation();
+  const handleViewSales = (client: any) => {
+    setClientForSales(client);
+    setIsSalesModalOpen(true);
+  };
 
-    const result = await showConfirm({
-      title: "¿Eliminar cliente?",
-      html: `Se eliminará permanentemente a <strong>${client.nombre}</strong>. Esta acción no se puede deshacer.`,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    });
+  const handleDeleteClient = async (client: any) => {
+    setDeletingClientId(client.id);
 
-    if (!result.isConfirmed) return;
+    try {
+      const preview = await getClientDeletionPreview(client.id);
 
-    await deleteMutation.mutateAsync(client.id);
+      if (preview.error) {
+        await showAlert("error", "No se puede eliminar", preview.error);
+        return;
+      }
+
+      if (preview.canDeleteDirectly) {
+        const annulledNote =
+          preview.annulledCount > 0
+            ? `<p class="text-xs mt-3 opacity-80">Se desvincularán <strong>${preview.annulledCount}</strong> venta(s) anulada(s) del cliente.</p>`
+            : "";
+
+        const result = await showConfirm({
+          title: "¿Eliminar cliente?",
+          html: `Se eliminará permanentemente a <strong>${client.nombre}</strong>. Esta acción no se puede deshacer.${annulledNote}`,
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
+        });
+
+        if (!result.isConfirmed) return;
+
+        await deleteMutation.mutateAsync({ id: client.id });
+        return;
+      }
+
+      const candidates = clientes
+        .filter((c: any) => c.id !== client.id)
+        .map((c: any) => ({
+          id: c.id,
+          label: `${c.nombre} (${c.nit})`,
+        }));
+
+      if (candidates.length === 0) {
+        await showAlert(
+          "error",
+          "No se puede eliminar",
+          `El cliente tiene ${preview.activeCount} venta(s) activa(s) y no hay otro cliente al cual reasignarlas.`,
+        );
+        return;
+      }
+
+      const result = await showReassignClientDialog({
+        clientName: client.nombre,
+        activeCount: preview.activeCount ?? 0,
+        annulledCount: preview.annulledCount ?? 0,
+        candidates,
+      });
+
+      if (!result.isConfirmed || !result.value) return;
+
+      await deleteMutation.mutateAsync({
+        id: client.id,
+        reassignToClientId: String(result.value),
+      });
+    } finally {
+      setDeletingClientId(null);
+    }
   };
 
   return (
     <div className="p-4 md:px-15 w-full mx-auto space-y-6">
-      {/* ENCABEZADO */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
@@ -107,9 +166,7 @@ export default function ListadoClientes() {
         </button>
       </div>
 
-      {/* BARRA DE HERRAMIENTAS: BUSCADOR IZQ - CONTROLES DER */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-        {/* IZQUIERDA: BUSCADOR */}
         <div className="flex items-center gap-2 bg-background border rounded-lg px-3 py-2 w-full sm:w-72 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
           <Search className="size-4 text-muted-foreground" />
           <input
@@ -121,7 +178,6 @@ export default function ListadoClientes() {
           />
         </div>
 
-        {/* DERECHA: SELECTOR + FLECHAS */}
         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
           <select
             value={itemsPerPage}
@@ -153,32 +209,34 @@ export default function ListadoClientes() {
         </div>
       </div>
 
-      {/* TABLA DE CLIENTES */}
       <div className="border rounded-xl overflow-hidden bg-card shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-[9px] md:text-sm text-left table-fixed">
-            <thead className="bg-muted/50 text-muted-foreground font-bold border-b uppercase tracking-widest">
+          <table className="w-full text-xs md:text-sm text-left md:table-fixed min-w-[320px]">
+            <thead className="bg-muted/50 text-muted-foreground font-bold border-b uppercase tracking-widest text-[10px] md:text-xs">
               <tr>
-                <th className="w-2/4 md:w-[35%] px-4 py-4 truncate">Nombre</th>
-                <th className="w-1/4 md:w-[10%] px-4 py-4 truncate">NIT</th>
-                <th className="hidden md:table-cell md:w-[25%] px-4 py-4 truncate">
+                <th className="px-3 md:px-4 py-3 md:py-4 min-w-0">Nombre</th>
+                <th className="px-2 md:px-4 py-3 md:py-4 w-20 md:w-[10%]">
+                  NIT
+                </th>
+                <th className="hidden md:table-cell md:w-[25%] px-4 py-4">
                   Dirección
                 </th>
-                <th className="w-1/4 md:w-[10%] px-4 py-4 truncate">
+                <th className="hidden sm:table-cell px-2 md:px-4 py-3 md:py-4 w-24 md:w-[12%]">
                   Teléfono
                 </th>
-                <th className="hidden md:table-cell md:w-[20%] px-4 py-4 truncate">
+                <th className="hidden md:table-cell md:w-[18%] px-4 py-4">
                   Email
                 </th>
-                <th className="w-[10%] px-4 py-4 text-center">Ventas</th>
-                <th className="w-[12%] px-4 py-4 text-center">Acciones</th>
+                <th className="w-12 md:w-[14%] px-1 md:px-4 py-3 md:py-4 text-center">
+                  <span className="hidden md:inline">Acciones</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {isLoading ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={6}
                     className="px-6 py-8 text-center text-muted-foreground italic"
                   >
                     Cargando clientes...
@@ -187,7 +245,7 @@ export default function ListadoClientes() {
               ) : currentItems.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={6}
                     className="px-6 py-8 text-center text-muted-foreground"
                   >
                     No hay resultados.
@@ -197,18 +255,18 @@ export default function ListadoClientes() {
                 currentItems.map((client: any) => (
                   <tr
                     key={client.id}
-                    className="hover:bg-muted/50 transition-colors group"
+                    className="hover:bg-muted/50 transition-colors"
                   >
-                    <td className="px-4 py-4 font-semibold uppercase truncate text-primary">
+                    <td className="px-3 md:px-4 py-3 md:py-4 font-semibold uppercase truncate text-primary max-w-[120px] sm:max-w-none">
                       {client.nombre}
                     </td>
-                    <td className="px-4 py-4 font-mono font-medium text-foreground/80 truncate">
+                    <td className="px-2 md:px-4 py-3 md:py-4 font-mono font-medium text-foreground/80 truncate">
                       {client.nit}
                     </td>
                     <td className="hidden md:table-cell px-4 py-4 text-muted-foreground truncate">
                       {client.direccion}
                     </td>
-                    <td className="px-4 py-4 font-medium truncate">
+                    <td className="hidden sm:table-cell px-2 md:px-4 py-3 md:py-4 font-medium truncate">
                       <a
                         href={`https://wa.me/502${client.telefono.replace(
                           /\s+/g,
@@ -225,39 +283,14 @@ export default function ListadoClientes() {
                     <td className="hidden md:table-cell px-4 py-4 text-muted-foreground truncate lowercase">
                       {client.email || "-"}
                     </td>
-                    <td className="px-4 py-4 text-center">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setClientForSales(client);
-                          setIsSalesModalOpen(true);
-                        }}
-                        className="p-2 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 rounded-lg transition-colors cursor-pointer inline-flex"
-                        title="Ver ventas"
-                      >
-                        <ShoppingCart className="size-4" />
-                      </button>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={(e) => handleEdit(e, client)}
-                          className="p-2 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 rounded-lg transition-colors cursor-pointer inline-flex"
-                          title="Editar cliente"
-                        >
-                          <Pencil className="size-4" />
-                        </button>
-                        {canDeleteClient && (
-                          <button
-                            onClick={(e) => handleDeleteClient(e, client)}
-                            disabled={deleteMutation.isPending}
-                            className="p-2 bg-red-500/10 text-red-600 hover:bg-red-500/20 rounded-lg transition-colors cursor-pointer inline-flex disabled:opacity-50"
-                            title="Eliminar cliente"
-                          >
-                            <Trash2 className="size-4" />
-                          </button>
-                        )}
-                      </div>
+                    <td className="px-1 md:px-4 py-3 md:py-4">
+                      <ClientRowActions
+                        canDelete={canDeleteClient}
+                        isDeleting={deletingClientId === client.id}
+                        onViewSales={() => handleViewSales(client)}
+                        onEdit={() => handleEdit(client)}
+                        onDelete={() => handleDeleteClient(client)}
+                      />
                     </td>
                   </tr>
                 ))
