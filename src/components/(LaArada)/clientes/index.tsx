@@ -22,6 +22,10 @@ import {
   showReassignClientDialog,
   showAlert,
 } from "@/lib/notifications";
+import {
+  getAnnulledSalesUnlinkMessage,
+  getActiveSalesNoCandidatesError,
+} from "@/utils/client-delete-messages";
 
 export default function ListadoClientes() {
   const { data: clientes = [], isLoading } = useClients();
@@ -95,7 +99,7 @@ export default function ListadoClientes() {
       if (preview.canDeleteDirectly) {
         const annulledNote =
           preview.annulledCount > 0
-            ? `<p class="text-xs mt-3 opacity-80">Se desvincularán <strong>${preview.annulledCount}</strong> venta(s) anulada(s) del cliente.</p>`
+            ? `<p class="text-xs mt-3 opacity-80">${getAnnulledSalesUnlinkMessage(preview.annulledCount ?? 0)}</p>`
             : "";
 
         const result = await showConfirm({
@@ -122,7 +126,7 @@ export default function ListadoClientes() {
         await showAlert(
           "error",
           "No se puede eliminar",
-          `El cliente tiene ${preview.activeCount} venta(s) activa(s) y no hay otro cliente al cual reasignarlas.`,
+          getActiveSalesNoCandidatesError(preview.activeCount ?? 0),
         );
         return;
       }

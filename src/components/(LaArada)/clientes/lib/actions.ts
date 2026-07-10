@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { ClientSchema, ClientFormValues } from "./zod";
 import { revalidatePath } from "next/cache";
+import { getActiveSalesReassignError } from "@/utils/client-delete-messages";
 
 function isVentaAnulada(estado?: string | null) {
   return (
@@ -156,7 +157,7 @@ export async function deleteClientAction(
   if (activas.length > 0) {
     if (!reassignToClientId) {
       return {
-        error: `Este cliente tiene ${activas.length} venta(s) activa(s). Debes reasignarlas a otro cliente antes de eliminarlo.`,
+        error: getActiveSalesReassignError(activas.length),
         code: "HAS_ACTIVE_SALES",
         activeCount: activas.length,
         annulledCount: anuladas.length,
