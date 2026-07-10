@@ -166,7 +166,7 @@ export const showConfirm = (options: {
     customClass: {
       popup: "rounded-3xl border border-border/50",
     },
-    didOpen: applySwalLayerStyles,
+    didOpen: () => applySwalLayerStyles(),
   });
 };
 
@@ -286,6 +286,6 @@ export const showAlert = (
     customClass: {
       popup: "rounded-3xl border border-border/50 backdrop-blur-xl",
     },
-    didOpen: applySwalLayerStyles,
+    didOpen: () => applySwalLayerStyles(),
   });
 };
