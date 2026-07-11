@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { getVentas, createVenta, getCatalogos, updateVenta, updateVentaPago, getVendedores } from "./actions";
+import { getVentas, createVenta, getCatalogos, updateVenta, updateVentaPago, updateVentaTipoVenta, getVendedores } from "./actions";
 import { VentaFormValues, PagoVentaValues } from "./zod";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
@@ -122,6 +122,29 @@ export function useUpdateVentaPago() {
         toast.success("Forma de pago actualizada", {
           theme: "colored",
           autoClose: 2000,
+        });
+      }
+    },
+  });
+}
+
+export function useUpdateVentaTipoVenta() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => updateVentaTipoVenta(id),
+    onSuccess: (res) => {
+      if (res?.error) {
+        Swal.fire({ icon: "error", title: "Error", text: res.error });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["ventas"] });
+        queryClient.invalidateQueries({ queryKey: ["creditos"] });
+        Swal.fire({
+          toast: true,
+          position: "top",
+          icon: "success",
+          title: "Venta cambiada a crédito",
+          timer: 1500,
+          showConfirmButton: false,
         });
       }
     },

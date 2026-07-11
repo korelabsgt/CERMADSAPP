@@ -17,6 +17,19 @@ async function removeComprobanteIfReplaced(
   }
 }
 
+async function getUserRole(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const metadata = user.user_metadata || {};
+  return (metadata.rol || user.role || "user") as string;
+}
+
+function isSuperOrAdmin(role: string | null) {
+  return role === "super" || role === "admin";
+}
+
 export async function getCatalogos() {
   const supabase = await createClient();
   const [clientes, productos] = await Promise.all([
@@ -320,9 +333,61 @@ export async function updateVenta(id: string, data: VentaFormValues) {
         usuario_id: cajero.userId,
       });
     }
+  } else {
+    await supabase.from("ven_pagos").delete().eq("venta_id", id);
   }
 
   revalidatePath("/cermadsa/laarada/pedidos");
+  revalidatePath("/cermadsa/laarada/creditos");
+  return { success: true };
+}
+
+export async function updateVentaTipoVenta(id: string) {
+  const supabase = await createClient();
+  const role = await getUserRole(supabase);
+
+  if (!isSuperOrAdmin(role)) {
+    return { error: "No tienes permiso para cambiar el tipo de venta." };
+  }
+
+  const { data: venta, error: errVenta } = await supabase
+    .from("ven_ventas")
+    .select("tipo_venta, img_comprobante_url")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (errVenta || !venta) {
+    return { error: errVenta?.message || "Venta no encontrada" };
+  }
+
+  if (venta.tipo_venta === "Crédito") {
+    return { success: true };
+  }
+
+  if (venta.tipo_venta !== "Contado") {
+    return { error: "Solo se permite cambiar de Contado a Crédito." };
+  }
+
+  await removeComprobanteIfReplaced(supabase, venta.img_comprobante_url, null);
+  await supabase.from("ven_pagos").delete().eq("venta_id", id);
+
+  const { error: errUpdate } = await supabase
+    .from("ven_ventas")
+    .update({
+      tipo_venta: "Crédito",
+      metodo_pago: null,
+      numero_boleta: null,
+      banco: null,
+      fecha_transferencia: null,
+      img_comprobante_url: null,
+    })
+    .eq("id", id);
+
+  if (errUpdate) return { error: errUpdate.message };
+
+  revalidatePath("/cermadsa/laarada/pedidos");
+  revalidatePath("/cermadsa/laarada/ventas");
+  revalidatePath("/cermadsa/laarada/creditos");
   return { success: true };
 }
 

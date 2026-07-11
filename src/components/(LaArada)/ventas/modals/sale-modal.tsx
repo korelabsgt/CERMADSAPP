@@ -12,6 +12,7 @@ import {
   useCreateVenta,
   useUpdateVenta,
   useUpdateVentaPago,
+  useUpdateVentaTipoVenta,
   useCatalogos,
 } from "../lib/hooks";
 import { useEffect, useState, useMemo, useRef } from "react";
@@ -66,6 +67,7 @@ export default function SaleModal({
   const createMutation = useCreateVenta();
   const updateMutation = useUpdateVenta();
   const updatePagoMutation = useUpdateVentaPago();
+  const updateTipoVentaMutation = useUpdateVentaTipoVenta();
 
   const [modals, setModals] = useState({ client: false, product: false });
   const [clientSearch, setClientSearch] = useState("");
@@ -156,6 +158,15 @@ export default function SaleModal({
   const camposDeshabilitados = isAnulado || isReadOnly || soloPagoEditable;
   const pagoDeshabilitado =
     isAnulado || (!isPendiente && isReadOnly && !soloPagoEditable);
+
+  const canChangeTipoVenta = ["super", "admin"].includes(effectiveRole || "");
+  const tipoVentaOriginal = ventaToEdit?.tipo_venta || "Contado";
+  const tipoVentaEditable =
+    canChangeTipoVenta && !!ventaToEdit && !isAnulado;
+  const tipoCambioACredito =
+    tipoVenta === "Crédito" && tipoVentaOriginal === "Contado";
+  const puedeGuardarSoloPago =
+    tipoVenta === "Contado" || (tipoCambioACredito && canChangeTipoVenta);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -270,6 +281,48 @@ export default function SaleModal({
     return updatePagoMutation.mutateAsync({ id: ventaToEdit.id, data });
   };
 
+  const guardarTipoCredito = async () => {
+    if (!ventaToEdit?.id || !tipoCambioACredito) return undefined;
+
+    const isDark = document.documentElement.classList.contains("dark");
+    const result = await Swal.fire({
+      title: "¿Cambiar a Crédito?",
+      text: tieneFelCertificada
+        ? "La venta quedará como crédito y se eliminará el registro de pago. La factura electrónica (DTE) no se modifica."
+        : "Se eliminará el registro de pago y la venta quedará con saldo pendiente.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3b82f6",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Sí, cambiar a crédito",
+      cancelButtonText: "Cancelar",
+      background: isDark ? "#1c1c1e" : undefined,
+      color: isDark ? "#f5f5f5" : undefined,
+    });
+
+    if (!result.isConfirmed) return undefined;
+    return updateTipoVentaMutation.mutateAsync(ventaToEdit.id);
+  };
+
+  const guardarSoloPagoEditable = async (data: VentaFormValues) => {
+    if (tipoCambioACredito && canChangeTipoVenta) {
+      const res = await guardarTipoCredito();
+      if (res?.success) onClose();
+      return;
+    }
+
+    if (tipoVenta !== "Contado") return;
+
+    const res = await guardarPago({
+      metodo_pago: data.metodo_pago,
+      numero_boleta: data.numero_boleta,
+      banco: data.banco,
+      fecha_transferencia: data.fecha_transferencia,
+      img_comprobante_url: data.img_comprobante_url,
+    });
+    if (res?.success) onClose();
+  };
+
   const seleccionarEfectivo = async () => {
     const imagenActual = getValues("img_comprobante_url");
     const tieneComprobante = !!imagenActual;
@@ -321,14 +374,7 @@ export default function SaleModal({
     if (isAnulado) return;
 
     if (soloPagoEditable && ventaToEdit) {
-      const res = await guardarPago({
-        metodo_pago: data.metodo_pago,
-        numero_boleta: data.numero_boleta,
-        banco: data.banco,
-        fecha_transferencia: data.fecha_transferencia,
-        img_comprobante_url: data.img_comprobante_url,
-      });
-      if (res?.success) onClose();
+      await guardarSoloPagoEditable(data);
       return;
     }
 
@@ -444,8 +490,12 @@ export default function SaleModal({
             <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 mt-4">
               <div className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-xs text-sky-800 dark:text-sky-300">
                 {tieneFelCertificada
-                  ? "Esta venta tiene factura electrónica (DTE). Solo puede modificar la forma de pago, si quiere cambiarla, antes debes anular la factura electrónica."
-                  : "Venta entregada. Solo puede modificar la forma de pago."}
+                  ? canChangeTipoVenta
+                    ? "Esta venta tiene factura electrónica (DTE). Puede modificar la forma de pago o cambiar el tipo a crédito."
+                    : "Esta venta tiene factura electrónica (DTE). Solo puede modificar la forma de pago, si quiere cambiarla, antes debes anular la factura electrónica."
+                  : canChangeTipoVenta
+                    ? "Venta entregada. Puede modificar la forma de pago o cambiar el tipo a crédito."
+                    : "Venta entregada. Solo puede modificar la forma de pago."}
               </div>
             </div>
           )}
@@ -537,7 +587,7 @@ export default function SaleModal({
                   </label>
                   <select
                     {...register("tipo_venta")}
-                    disabled={camposDeshabilitados}
+                    disabled={camposDeshabilitados && !tipoVentaEditable}
                     className="w-full h-10 px-3 border rounded-lg bg-background text-sm outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <option value="Contado">Contado</option>
@@ -871,15 +921,15 @@ export default function SaleModal({
                       disabled={
                         isSubmitting ||
                         updatePagoMutation.isPending ||
-                        tipoVenta !== "Contado"
+                        updateTipoVentaMutation.isPending ||
+                        !puedeGuardarSoloPago
                       }
                       onClick={async () => {
-                        const res = await guardarPago();
-                        if (res?.success) onClose();
+                        await guardarSoloPagoEditable(getValues());
                       }}
                       className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 disabled:opacity-50 cursor-pointer transition-all"
                     >
-                      GUARDAR PAGO
+                      {tipoCambioACredito ? "CAMBIAR A CRÉDITO" : "GUARDAR PAGO"}
                     </button>
                   </div>
                 ) : (
@@ -952,15 +1002,15 @@ export default function SaleModal({
                       disabled={
                         isSubmitting ||
                         updatePagoMutation.isPending ||
-                        tipoVenta !== "Contado"
+                        updateTipoVentaMutation.isPending ||
+                        !puedeGuardarSoloPago
                       }
                       onClick={async () => {
-                        const res = await guardarPago();
-                        if (res?.success) onClose();
+                        await guardarSoloPagoEditable(getValues());
                       }}
                       className="px-8 py-2 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 disabled:opacity-50 cursor-pointer transition-all flex items-center gap-2"
                     >
-                      GUARDAR PAGO
+                      {tipoCambioACredito ? "CAMBIAR A CRÉDITO" : "GUARDAR PAGO"}
                     </button>
                   </div>
                 ) : (
