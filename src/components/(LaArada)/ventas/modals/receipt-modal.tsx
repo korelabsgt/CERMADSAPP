@@ -30,6 +30,21 @@ interface ReceiptModalProps {
 
 type Tab = "recibo" | "factura";
 
+function isConsumidorFinalNit(nit?: string | null): boolean {
+  if (!nit?.trim()) return true;
+  const normalized = nit.trim().toUpperCase().replace(/[\s/]/g, "");
+  return normalized === "CF" || normalized === "CONSUMIDORFINAL";
+}
+
+function resetReceptorState() {
+  return {
+    nitReceptor: "",
+    nombreReceptor: "CONSUMIDOR FINAL",
+    facturaCF: true,
+    correoReceptor: "",
+  };
+}
+
 /** Epson LX-350 — forma continua 9.5 in (ancho) × 11 in (largo por página). */
 const RECEIPT_PAGE_W_IN = 9.5;
 const RECEIPT_PAGE_H_IN = 11;
@@ -204,6 +219,12 @@ export default function ReceiptModal({
       setTab("recibo");
       reset();
       setInfileResult(null);
+      const freshReceptor = resetReceptorState();
+      setNitReceptor(freshReceptor.nitReceptor);
+      setNombreReceptor(freshReceptor.nombreReceptor);
+      setFacturaCF(freshReceptor.facturaCF);
+      setCorreoReceptor(freshReceptor.correoReceptor);
+
       getVentaById(ventaId).then((data) => {
         setVenta(data);
         if (data?.dte_documentos?.length > 0) {
@@ -224,23 +245,47 @@ export default function ReceiptModal({
             alertas_infile: !!dte.alertas_infile?.length,
             descripcion_alertas_infile: dte.alertas_infile ?? [],
           } as INFILEResponse);
-          if (dte.id_receptor) setNitReceptor(dte.id_receptor);
-          if (dte.nombre_receptor) setNombreReceptor(dte.nombre_receptor);
-          if (dte.id_receptor && dte.id_receptor !== "CF") setFacturaCF(false);
-        } else {
-          if (data?.ven_clientes?.nit && data.ven_clientes.nit !== "C/F") {
-            setNitReceptor(data.ven_clientes.nit);
-            setFacturaCF(false);
-          }
-          if (data?.ven_clientes?.nombre)
-            setNombreReceptor(data.ven_clientes.nombre);
+          const dteEsCF = isConsumidorFinalNit(dte.id_receptor);
+          setFacturaCF(dteEsCF);
+          setNitReceptor(dteEsCF ? "" : dte.id_receptor || "");
+          setNombreReceptor(
+            dte.nombre_receptor ||
+              (dteEsCF ? "CONSUMIDOR FINAL" : data?.ven_clientes?.nombre || "CONSUMIDOR FINAL"),
+          );
         }
         setLoading(false);
       });
     } else {
       setVenta(null);
+      const freshReceptor = resetReceptorState();
+      setNitReceptor(freshReceptor.nitReceptor);
+      setNombreReceptor(freshReceptor.nombreReceptor);
+      setFacturaCF(freshReceptor.facturaCF);
+      setCorreoReceptor(freshReceptor.correoReceptor);
     }
   }, [isOpen, ventaId, reset]);
+
+  const handleFacturaCFChange = (cf: boolean) => {
+    setFacturaCF(cf);
+    if (cf) {
+      setNitReceptor("");
+      setNombreReceptor("CONSUMIDOR FINAL");
+      return;
+    }
+
+    const clienteNit = venta?.ven_clientes?.nit;
+    const clienteNombre = venta?.ven_clientes?.nombre;
+    if (clienteNit && !isConsumidorFinalNit(clienteNit)) {
+      setNitReceptor(clienteNit);
+    } else {
+      setNitReceptor("");
+    }
+    setNombreReceptor(
+      clienteNombre && clienteNit && !isConsumidorFinalNit(clienteNit)
+        ? clienteNombre
+        : "",
+    );
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -273,9 +318,23 @@ export default function ReceiptModal({
   const handleCertificar = async () => {
     if (!venta) return;
 
-    const nitFinal = facturaCF
-      ? "CF"
-      : nitReceptor.trim().toUpperCase() || "CF";
+    if (!facturaCF && !nitReceptor.trim()) {
+      await Swal.fire({
+        didOpen: () => {
+          const swalContainer = Swal.getContainer();
+          if (swalContainer) {
+            swalContainer.style.setProperty("z-index", "99999", "important");
+          }
+        },
+        title: "NIT requerido",
+        text: "Ingrese el NIT del receptor o seleccione C/F.",
+        icon: "warning",
+        confirmButtonColor: "#0284c7",
+      });
+      return;
+    }
+
+    const nitFinal = facturaCF ? "CF" : nitReceptor.trim().toUpperCase();
     const nombreFinal = facturaCF
       ? "CONSUMIDOR FINAL"
       : nombreReceptor.trim() || "CONSUMIDOR FINAL";
@@ -346,6 +405,9 @@ export default function ReceiptModal({
     if (resultado) {
       if (resultado.resultado) {
         setInfileResult(resultado);
+        setFacturaCF(facturaCF);
+        setNitReceptor(facturaCF ? "" : nitFinal);
+        setNombreReceptor(nombreFinal);
         if (ventaId) {
           const updatedVenta = await getVentaById(ventaId);
           setVenta(updatedVenta);
@@ -508,6 +570,20 @@ export default function ReceiptModal({
   const dteActivo = venta?.dte_documentos?.find(
     (d: any) => d.estado === "certificado",
   );
+  const dteMostrado =
+    venta?.dte_documentos?.find(
+      (d: any) => d.uuid_infile === infileResult?.uuid,
+    ) ?? dteActivo;
+  const displayNitReceptor = dteMostrado
+    ? isConsumidorFinalNit(dteMostrado.id_receptor)
+      ? "CF"
+      : dteMostrado.id_receptor
+    : facturaCF
+      ? "CF"
+      : nitReceptor.trim() || "CF";
+  const displayNombreReceptor =
+    dteMostrado?.nombre_receptor ||
+    (facturaCF ? "CONSUMIDOR FINAL" : nombreReceptor.trim() || "CONSUMIDOR FINAL");
   const tipoComprobante = dteActivo
     ? dteActivo.id_receptor === "CF"
       ? "Factura CF"
@@ -1355,10 +1431,7 @@ export default function ReceiptModal({
                                       >
                                         Cliente:
                                       </span>
-                                      <span>
-                                        {nombreReceptor.trim() ||
-                                          "CONSUMIDOR FINAL"}
-                                      </span>
+                                      <span>{displayNombreReceptor}</span>
                                     </div>
                                     <div
                                       style={{ display: "flex", gap: "6px" }}
@@ -1373,7 +1446,7 @@ export default function ReceiptModal({
                                       >
                                         NIT:
                                       </span>
-                                      <span>{nitReceptor.trim() || "CF"}</span>
+                                      <span>{displayNitReceptor}</span>
                                     </div>
                                   </td>
                                   <td
@@ -1741,6 +1814,11 @@ export default function ReceiptModal({
                               <button
                                 onClick={() => {
                                   setInfileResult(null);
+                                  const freshReceptor = resetReceptorState();
+                                  setNitReceptor(freshReceptor.nitReceptor);
+                                  setNombreReceptor(freshReceptor.nombreReceptor);
+                                  setFacturaCF(freshReceptor.facturaCF);
+                                  setCorreoReceptor(freshReceptor.correoReceptor);
                                   setVenta({
                                     ...venta,
                                     dte_documentos: venta.dte_documentos.filter(
@@ -1827,7 +1905,7 @@ export default function ReceiptModal({
                                     </span>
                                     <button
                                       type="button"
-                                      onClick={() => setFacturaCF(!facturaCF)}
+                                      onClick={() => handleFacturaCFChange(!facturaCF)}
                                       className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${!facturaCF ? "bg-sky-500" : "bg-gray-300"}`}
                                     >
                                       <span
