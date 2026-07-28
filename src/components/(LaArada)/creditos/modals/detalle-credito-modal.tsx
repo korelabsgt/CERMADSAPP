@@ -1,30 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useUser } from "@/components/(base)/providers/UserProvider";
+import ReceiptModal from "@/components/(LaArada)/ventas/modals/receipt-modal";
+import { showConfirm, showToast } from "@/lib/notifications";
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  X,
-  CreditCard,
-  Loader2,
-  History,
   ChevronDown,
   ChevronUp,
-  Printer,
-  MessageCircle,
-  Trash2,
+  CreditCard,
   FileCheck2,
+  FileDown,
+  History,
+  Loader2,
+  MessageCircle,
+  Printer,
+  Trash2,
+  X,
 } from "lucide-react";
+import { useState } from "react";
+import { exportReportePdf } from "../lib/export-reporte-pdf";
+import { useEliminarAbono, useProcesarPago } from "../lib/hooks";
 import {
   ClienteCredito,
   DteDocumentoCredito,
   PagoCreditoHistorial,
   VentaCredito,
 } from "../lib/zod";
-import { useProcesarPago, useEliminarAbono } from "../lib/hooks";
-import { cn } from "@/lib/utils";
-import { showToast, showConfirm } from "@/lib/notifications";
-import { useUser } from "@/components/(base)/providers/UserProvider";
-import ReceiptModal from "@/components/(LaArada)/ventas/modals/receipt-modal";
 
 interface DetalleCreditoModalProps {
   isOpen: boolean;
@@ -52,9 +54,9 @@ const MESES_CORTOS = [
 const felToneClass =
   "bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-400 border border-sky-200 dark:border-sky-800";
 
-type VistaCuenta = "Detalle" | "Reportes";
+type VistaCuenta = "Abonos" | "Reportes";
 
-const VISTA_OPTIONS: VistaCuenta[] = ["Detalle", "Reportes"];
+const VISTA_OPTIONS: VistaCuenta[] = ["Abonos", "Reportes"];
 
 const getVentaLabel = (venta: VentaCredito) =>
   venta.numero_recibo
@@ -64,7 +66,10 @@ const getVentaLabel = (venta: VentaCredito) =>
       : "---";
 
 const getTotalAbonos = (venta: VentaCredito) =>
-  (venta.ven_pagos ?? []).reduce((sum, pago) => sum + Number(pago.monto || 0), 0);
+  (venta.ven_pagos ?? []).reduce(
+    (sum, pago) => sum + Number(pago.monto || 0),
+    0,
+  );
 
 const formatDateShort = (value?: string | null) => {
   if (!value) return "Sin fecha";
@@ -226,7 +231,8 @@ export default function DetalleCreditoModal({
   const [deletingPagoId, setDeletingPagoId] = useState<string | null>(null);
   const [selectedVentaId, setSelectedVentaId] = useState<string | null>(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
-  const [vista, setVista] = useState<VistaCuenta>("Detalle");
+  const [vista, setVista] = useState<VistaCuenta>("Abonos");
+  const [exportandoReporte, setExportandoReporte] = useState(false);
 
   const user = useUser();
   const metadata = user?.user_metadata || {};
@@ -246,6 +252,52 @@ export default function DetalleCreditoModal({
   const closeReceiptModal = () => {
     setIsReceiptModalOpen(false);
     setSelectedVentaId(null);
+  };
+
+  const handleExportarReporte = async () => {
+    if (ventasCliente.length === 0) return;
+
+    setExportandoReporte(true);
+    try {
+      const rows = ventasCliente.map((venta) => {
+        const deuda = Number(venta.total || 0);
+        const abonosTotal = getTotalAbonos(venta);
+        const saldo = venta.saldo_pendiente ?? deuda - abonosTotal;
+
+        return {
+          fecha: formatDateShort(venta.created_at || venta.fecha_entrega),
+          venta: `#${getVentaLabel(venta)}`,
+          comprobante: getComprobanteLabel(venta),
+          deuda: `Q${formatMoney(deuda)}`,
+          abonos: `Q${formatMoney(abonosTotal)}`,
+          saldo: `Q${formatMoney(saldo)}`,
+        };
+      });
+
+      const totales = {
+        deuda: `Q${formatMoney(
+          ventasCliente.reduce((sum, v) => sum + Number(v.total || 0), 0),
+        )}`,
+        abonos: `Q${formatMoney(
+          ventasCliente.reduce((sum, v) => sum + getTotalAbonos(v), 0),
+        )}`,
+        saldo: `Q${formatMoney(
+          ventasCliente.reduce((sum, v) => {
+            const deuda = Number(v.total || 0);
+            const abonosTotal = getTotalAbonos(v);
+            return sum + (v.saldo_pendiente ?? deuda - abonosTotal);
+          }, 0),
+        )}`,
+      };
+
+      await exportReportePdf(cliente.nombre, cliente.nit, rows, totales);
+      showToast("success", "Reporte PDF descargado correctamente.", "top");
+    } catch (error) {
+      console.error(error);
+      showToast("error", "No se pudo generar el PDF del reporte.", "top");
+    } finally {
+      setExportandoReporte(false);
+    }
   };
 
   const handleMontoChange = (id: string, value: string, max: number) => {
@@ -419,24 +471,43 @@ export default function DetalleCreditoModal({
 
             <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-4 max-w-7xl mx-auto w-full">
               {vista === "Reportes" ? (
-                <div className="border rounded-xl overflow-hidden bg-card shadow-sm">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-end">
+                    <button
+                      type="button"
+                      onClick={handleExportarReporte}
+                      disabled={
+                        exportandoReporte || ventasCliente.length === 0
+                      }
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-red-100 px-4 text-[10px] font-bold uppercase tracking-widest text-red-600 transition-colors hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900"
+                    >
+                      {exportandoReporte ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <FileDown className="size-4" />
+                      )}
+                      Descargar PDF
+                    </button>
+                  </div>
+
+                  <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-sm">
                   <table className="w-full text-xs md:text-sm text-left">
-                    <thead className="bg-muted/50 text-muted-foreground font-bold border-b uppercase">
+                    <thead className="border-b border-zinc-200 bg-zinc-50 font-bold text-zinc-500">
                       <tr>
                         <th className="px-4 py-3">Fecha</th>
                         <th className="px-4 py-3">Venta</th>
                         <th className="px-4 py-3">Comprobante</th>
                         <th className="px-4 py-3 text-right">Deuda</th>
-                        <th className="px-4 py-3 text-right">Abonos</th>
+                        <th className="px-4 py-3 text-right">Abonado</th>
                         <th className="px-4 py-3 text-right">Saldo</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border/50">
+                    <tbody className="divide-y divide-zinc-100">
                       {ventasCliente.length === 0 ? (
                         <tr>
                           <td
                             colSpan={6}
-                            className="px-4 py-8 text-center text-muted-foreground font-bold"
+                            className="px-4 py-8 text-center font-bold text-zinc-500"
                           >
                             No hay ventas a crédito para este cliente.
                           </td>
@@ -453,9 +524,9 @@ export default function DetalleCreditoModal({
                           return (
                             <tr
                               key={venta.id}
-                              className="hover:bg-muted/20 transition-colors"
+                              className="transition-colors"
                             >
-                              <td className="px-4 py-3 font-medium whitespace-nowrap uppercase">
+                              <td className="px-4 py-3 font-medium whitespace-nowrap">
                                 {formatDateShort(
                                   venta.created_at || venta.fecha_entrega,
                                 )}
@@ -468,10 +539,10 @@ export default function DetalleCreditoModal({
                                   type="button"
                                   onClick={() => openReceiptModal(venta.id)}
                                   className={cn(
-                                    "inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold uppercase transition-opacity hover:opacity-80 cursor-pointer whitespace-nowrap",
+                                    "inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold transition-opacity hover:opacity-80 cursor-pointer whitespace-nowrap",
                                     dteFel
-                                      ? felToneClass
-                                      : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400 border border-amber-200 dark:border-amber-800",
+                                      ? "border border-sky-200 bg-sky-100 text-sky-600"
+                                      : "border border-amber-200 bg-amber-100 text-amber-700",
                                   )}
                                 >
                                   {comprobanteLabel}
@@ -492,9 +563,12 @@ export default function DetalleCreditoModal({
                       )}
                     </tbody>
                     {ventasCliente.length > 0 ? (
-                      <tfoot className="bg-muted/40 border-t font-black uppercase text-[10px] tracking-widest">
+                      <tfoot className="border-t border-zinc-200 bg-zinc-50 font-black text-[10px]">
                         <tr>
-                          <td colSpan={3} className="px-4 py-3 text-muted-foreground">
+                          <td
+                            colSpan={3}
+                            className="px-4 py-3 text-zinc-500"
+                          >
                             Totales
                           </td>
                           <td className="px-4 py-3 text-right tabular-nums text-sm">
@@ -532,375 +606,368 @@ export default function DetalleCreditoModal({
                       </tfoot>
                     ) : null}
                   </table>
+                  </div>
                 </div>
               ) : (
-              ventasCliente.map((venta) => {
-                const saldoPendiente =
-                  venta.saldo_pendiente ?? Number(venta.total);
-                const montoActual = abonos[venta.id] || "";
-                const isExpanded = expandedId === venta.id;
-                const dteFel = getFelCertificado(venta);
+                ventasCliente.map((venta) => {
+                  const saldoPendiente =
+                    venta.saldo_pendiente ?? Number(venta.total);
+                  const montoActual = abonos[venta.id] || "";
+                  const isExpanded = expandedId === venta.id;
+                  const dteFel = getFelCertificado(venta);
 
-                return (
-                  <div
-                    key={venta.id}
-                    className={cn(
-                      "bg-card border-2 rounded-2xl overflow-hidden transition-all duration-300",
-                      isExpanded
-                        ? "border-red-500/50 shadow-lg ring-4 ring-red-500/10"
-                        : "hover:border-foreground/30",
-                    )}
-                  >
+                  return (
                     <div
-                      onClick={() => toggleExpand(venta.id)}
-                      className="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer group"
+                      key={venta.id}
+                      className={cn(
+                        "bg-card border-2 rounded-2xl overflow-hidden transition-all duration-300",
+                        isExpanded
+                          ? "border-red-500/50 shadow-lg ring-4 ring-red-500/10"
+                          : "hover:border-foreground/30",
+                      )}
                     >
-                      <div className="flex-1 w-full">
-                        <div className="flex flex-wrap justify-between items-center gap-2 w-full">
-                          <p className="font-bold text-lg md:text-xl text-foreground">
-                            Venta #
-                            {venta.id
-                              ? `${venta.id.substring(0, 3).toUpperCase()}-${venta.id.substring(3, 6).toUpperCase()}`
-                              : "---"}
-                          </p>
+                      <div
+                        onClick={() => toggleExpand(venta.id)}
+                        className="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer group"
+                      >
+                        <div className="flex-1 w-full">
+                          <div className="flex flex-wrap justify-between items-center gap-2 w-full">
+                            <p className="font-bold text-lg md:text-xl text-foreground">
+                              Venta #
+                              {venta.id
+                                ? `${venta.id.substring(0, 3).toUpperCase()}-${venta.id.substring(3, 6).toUpperCase()}`
+                                : "---"}
+                            </p>
                           <div className="flex items-center gap-2">
-                            {dteFel ? (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  openReceiptModal(venta.id);
-                                }}
-                                className={cn(
-                                  "inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold uppercase cursor-pointer hover:opacity-80 transition-opacity",
-                                  felToneClass,
+                              <p className="text-sm text-muted-foreground font-medium">
+                                {formatDateShort(
+                                  venta.created_at || venta.fecha_entrega,
                                 )}
-                              >
-                                FEL: {formatFelNumero(dteFel.serie, dteFel.numero)}
-                              </button>
-                            ) : null}
-                            <p className="text-sm text-muted-foreground font-medium">
-                              {formatDateShort(
-                                venta.created_at || venta.fecha_entrega,
-                              )}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-sm text-muted-foreground font-medium mt-1">
+                            Vendió: {venta.vendedor_nombre}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between md:justify-end gap-4 md:gap-8 border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0">
+                          <div className="text-left md:text-right">
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                              Original
+                            </p>
+                            <p className="font-bold text-sm text-muted-foreground">
+                              Q{formatMoney(venta.total)}
                             </p>
                           </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground font-medium mt-1">
-                          Vendió: {venta.vendedor_nombre}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center justify-between md:justify-end gap-4 md:gap-8 border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0">
-                        <div className="text-left md:text-right">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                            Original
-                          </p>
-                          <p className="font-bold text-sm text-muted-foreground">
-                            Q{formatMoney(venta.total)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[11px] font-bold text-red-500 uppercase tracking-widest">
-                            Pendiente
-                          </p>
-                          <p className="font-black text-xl md:text-2xl text-foreground">
-                            Q{formatMoney(saldoPendiente)}
-                          </p>
-                        </div>
-                        <div className="text-muted-foreground hidden md:block">
-                          {isExpanded ? (
-                            <ChevronUp className="size-6" />
-                          ) : (
-                            <ChevronDown className="size-6" />
-                          )}
+                          <div className="text-right">
+                            <p className="text-[11px] font-bold text-red-500 uppercase tracking-widest">
+                              Pendiente
+                            </p>
+                            <p className="font-black text-xl md:text-2xl text-foreground">
+                              Q{formatMoney(saldoPendiente)}
+                            </p>
+                          </div>
+                          <div className="text-muted-foreground hidden md:block">
+                            {isExpanded ? (
+                              <ChevronUp className="size-6" />
+                            ) : (
+                              <ChevronDown className="size-6" />
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="border-t-2 bg-muted/10 overflow-hidden"
-                        >
-                          <div className="p-5 md:p-8 flex flex-col lg:flex-row gap-8">
-                            <div className="flex-1 space-y-5">
-                              {dteFel ? (
-                                <FelInfoPanel
-                                  dte={dteFel}
-                                  totalVenta={Number(venta.total)}
-                                  clienteNombre={cliente.nombre}
-                                  onOpen={() => openReceiptModal(venta.id)}
-                                />
-                              ) : null}
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="border-t-2 bg-muted/10 overflow-hidden"
+                          >
+                            <div className="p-5 md:p-8 flex flex-col lg:flex-row gap-8">
+                              <div className="flex-1 space-y-5">
+                                {dteFel ? (
+                                  <FelInfoPanel
+                                    dte={dteFel}
+                                    totalVenta={Number(venta.total)}
+                                    clienteNombre={cliente.nombre}
+                                    onOpen={() => openReceiptModal(venta.id)}
+                                  />
+                                ) : null}
 
-                              <div className="flex items-center justify-between border-b border-border/50 pb-3">
-                                <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground uppercase tracking-widest">
-                                  <History className="size-5" />
-                                  Historial de Pagos
-                                </div>
-                                {venta.ven_pagos &&
-                                  venta.ven_pagos.length > 0 && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (whatsappVentaId === venta.id) {
-                                          setWhatsappVentaId(null);
-                                        } else {
-                                          setWhatsappVentaId(venta.id);
-                                          setWhatsappPhone(
-                                            cliente?.telefono &&
-                                              cliente.telefono !== "N/A"
-                                              ? cliente.telefono
-                                              : "",
-                                          );
-                                        }
-                                      }}
-                                      className="px-3 py-1.5 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-lg transition-all cursor-pointer flex items-center gap-2"
-                                    >
-                                      <MessageCircle className="size-4" />
-                                      <span className="text-xs font-bold uppercase tracking-widest">
-                                        Enviar Abonos
-                                      </span>
-                                    </button>
-                                  )}
-                              </div>
-
-                              <AnimatePresence>
-                                {whatsappVentaId === venta.id && (
-                                  <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: "auto", opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    className="mb-4 flex items-center gap-2 overflow-hidden"
-                                  >
-                                    <input
-                                      type="text"
-                                      value={whatsappPhone}
-                                      onChange={(e) =>
-                                        setWhatsappPhone(e.target.value)
-                                      }
-                                      placeholder="Número sin código"
-                                      className="flex-1 bg-muted/50 border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500/50"
-                                      onClick={(e) => e.stopPropagation()}
-                                    />
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (whatsappPhone) {
-                                          const formatParts = (dStr?: string) => {
-                                            if (!dStr)
-                                              return { d: "N/A", t: "" };
-                                            const d = new Date(dStr);
-                                            const diaSemana = d
-                                              .toLocaleDateString("es-GT", {
-                                                weekday: "short",
-                                              })
-                                              .replace(".", "");
-                                            const fechaManual = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear().toString().slice(-2)}`;
-                                            const horaManual =
-                                              d.toLocaleTimeString("es-GT", {
-                                                hour: "numeric",
-                                                minute: "2-digit",
-                                                hour12: true,
-                                              });
-                                            return {
-                                              d: `${diaSemana}, ${fechaManual}`,
-                                              t: horaManual,
-                                            };
-                                          };
-
-                                          const numV = venta.id
-                                            ? `${venta.id.substring(0, 3).toUpperCase()}-${venta.id.substring(3, 6).toUpperCase()}`
-                                            : "---";
-                                          const fV = formatParts(
-                                            venta.created_at,
-                                          );
-                                          const totV = formatMoney(venta.total);
-                                          const salV = formatMoney(
-                                            venta.saldo_pendiente ?? 0,
-                                          );
-
-                                          let texto = `👤 *${cliente?.nombre}*\n\n*${fV.d}, ${fV.t}*\n\`\`\`Venta #${numV}: Q${totV}\`\`\`\n\n\n📝 *Abonos:*\n\n`;
-
-                                          venta.ven_pagos?.forEach((pago) => {
-                                            const fP = formatParts(
-                                              pago.created_at,
+                                <div className="flex items-center justify-between border-b border-border/50 pb-3">
+                                  <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                                    <History className="size-5" />
+                                    Historial de Pagos
+                                  </div>
+                                  {venta.ven_pagos &&
+                                    venta.ven_pagos.length > 0 && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (whatsappVentaId === venta.id) {
+                                            setWhatsappVentaId(null);
+                                          } else {
+                                            setWhatsappVentaId(venta.id);
+                                            setWhatsappPhone(
+                                              cliente?.telefono &&
+                                                cliente.telefono !== "N/A"
+                                                ? cliente.telefono
+                                                : "",
                                             );
-                                            const idA = pago.id
-                                              ? `${pago.id.substring(0, 3).toUpperCase()}-${pago.id.substring(3, 6).toUpperCase()}`
-                                              : "---";
-                                            const monA = formatMoney(pago.monto);
-                                            texto += `*${fP.d}, ${fP.t}*\n\`\`\`Abono #${idA}: Q${monA}\`\`\`\n\n`;
-                                          });
+                                          }
+                                        }}
+                                        className="px-3 py-1.5 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-lg transition-all cursor-pointer flex items-center gap-2"
+                                      >
+                                        <MessageCircle className="size-4" />
+                                        <span className="text-xs font-bold uppercase tracking-widest">
+                                          Enviar Abonos
+                                        </span>
+                                      </button>
+                                    )}
+                                </div>
 
-                                          texto += `🧾 *Saldo: Q${salV}*\n\n\n*La Arada*\n*_¡Gracias por sus pagos!_*`;
-
-                                          const url = `https://api.whatsapp.com/send?phone=502${whatsappPhone.replace(/\s+/g, "")}&text=${encodeURIComponent(texto)}`;
-                                          window.open(url, "_blank");
-                                          setWhatsappVentaId(null);
+                                <AnimatePresence>
+                                  {whatsappVentaId === venta.id && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      className="mb-4 flex items-center gap-2 overflow-hidden"
+                                    >
+                                      <input
+                                        type="text"
+                                        value={whatsappPhone}
+                                        onChange={(e) =>
+                                          setWhatsappPhone(e.target.value)
                                         }
-                                      }}
-                                      className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-bold hover:bg-emerald-600"
-                                    >
-                                      Enviar
-                                    </button>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
+                                        placeholder="Número sin código"
+                                        className="flex-1 bg-muted/50 border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500/50"
+                                        onClick={(e) => e.stopPropagation()}
+                                      />
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (whatsappPhone) {
+                                            const formatParts = (
+                                              dStr?: string,
+                                            ) => {
+                                              if (!dStr)
+                                                return { d: "N/A", t: "" };
+                                              const d = new Date(dStr);
+                                              const diaSemana = d
+                                                .toLocaleDateString("es-GT", {
+                                                  weekday: "short",
+                                                })
+                                                .replace(".", "");
+                                              const fechaManual = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear().toString().slice(-2)}`;
+                                              const horaManual =
+                                                d.toLocaleTimeString("es-GT", {
+                                                  hour: "numeric",
+                                                  minute: "2-digit",
+                                                  hour12: true,
+                                                });
+                                              return {
+                                                d: `${diaSemana}, ${fechaManual}`,
+                                                t: horaManual,
+                                              };
+                                            };
 
-                              {venta.ven_pagos && venta.ven_pagos.length > 0 ? (
-                                <div className="space-y-3">
-                                  {venta.ven_pagos.map((pago, idx) => (
-                                    <div
-                                      key={pago.id || idx}
-                                      className="flex flex-col text-sm bg-background border-2 border-border/50 p-4 rounded-xl shadow-sm hover:border-emerald-500/30"
-                                    >
-                                      <div className="flex justify-between items-start w-full mb-1">
-                                        <span className="font-bold text-foreground text-base">
-                                          Abono: #
-                                          {pago.id
-                                            ? `${pago.id.substring(0, 3).toUpperCase()}-${pago.id.substring(3, 6).toUpperCase()}`
-                                            : "---"}
-                                        </span>
-                                        <span className="text-xs text-muted-foreground font-medium text-right mt-1">
-                                          {pago.created_at
-                                            ? new Date(
+                                            const numV = venta.id
+                                              ? `${venta.id.substring(0, 3).toUpperCase()}-${venta.id.substring(3, 6).toUpperCase()}`
+                                              : "---";
+                                            const fV = formatParts(
+                                              venta.created_at,
+                                            );
+                                            const totV = formatMoney(
+                                              venta.total,
+                                            );
+                                            const salV = formatMoney(
+                                              venta.saldo_pendiente ?? 0,
+                                            );
+
+                                            let texto = `👤 *${cliente?.nombre}*\n\n*${fV.d}, ${fV.t}*\n\`\`\`Venta #${numV}: Q${totV}\`\`\`\n\n\n📝 *Abonos:*\n\n`;
+
+                                            venta.ven_pagos?.forEach((pago) => {
+                                              const fP = formatParts(
                                                 pago.created_at,
-                                              ).toLocaleString("es-GT")
-                                            : "N/A"}
+                                              );
+                                              const idA = pago.id
+                                                ? `${pago.id.substring(0, 3).toUpperCase()}-${pago.id.substring(3, 6).toUpperCase()}`
+                                                : "---";
+                                              const monA = formatMoney(
+                                                pago.monto,
+                                              );
+                                              texto += `*${fP.d}, ${fP.t}*\n\`\`\`Abono #${idA}: Q${monA}\`\`\`\n\n`;
+                                            });
+
+                                            texto += `🧾 *Saldo: Q${salV}*\n\n\n*La Arada*\n*_¡Gracias por sus pagos!_*`;
+
+                                            const url = `https://api.whatsapp.com/send?phone=502${whatsappPhone.replace(/\s+/g, "")}&text=${encodeURIComponent(texto)}`;
+                                            window.open(url, "_blank");
+                                            setWhatsappVentaId(null);
+                                          }
+                                        }}
+                                        className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-bold hover:bg-emerald-600"
+                                      >
+                                        Enviar
+                                      </button>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+
+                                {venta.ven_pagos &&
+                                venta.ven_pagos.length > 0 ? (
+                                  <div className="space-y-3">
+                                    {venta.ven_pagos.map((pago, idx) => (
+                                      <div
+                                        key={pago.id || idx}
+                                        className="flex flex-col text-sm bg-background border-2 border-border/50 p-4 rounded-xl shadow-sm hover:border-emerald-500/30"
+                                      >
+                                        <div className="flex justify-between items-start w-full mb-1">
+                                          <span className="font-bold text-foreground text-base">
+                                            Abono: #
+                                            {pago.id
+                                              ? `${pago.id.substring(0, 3).toUpperCase()}-${pago.id.substring(3, 6).toUpperCase()}`
+                                              : "---"}
+                                          </span>
+                                          <span className="text-xs text-muted-foreground font-medium text-right mt-1">
+                                            {pago.created_at
+                                              ? new Date(
+                                                  pago.created_at,
+                                                ).toLocaleString("es-GT")
+                                              : "N/A"}
+                                          </span>
+                                        </div>
+                                        <span className="text-sm text-muted-foreground font-medium w-full pb-3">
+                                          Cobró:{" "}
+                                          {pago.cajero_nombre || "Desconocido"}
                                         </span>
-                                      </div>
-                                      <span className="text-sm text-muted-foreground font-medium w-full pb-3">
-                                        Cobró:{" "}
-                                        {pago.cajero_nombre || "Desconocido"}
-                                      </span>
-                                      <div className="grid grid-cols-2 items-center w-full pt-3 border-t border-border/50">
-                                        <span className="font-black text-emerald-600 text-lg">
-                                          + Q{formatMoney(pago.monto)}
-                                        </span>
-                                        <div className="flex justify-end gap-2">
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              imprimirRecibo(pago, venta);
-                                            }}
-                                            className="p-2.5 bg-blue-500/10 text-blue-600 hover:bg-blue-500 hover:text-white rounded-lg transition-all cursor-pointer"
-                                          >
-                                            <Printer className="size-5" />
-                                          </button>
-                                          {canDeleteAbono && pago.id && (
+                                        <div className="grid grid-cols-2 items-center w-full pt-3 border-t border-border/50">
+                                          <span className="font-black text-emerald-600 text-lg">
+                                            + Q{formatMoney(pago.monto)}
+                                          </span>
+                                          <div className="flex justify-end gap-2">
                                             <button
-                                              onClick={(e) =>
-                                                handleEliminarAbono(e, pago)
-                                              }
-                                              disabled={
-                                                deletingPagoId === pago.id ||
-                                                processingId !== null
-                                              }
-                                              className="p-2.5 bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white rounded-lg transition-all cursor-pointer disabled:opacity-50"
-                                              title="Eliminar abono"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                imprimirRecibo(pago, venta);
+                                              }}
+                                              className="p-2.5 bg-blue-500/10 text-blue-600 hover:bg-blue-500 hover:text-white rounded-lg transition-all cursor-pointer"
                                             >
-                                              {deletingPagoId === pago.id ? (
-                                                <Loader2 className="size-5 animate-spin" />
-                                              ) : (
-                                                <Trash2 className="size-5" />
-                                              )}
+                                              <Printer className="size-5" />
                                             </button>
-                                          )}
+                                            {canDeleteAbono && pago.id && (
+                                              <button
+                                                onClick={(e) =>
+                                                  handleEliminarAbono(e, pago)
+                                                }
+                                                disabled={
+                                                  deletingPagoId === pago.id ||
+                                                  processingId !== null
+                                                }
+                                                className="p-2.5 bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white rounded-lg transition-all cursor-pointer disabled:opacity-50"
+                                                title="Eliminar abono"
+                                              >
+                                                {deletingPagoId === pago.id ? (
+                                                  <Loader2 className="size-5 animate-spin" />
+                                                ) : (
+                                                  <Trash2 className="size-5" />
+                                                )}
+                                              </button>
+                                            )}
+                                          </div>
                                         </div>
                                       </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="p-8 text-center border-2 border-dashed rounded-2xl text-muted-foreground text-sm font-bold uppercase opacity-60">
+                                    No hay abonos registrados.
+                                  </div>
+                                )}
+                              </div>
+                              {saldoPendiente > 0 && (
+                                <div className="w-full lg:w-96 shrink-0">
+                                  <div className="bg-background border-2 border-border/60 rounded-3xl p-5 shadow-md flex flex-col gap-3">
+                                    <label className="text-sm font-black text-foreground uppercase block text-center">
+                                      Ingresar Abono
+                                    </label>
+                                    <div className="flex items-center gap-3 bg-muted/30 border-2 rounded-2xl px-5 py-4 focus-within:ring-2 focus-within:ring-red-500/20">
+                                      <input
+                                        type="number"
+                                        inputMode="decimal"
+                                        min="0"
+                                        max={saldoPendiente}
+                                        step="0.01"
+                                        value={montoActual}
+                                        onKeyDown={(e) => {
+                                          if (
+                                            e.key === "-" ||
+                                            e.key === "e" ||
+                                            e.key === "E" ||
+                                            e.key === "+"
+                                          )
+                                            e.preventDefault();
+                                          if (
+                                            e.key === "Enter" &&
+                                            (abonos[venta.id] ?? 0) > 0 &&
+                                            processingId !== venta.id
+                                          ) {
+                                            e.preventDefault();
+                                            handlePagarVenta(
+                                              venta.id,
+                                              abonos[venta.id],
+                                            );
+                                          }
+                                        }}
+                                        onChange={(e) =>
+                                          handleMontoChange(
+                                            venta.id,
+                                            e.target.value,
+                                            saldoPendiente,
+                                          )
+                                        }
+                                        placeholder="0.00"
+                                        className="w-full bg-transparent outline-none font-black text-4xl text-center"
+                                      />
                                     </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div className="p-8 text-center border-2 border-dashed rounded-2xl text-muted-foreground text-sm font-bold uppercase opacity-60">
-                                  No hay abonos registrados.
+                                    <AnimatePresence>
+                                      {(abonos[venta.id] ?? 0) > 0 && (
+                                        <motion.button
+                                          initial={{ opacity: 0, y: -6 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -6 }}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handlePagarVenta(
+                                              venta.id,
+                                              abonos[venta.id],
+                                            );
+                                          }}
+                                          disabled={processingId === venta.id}
+                                          className="w-full py-3 rounded-2xl bg-red-500 text-white font-black hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-red-500/20 text-sm uppercase tracking-wide"
+                                        >
+                                          {processingId === venta.id ? (
+                                            <Loader2 className="size-4 animate-spin" />
+                                          ) : (
+                                            <>Registrar Abono</>
+                                          )}
+                                        </motion.button>
+                                      )}
+                                    </AnimatePresence>
+                                  </div>
                                 </div>
                               )}
                             </div>
-                            {saldoPendiente > 0 && (
-                              <div className="w-full lg:w-96 shrink-0">
-                                <div className="bg-background border-2 border-border/60 rounded-3xl p-5 shadow-md flex flex-col gap-3">
-                                  <label className="text-sm font-black text-foreground uppercase block text-center">
-                                    Ingresar Abono
-                                  </label>
-                                  <div className="flex items-center gap-3 bg-muted/30 border-2 rounded-2xl px-5 py-4 focus-within:ring-2 focus-within:ring-red-500/20">
-                                    <input
-                                      type="number"
-                                      inputMode="decimal"
-                                      min="0"
-                                      max={saldoPendiente}
-                                      step="0.01"
-                                      value={montoActual}
-                                      onKeyDown={(e) => {
-                                        if (
-                                          e.key === "-" ||
-                                          e.key === "e" ||
-                                          e.key === "E" ||
-                                          e.key === "+"
-                                        )
-                                          e.preventDefault();
-                                        if (
-                                          e.key === "Enter" &&
-                                          (abonos[venta.id] ?? 0) > 0 &&
-                                          processingId !== venta.id
-                                        ) {
-                                          e.preventDefault();
-                                          handlePagarVenta(
-                                            venta.id,
-                                            abonos[venta.id],
-                                          );
-                                        }
-                                      }}
-                                      onChange={(e) =>
-                                        handleMontoChange(
-                                          venta.id,
-                                          e.target.value,
-                                          saldoPendiente,
-                                        )
-                                      }
-                                      placeholder="0.00"
-                                      className="w-full bg-transparent outline-none font-black text-4xl text-center"
-                                    />
-                                  </div>
-                                  <AnimatePresence>
-                                    {(abonos[venta.id] ?? 0) > 0 && (
-                                      <motion.button
-                                        initial={{ opacity: 0, y: -6 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -6 }}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handlePagarVenta(
-                                            venta.id,
-                                            abonos[venta.id],
-                                          );
-                                        }}
-                                        disabled={processingId === venta.id}
-                                        className="w-full py-3 rounded-2xl bg-red-500 text-white font-black hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-red-500/20 text-sm uppercase tracking-wide"
-                                      >
-                                        {processingId === venta.id ? (
-                                          <Loader2 className="size-4 animate-spin" />
-                                        ) : (
-                                          <>Registrar Abono</>
-                                        )}
-                                      </motion.button>
-                                    )}
-                                  </AnimatePresence>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })
               )}
             </div>
           </motion.div>
