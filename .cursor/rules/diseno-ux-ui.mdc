@@ -1,0 +1,340 @@
+---
+description: Diseño UX/UI zinc, botones, modales, toastify, SweetAlert 2 y donas
+alwaysApply: true
+---
+
+# Diseño UX/UI
+
+## Tema y fondos
+
+- Tema claro: fondo de página blanco; cards y componentes en zinc claro (`zinc-50`, header/layout `zinc-100`).
+- Tema oscuro: fondo de página `zinc-900`; cards y componentes en un tono de gris más claro (`zinc-800`).
+- La UI usa tonos zinc para fondos de superficie.
+
+## Botones (UI general)
+
+Siempre `cursor-pointer`; deshabilitado: `cursor-not-allowed` y `disabled:opacity-50`.
+
+**Regla global:** fondo sólido suave semántico; **sin borde** (`border-0`); **sin sombra** en botones de acción. Texto en mayúsculas pequeñas cuando aplique: `uppercase text-[10px] tracking-widest font-bold`.
+
+### CTA de página (crear, enviar listado)
+
+- `inline-flex h-11 items-center justify-center rounded-xl px-6`
+- `bg-azul-trifinio text-white`
+- Hover: `hover:opacity-90`; activo: `active:scale-95`
+
+### Guardar / acción principal (formularios y modales)
+
+- `inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6`
+- `bg-emerald-200 text-emerald-900 hover:bg-emerald-300 active:scale-95`
+- Oscuro: `dark:bg-emerald-800/70 dark:text-emerald-50 dark:hover:bg-emerald-700/80`
+- Usar en `ModalSubmit`, «Guardar cambios», «Guardar» en recortes, etc.
+
+### Cancelar / secundario
+
+- `inline-flex h-11 items-center justify-center rounded-xl px-6`
+- `bg-zinc-200 text-zinc-700 hover:bg-zinc-300`
+- Oscuro: `dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600`
+
+### Agregar ítem (por sección)
+
+Botones «Agregar avance», «Agregar resultado», etc.:
+
+- `inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-bold transition-colors`
+- Fondo `*-100` con texto del color de la sección; hover `*-200`; oscuro `*-950` / hover `*-900`
+- Colores por sección:
+  - Proyecto / azul: `bg-sky-100 text-azul-trifinio`
+  - Avance / ámbar: `bg-amber-100 text-amber-700`
+  - Resultado / violeta: `bg-violet-100 text-violet-700`
+  - Efecto / esmeralda: `bg-emerald-100 text-emerald-700`
+  - Beneficiarios / celeste: `bg-sky-100 text-sky-700`
+
+### Quitar (destructivo inline)
+
+- `inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-bold`
+- `bg-red-100 text-red-600 hover:bg-red-200`
+- Oscuro: `dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900`
+- Confirmar con SweetAlert 2 antes de eliminar (ver SweetAlert)
+
+### Prohibido en botones
+
+- Bordes visibles (`border`, `border-2`, outline esmeralda/azul en botones).
+- Fondos transparentes con solo borde en acciones de guardar/cancelar.
+- Sombras en botones de formulario.
+
+## Modales
+
+Implementación única: `components/ui/general-modal.tsx` (`ModalShell`, `ModalInput`, `ModalLabel`, `ModalTextarea`, `ModalSubmit`, `ModalFooter`, `ModalConfirmDelete`).
+
+### Comportamiento
+
+- Portal al `body` con `createPortal`; `z-[200]` por encima del header.
+- Bloquear scroll del `body` mientras el modal esté abierto.
+- **Escritorio:** modal centrado, ancho máximo moderado, padding alrededor.
+- **Teléfono:** pantalla completa (`100dvh`), sin padding exterior, sin borde animado; panel plano zinc de borde a borde.
+
+### Overlay
+
+- Escritorio: `bg-zinc-700/20` + `backdrop-blur-sm`; sin capa blanca.
+- Teléfono: fondo sólido zinc (`zinc-100` claro / `zinc-900` oscuro), sin blur.
+
+### Contenedor (escritorio)
+
+- Esquinas muy redondeadas (`rounded-3xl`).
+- Borde animado celeste solo en escritorio: padding 3px y gradiente radial (`#1a95d3` → `#5ec8f0`) que sigue el cursor; interior sólido encima.
+- Sombra ligera.
+
+### Superficies
+
+- Tema claro: `bg-zinc-100` uniforme en header y cuerpo.
+- Tema oscuro: header/footer `zinc-800`; zona de campos `zinc-900`.
+
+### Header y cierre
+
+- Título `foreground`; subtítulo `text-[10px] uppercase tracking-widest text-muted-foreground`.
+- Sin icono decorativo ni línea divisoria.
+- Cierre únicamente con X celeste, área táctil amplia, hover suave.
+- En teléfono: safe area superior e inferior.
+
+### Campos y acción
+
+- Sin placeholder; `border-2 border-celeste-trifinio`; fondo transparente; focus ring celeste; ancho completo.
+- Footer con **Cancelar** (gris `zinc-200`) a la izquierda y **Guardar** (esmeralda suave) a la derecha cuando haya dos acciones; si solo hay una, **Guardar** centrado.
+- Ambos botones: patrón de la sección Botones (sin borde, fondo sólido suave).
+
+### Feedback en modales
+
+- `toast.success()` / `toast.error()` / `toast.warn()` de react-toastify (ver sección Toastify).
+- Códigos de server action: `modalActionMessage` + `MODAL_ACTION_ERRORS` en `modal-toast.ts`.
+- Confirmaciones destructivas: `ModalConfirmDelete` dentro del modal.
+
+### Prohibido en modales
+
+- `Dialog` de shadcn u otros modales ad hoc para formularios.
+- SweetAlert en formularios con `ModalShell`.
+- Botones con borde u outline en guardar/cancelar.
+- Fondos negro/blanco fijos fuera de la paleta zinc; `min-h-*` artificial en el body.
+- `ToastContainer` duplicado por página (usar el global del layout).
+
+## Toastify (notificaciones)
+
+Siempre **react-toastify** para éxito, error y advertencia en toda la app.
+
+### Contenedor (único)
+
+- `ObsToastContainer` en el layout raíz; **no** montar otro `ToastContainer` en páginas o módulos.
+- Configuración obligatoria: `position="top-center"`, `autoClose={3000}`, `theme="colored"`.
+- Los toasts aparecen **centrados en la parte superior** de la pantalla.
+- Importar estilos una vez: `react-toastify/dist/ReactToastify.css`.
+
+### Uso en código
+
+```typescript
+import { toast } from "react-toastify";
+
+toast.success("Guardado correctamente.");
+toast.error("No se pudo guardar.");
+toast.warn("Revisa los datos del formulario.");
+```
+
+- Llamadas directas a `toast.*`; sin wrappers ni SweetAlert para feedback simple.
+- `autoClose` distinto solo si el mensaje lo requiere: `toast.warn("...", { autoClose: 6000 })`.
+- Códigos de API: `modalActionMessage(code, fallback)` desde `modal-toast.ts`.
+
+### Apariencia (obligatoria)
+
+Definida en `globals.css` con variables `--toastify-*` y reglas `.Toastify__toast`; **no** sobrescribir con `theme="light"` ni `theme="dark"` en el contenedor.
+
+- **Fondo sólido** de color semántico en todo el toast (verde éxito, rojo error, ámbar advertencia); sin gradiente ni tarjeta blanca interior.
+- **Sin sombra** (`--toastify-toast-shadow: none`; `box-shadow: none !important`).
+- **Sin** borde fino de contraste ni fondo blanco/transparente.
+- Texto blanco en éxito/error; texto oscuro (`#0f172a`) en advertencia.
+- Iconos del mismo color que el texto del toast.
+- Barra de progreso semitransparente acorde al fondo.
+- `z-index` 10000 (por encima de modales `z-[200]`).
+- Esquinas `0.75rem` (`--toastify-toast-bd-radius`); tipografía en negrita (`font-weight: 700`).
+- Colores en `:root` y `.dark` vía `--toastify-color-success|error|warning`.
+
+## SweetAlert 2 (confirmaciones)
+
+SweetAlert 2 solo **fuera de `ModalShell`** para confirmar eliminaciones o decisiones destructivas en formularios y listas. Dentro de modales: `ModalConfirmDelete`, nunca SweetAlert.
+
+### Configuración base
+
+Centralizar estilos en `lib/swal.ts` del módulo (referencia: `memoria-labores/lib/swal.ts`):
+
+```typescript
+buttonsStyling: false,
+customClass: swalMemoriaCustomClass,
+background: dark ? "#18181b" : "#f4f4f5",
+color: dark ? "#fafafa" : "#18181b",
+didOpen: () => { /* z-index 10001, por encima de toastify */ },
+```
+
+### Popup
+
+- Esquinas redondeadas: `rounded-2xl` (`!rounded-2xl` en `customClass.popup`).
+- Fondo zinc: `bg-zinc-100` claro / `dark:bg-zinc-900` oscuro.
+- Borde: `border border-border` / `dark:border-zinc-700`.
+- Padding `p-6`; título `text-lg font-black`; texto `text-sm text-muted-foreground`.
+- Icono warning: borde y color ámbar (`border-amber-500 text-amber-500`).
+
+### Botones
+
+Sin estilos por defecto de SweetAlert (`buttonsStyling: false`). Acciones centradas: `flex w-full flex-wrap justify-center gap-2`.
+
+**Confirmar (destructivo):**
+
+- `h-10 rounded-xl px-5 text-xs font-bold`
+- `bg-red-100 text-red-600 hover:bg-red-200`
+- Oscuro: `dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900`
+- Sin borde ni sombra (`border-0 shadow-none`)
+
+**Cancelar:**
+
+- Misma altura y radio que confirmar
+- `bg-sky-100 text-azul-trifinio hover:bg-sky-200`
+- Oscuro: `dark:bg-sky-950 dark:text-azul-trifinio dark:hover:bg-sky-900`
+
+### Prohibido en SweetAlert
+
+- Botones con el estilo por defecto de SweetAlert (`confirmButtonColor` sólido sin `customClass`).
+- SweetAlert dentro de formularios que usen `ModalShell`.
+- Popups con esquinas cuadradas o fondo blanco/negro fuera de la paleta zinc.
+
+## Donas (gráficos circulares)
+
+Referencia de implementación: `memoria-labores/InformeMemoriaVista.tsx` (`DonutChart`, `DonutLeyenda`, `DonutPanel`, `DonutDesglosePanel`). Librerías: **recharts** (`PieChart`, `Pie`, `Cell`) + **framer-motion** para el centro y el detalle al hover.
+
+### Geometría y estilo del arco
+
+- `innerRadius`: 32% del tamaño; `outerRadius`: 48% del tamaño.
+- `cornerRadius`: 6; `stroke`: none.
+- `paddingAngle`: 2 solo si hay más de un segmento con valor > 0.
+- Tamaños: **184px** (paneles estándar), **220px** (desglose completo central).
+- Sin tooltip flotante de Recharts; el detalle va **dentro del agujero**, debajo de «TOTAL».
+
+### Paleta semántica (beneficiarios)
+
+**Por grupo:**
+
+- Hombres: `#2563eb`
+- Mujeres: `#ec4899`
+- Jóvenes: `#22c55e`
+
+**Por tipo:**
+
+- Directos: `#0ea5e9`
+- Indirectos: `#a855f7`
+
+**Desglose completo** (tonos más claros para indirectos): azul `#1d4ed8` / `#60a5fa`, rosa `#db2777` / `#f9a8d4`, verde `#15803d` / `#86efac`.
+
+### Centro de la dona
+
+Contenedor absoluto centrado con `pointer-events-none`; el `Pie` recibe hover.
+
+**Reposo (sin segmento activo):**
+
+- Número total: `text-3xl font-black`, locale `es-GT`.
+- Etiqueta: `TOTAL` en `text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground`.
+- Bloque **centrado verticalmente** en el agujero; sin espacio reservado abajo.
+
+**Hover (segmento activo):**
+
+- El bloque total + etiqueta **se desplaza suave hacia arriba** (`motion.div` con `layout`, easing `[0.4, 0, 0.2, 1]`, ~0,3 s).
+- Debajo aparece el detalle con `AnimatePresence` (entrada y salida suaves, no de golpe):
+  - Nombre del segmento: `text-[9px] font-semibold text-muted-foreground`, truncado.
+  - Línea de datos: **porcentaje** en color del segmento + **cantidad** en `foreground`, `text-xs font-black tabular-nums`.
+  - Porcentaje entra con ligero `x: -4`; cantidad con `x: 4` y delay escalonado (~40 ms / 80 ms).
+- Salida del detalle: `opacity: 0`, `height: 0`, `marginTop: 0` en ~0,3 s para que el total **vuelva al centro suavemente** (misma duración que el `layout` del contenedor).
+
+### Animación de llenado (acordeón)
+
+- Prop `animateFill`: `true` solo cuando el panel/acordeón está abierto; `false` mientras está cerrado.
+- Cerrado: anillo vacío placeholder (`border-[10px] border-slate-100` / `dark:border-zinc-800`), sin montar el `Pie`.
+- Al abrir: montar el `Pie` y animar el llenado:
+  - `animationDuration`: **1400 ms**
+  - `animationBegin`: **280 ms** (sincronizado con la apertura del acordeón)
+  - `animationEasing`: `ease-out`
+- Cada reapertura del acordeón **repite** la animación de llenado.
+- `useReducedMotion`: desactivar animaciones de relleno y simplificar transiciones del centro.
+
+### Leyenda (`DonutLeyenda`)
+
+Filas en `rounded-full bg-slate-50` (`dark:bg-zinc-800/60`), gap 2.5.
+
+Por fila (izquierda → derecha):
+
+1. **Círculo** `h-9 w-9`: fondo del color del segmento; **cantidad** en blanco (`text-[10px] font-black`).
+2. **Etiqueta** `text-sm font-semibold` (nombre del segmento).
+3. **Porcentaje** a la derecha en el **color del segmento** (`text-sm font-black tabular-nums`).
+
+Solo ítems con `value > 0`. Columnas: 1 por defecto; 2 en `sm:grid` cuando aplique.
+
+### Layout de paneles
+
+**`DonutPanel`** (ej. «Por grupo», «Directos vs indirectos»):
+
+- Superficie: `rounded-2xl bg-white p-3 sm:p-5` (`dark:bg-zinc-900/70`).
+- Título: `text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground`, centrado sobre la dona.
+- Escritorio: dona a la izquierda, leyenda a la derecha (`sm:flex-row`); móvil: columna centrada.
+
+**`DonutDesglosePanel`**:
+
+- Título central: «Desglose completo».
+- Grid 3 columnas en `lg`: leyenda directos (fondo `bg-sky-50/80`) | dona central 220px | leyenda indirectos (fondo `bg-violet-50/80`).
+- Subtítulos «Directos» / «Indirectos» centrados en cada columna lateral.
+
+### Constantes de animación (donas)
+
+```typescript
+const donutDetailEase = [0.4, 0, 0.2, 1] as const;
+const donutFillDurationMs = 1400;
+const donutFillBeginMs = 280;
+```
+
+### Prohibido en donas
+
+- Tooltip flotante de Recharts que tape el total.
+- Reservar altura fija bajo «TOTAL» en reposo (desplaza el número del centro).
+- Salida abrupta del detalle al quitar hover (debe colapsar con la misma suavidad que la entrada).
+- Animar el llenado antes de que el acordeón/panel esté visible.
+- Leyenda con porcentaje dentro del círculo y cantidad a la derecha en gris (invertido respecto al patrón).
+
+## Animaciones de listas (añadir / quitar)
+
+Siempre **framer-motion** al agregar o quitar filas, tarjetas o bloques repetibles en formularios y listas.
+
+### Patrón obligatorio
+
+- `AnimatePresence` con `mode="popLayout"` e `initial={false}` envolviendo el `.map()` de ítems dinámicos.
+- Cada ítem: `motion.div` (o `motion.li`) con `layout`, entrada `opacity` + `y`, salida suave inversa; sin sombras animadas.
+- Transición: ~`0.25`–`0.35`s, easing `[0.4, 0, 0.2, 1]`.
+- Respetar `motion-reduce:transition-none` o `useReducedMotion` cuando el usuario pida menos movimiento.
+
+### Ejemplo
+
+```tsx
+import { AnimatePresence, motion } from "framer-motion";
+
+<AnimatePresence mode="popLayout" initial={false}>
+  {items.map((item, i) => (
+    <motion.div
+      key={i}
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8, scale: 0.99 }}
+      transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+    >
+      {children}
+    </motion.div>
+  ))}
+</AnimatePresence>
+```
+
+### Prohibido
+
+- Montar o desmontar ítems sin animación cuando el usuario añade o quita manualmente.
+- Sombras en las animaciones de entrada/salida.
+- `useEffect` solo para animar; la animación va en el render con framer-motion.

@@ -1,0 +1,118 @@
+---
+description: Stack, estructura de carpetas, código y enrutamiento
+alwaysApply: true
+---
+
+# Estructura de proyecto
+
+## Stack
+
+- Next.js (App Router), TypeScript estricto, Supabase (Auth, RLS, Storage), Tailwind CSS, TanStack Query, Zod, todo se instala con pnpm.
+
+## Estructura de componentes
+
+Todo componente es autocontenido en `components/[nombre-componente]/`:
+
+- `NombreRepresentativo.tsx` — entrada y render (nombre según función, no genérico)
+- `forms/Crear.tsx` — inserción
+- `forms/VerEditar.tsx` — edición
+- `lib/hooks.ts` — hooks y TanStack Query
+- `lib/actions.ts` — Server Actions
+- `lib/zod.ts` — schemas y tipos (`z.infer`, sin `types.ts` ni `interfaces.ts`)
+
+Prohibido dispersar lógica del módulo fuera de esa carpeta.
+
+## Código
+
+- Sin comentarios explicativos en archivos de código.
+- Sin `any`; `strictNullChecks` obligatorio.
+- Mutaciones: Server Actions en `lib/actions.ts`.
+- Cliente async: TanStack Query (`useQuery` / `useMutation`), no `useEffect` para carga de datos.
+- Antes de crear features, inspeccionar la carpeta del componente y respetar su estructura existente.
+
+## Server Actions (seguridad)
+
+- Validar sesión Supabase antes de mutar o leer datos privados.
+- Validar input con `.safeParse()` de `lib/zod.ts`; nunca pasar formularios directo a Supabase.
+- `try/catch`; devolver códigos/mensajes controlados, no errores internos de DB/OS.
+
+## Enrutamiento (`app/`)
+
+- `page.tsx` solo importa el componente principal dentro de `<Suspense>`.
+- Prohibido UI compleja, lógica de negocio o estado en `page.tsx`.
+
+```typescript
+import { Suspense } from "react";
+import { NombreComponentePrincipal } from "@/components/mi-componente/NombreComponentePrincipal";
+
+export default function Page() {
+  return (
+    <Suspense>
+      <NombreComponentePrincipal />
+    </Suspense>
+  );
+}
+```
+
+## Modales
+
+Implementación única en `components/ui/general-modal.tsx`. Los formularios reutilizan `ModalShell`, inputs y footer; el feedback con `toast` de react-toastify y `modalActionMessage` de `modal-toast.ts`.
+
+### Comportamiento
+
+- Portal al `body` con `createPortal`; `z-index` por encima del header de la app.
+- Bloquear scroll del `body` mientras el modal esté abierto.
+- **Escritorio:** modal centrado, ancho máximo moderado, padding alrededor.
+- **Teléfono:** pantalla completa (`100dvh`), sin padding exterior, sin borde animado; panel plano zinc de borde a borde.
+
+### Overlay
+
+- Escritorio: tinte `zinc-700` semitransparente con `backdrop-blur` suave; sin capa blanca.
+- Teléfono: fondo sólido zinc (claro `zinc-100` / oscuro `zinc-900`), sin blur.
+
+### Contenedor (escritorio)
+
+- Esquinas muy redondeadas.
+- Borde animado celeste (gradiente radial que sigue el cursor) solo en escritorio; en teléfono no aplica.
+- Sombra ligera.
+
+### Superficies y tema
+
+- Tema claro: modal en `zinc-100` uniforme en header y cuerpo.
+- Tema oscuro: header/footer en `zinc-800`; zona de campos en `zinc-900`.
+- Tonos zinc alineados con header y layout de la app.
+
+### Header
+
+- Título en `foreground`; subtítulo en mayúsculas pequeñas, tracking amplio, color apagado.
+- Sin icono decorativo ni línea divisoria.
+- Cierre únicamente con X celeste, área táctil amplia, hover suave.
+- En teléfono: respetar safe area superior (notch).
+
+### Campos
+
+- Sin placeholder.
+- Borde celeste de marca, grosor visible; fondo transparente; texto `foreground`; focus ring celeste.
+- Ancho completo del contenedor (especialmente en teléfono).
+
+### Acción principal
+
+- «Guardar» con fondo `bg-emerald-200 text-emerald-900` (patrón Guardar de `diseno-ux-ui.mdc`).
+- «Cancelar» con fondo gris `bg-zinc-200` cuando aplique.
+- Footer con safe area inferior en teléfono.
+- Todos los botones con `cursor-pointer`; deshabilitado con `cursor-not-allowed`.
+
+### Feedback (toastify)
+
+- Un solo `ToastContainer` global en el layout (`ObsToastContainer`): `position="top-center"`, `autoClose={3000}`, `theme="colored"`.
+- En formularios y acciones: `import { toast } from "react-toastify"` y `toast.success()` / `toast.error()` / `toast.warn()` directo, como en el resto del sistema.
+- Códigos de server action: `modalActionMessage` + `MODAL_ACTION_ERRORS` desde `modal-toast.ts`.
+- Confirmaciones destructivas en modales: `ModalConfirmDelete` dentro del modal, no SweetAlert.
+- Estilo: variables `--toastify-*` en `globals.css` (fondo sólido por tipo, sin sombra).
+
+### Prohibido
+
+- `Dialog` de shadcn u otros modales ad hoc para formularios del sistema.
+- SweetAlert en formularios que usen `ModalShell`.
+- Fondos negro/blanco fijos fuera de la paleta zinc.
+- Alturas mínimas artificiales en el cuerpo del modal.

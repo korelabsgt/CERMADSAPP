@@ -18,6 +18,38 @@ export interface ClienteCredito {
   cantidadPedidos: number;
 }
 
+export interface DteDocumentoCredito {
+  id?: string;
+  estado: string;
+  serie?: string | null;
+  numero?: number | string | null;
+  uuid_infile?: string | null;
+  fecha_certificacion?: string | null;
+  id_receptor?: string | null;
+  nombre_receptor?: string | null;
+  gran_total?: number | string | null;
+}
+
+export interface PagoCreditoHistorial {
+  id: string;
+  monto: number;
+  usuario_id: string;
+  cajero_nombre?: string;
+  created_at?: string;
+  fecha_pago?: string;
+}
+
+export interface DetalleVentaCredito {
+  id: string;
+  cantidad: number;
+  precio_aplicado: number;
+  subtotal: number;
+  inv_productos?: {
+    nombre: string;
+    medida: string;
+  };
+}
+
 export interface VentaCredito {
   id: string;
   cliente_id: string;
@@ -30,28 +62,14 @@ export interface VentaCredito {
   numero_recibo?: number;
   created_at?: string;
   tipo_comprobante?: string;
+  metodo_pago?: string | null;
   saldo_pendiente?: number;
   ven_clientes?: {
     nombre: string;
     nit: string;
     telefono: string;
   };
-  ven_detalle?: Array<{
-    id: string;
-    cantidad: number;
-    precio_aplicado: number;
-    subtotal: number;
-    inv_productos?: {
-      nombre: string;
-      medida: string;
-    };
-  }>;
-  ven_pagos?: Array<{
-    id: string;
-    monto: number;
-    usuario_id: string;
-    cajero_nombre?: string;
-    created_at?: string;
-    fecha_pago?: string;
-  }>;
+  ven_detalle?: DetalleVentaCredito[];
+  ven_pagos?: PagoCreditoHistorial[];
+  dte_documentos?: DteDocumentoCredito[] | null;
 }

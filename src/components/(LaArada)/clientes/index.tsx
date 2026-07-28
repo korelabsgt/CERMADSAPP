@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Plus,
   Search,
@@ -42,7 +42,7 @@ export default function ListadoClientes() {
   const [deletingClientId, setDeletingClientId] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [pageSize, setPageSize] = useState<number | "all">(10);
 
   const filteredClientes = clientes.filter(
     (client: any) =>
@@ -51,18 +51,19 @@ export default function ListadoClientes() {
   );
 
   const totalItems = filteredClientes.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalPages =
+    pageSize === "all" ? 1 : Math.max(1, Math.ceil(totalItems / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredClientes.slice(
-    indexOfFirstItem,
-    indexOfLastItem,
-  );
+  const currentItems =
+    pageSize === "all"
+      ? filteredClientes
+      : filteredClientes.slice(
+          (safeCurrentPage - 1) * pageSize,
+          safeCurrentPage * pageSize,
+        );
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, itemsPerPage]);
+  const resetPage = () => setCurrentPage(1);
 
   const handleEdit = (client: any) => {
     setSelectedClient(client);
@@ -78,6 +79,11 @@ export default function ListadoClientes() {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    resetPage();
   };
 
   const handleViewSales = (client: any) => {
@@ -178,33 +184,42 @@ export default function ListadoClientes() {
             placeholder="Buscar..."
             className="bg-transparent outline-none text-xs md:text-sm w-full"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
           <select
-            value={itemsPerPage}
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(
+                e.target.value === "all" ? "all" : Number(e.target.value),
+              );
+              resetPage();
+            }}
             className="bg-background border rounded-lg px-2 py-2 text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer h-9.5 w-20 text-center"
           >
-            <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={20}>20</option>
-            <option value={100000}>Todos</option>
+            <option value={50}>50</option>
+            <option value="all">Todos</option>
           </select>
 
           <div className="flex items-center gap-1">
             <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1 || totalItems === 0}
+              onClick={() => handlePageChange(safeCurrentPage - 1)}
+              disabled={pageSize === "all" || safeCurrentPage === 1 || totalItems === 0}
               className="p-2 border rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="size-4" />
             </button>
             <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages || totalItems === 0}
+              onClick={() => handlePageChange(safeCurrentPage + 1)}
+              disabled={
+                pageSize === "all" ||
+                safeCurrentPage === totalPages ||
+                totalItems === 0
+              }
               className="p-2 border rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight className="size-4" />

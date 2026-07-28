@@ -34,7 +34,18 @@ export async function getVentasCredito() {
         subtotal,
         inv_productos (nombre, medida)
       ),
-      ven_pagos (id, monto, usuario_id, created_at, fecha_pago)
+      ven_pagos (id, monto, usuario_id, created_at, fecha_pago),
+      dte_documentos (
+        id,
+        estado,
+        serie,
+        numero,
+        uuid_infile,
+        fecha_certificacion,
+        id_receptor,
+        nombre_receptor,
+        gran_total
+      )
     `,
     )
     .eq("tipo_venta", "Crédito")
