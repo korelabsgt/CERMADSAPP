@@ -290,9 +290,21 @@ export default function DetalleCreditoModal({
         )}`,
       };
 
-      await exportReportePdf(cliente.nombre, cliente.nit, rows, totales);
-      showToast("success", "Reporte PDF descargado correctamente.", "top");
+      const result = await exportReportePdf(
+        cliente.nombre,
+        cliente.nit,
+        rows,
+        totales,
+      );
+      showToast(
+        "success",
+        result === "shared"
+          ? "Elige WhatsApp y envía solo el PDF."
+          : "Reporte PDF descargado correctamente.",
+        "top",
+      );
     } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
       console.error(error);
       showToast("error", "No se pudo generar el PDF del reporte.", "top");
     } finally {

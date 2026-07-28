@@ -64,6 +64,11 @@ function formatFechaReporte(date = new Date()) {
   return `${dia} ${numero}/${mes}/${anio}`;
 }
 
+function isMobileDevice() {
+  if (typeof navigator === "undefined") return false;
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+}
+
 function downloadPdfBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -74,6 +79,30 @@ function downloadPdfBlob(blob: Blob, filename: string) {
   anchor.click();
   anchor.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function shareOrDownloadPdf(blob: Blob, filename: string) {
+  const file = new File([blob], filename, { type: "application/pdf" });
+
+  if (isMobileDevice() && typeof navigator.share === "function") {
+    const canShareFile =
+      typeof navigator.canShare !== "function" ||
+      navigator.canShare({ files: [file] });
+
+    if (canShareFile) {
+      try {
+        await navigator.share({ files: [file] });
+        return "shared" as const;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          throw error;
+        }
+      }
+    }
+  }
+
+  downloadPdfBlob(blob, filename);
+  return "downloaded" as const;
 }
 
 let logoPdfCache: string | null = null;
@@ -312,5 +341,5 @@ export async function exportReportePdf(
   });
 
   const pdfBlob = doc.output("blob");
-  downloadPdfBlob(pdfBlob, buildReporteFilename(clienteNombre));
+  return shareOrDownloadPdf(pdfBlob, buildReporteFilename(clienteNombre));
 }
