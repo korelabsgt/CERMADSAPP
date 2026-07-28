@@ -502,8 +502,9 @@ export default function DetalleCreditoModal({
                     </button>
                   </div>
 
-                  <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-sm">
-                  <table className="w-full text-xs md:text-sm text-left">
+                  <div className="rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-sm">
+                    <div className="overflow-x-auto overscroll-x-contain">
+                  <table className="w-full min-w-[44rem] text-xs md:text-sm text-left">
                     <thead className="border-b border-zinc-200 bg-zinc-50 font-bold text-zinc-500">
                       <tr>
                         <th className="px-4 py-3">Fecha</th>
@@ -618,6 +619,7 @@ export default function DetalleCreditoModal({
                       </tfoot>
                     ) : null}
                   </table>
+                    </div>
                   </div>
                 </div>
               ) : (
