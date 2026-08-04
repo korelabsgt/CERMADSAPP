@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
-  CreditCard,
+  ArrowLeft,
   Loader2,
   Receipt,
   X,
@@ -14,19 +15,19 @@ import {
   UserCheck,
   Trash2,
   FileCheck2,
+  Pencil,
+  Check,
 } from "lucide-react";
-import { useCreditos, useEliminarAbono } from "./lib/hooks";
+import { useCreditos, useEditarAbono, useEliminarAbono } from "./lib/hooks";
 import {
-  ClienteCredito,
   DetalleVentaCredito,
   PagoCreditoHistorial,
   VentaCredito,
 } from "./lib/zod";
 import CreditosList from "./components/creditos-list";
-import DetalleCreditoModal from "./modals/detalle-credito-modal";
 import ReciboAbonoPrint from "./components/recibo-abono-print";
 import { useUser } from "@/components/(base)/providers/UserProvider";
-import { showConfirm } from "@/lib/notifications";
+import { showConfirm, showToast } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 
 type PagoEncontrado = {
@@ -35,20 +36,6 @@ type PagoEncontrado = {
 };
 
 const DIAS_SEMANA = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-const MESES_CORTOS = [
-  "ene",
-  "feb",
-  "mar",
-  "abr",
-  "may",
-  "jun",
-  "jul",
-  "ago",
-  "sep",
-  "oct",
-  "nov",
-  "dic",
-];
 
 const formatDateShort = (value?: string | null) => {
   if (!value) return "Sin fecha";
@@ -62,8 +49,8 @@ const formatDateShort = (value?: string | null) => {
     date.toLocaleString("en-US", { timeZone: "America/Guatemala" }),
   );
   const dia = DIAS_SEMANA[guatemala.getDay()];
-  const numero = guatemala.getDate();
-  const mes = MESES_CORTOS[guatemala.getMonth()];
+  const numero = String(guatemala.getDate()).padStart(2, "0");
+  const mes = String(guatemala.getMonth() + 1).padStart(2, "0");
   const anio = String(guatemala.getFullYear()).slice(-2);
   return `${dia} ${numero}/${mes}/${anio}`;
 };
@@ -95,17 +82,19 @@ const felToneClass =
   "bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-400 border border-sky-200 dark:border-sky-800";
 
 export default function Creditos() {
+  const router = useRouter();
   const { clientesConCredito, creditosTotales, isLoading } = useCreditos();
   const { mutateAsync: eliminarAbono, isPending: isDeletingAbono } =
     useEliminarAbono();
+  const { mutateAsync: editarAbono, isPending: isEditingAbono } =
+    useEditarAbono();
   const user = useUser();
   const metadata = user?.user_metadata || {};
   const userRole = (metadata.rol || user?.role || "user") as string;
-  const canDeleteAbono = userRole === "super" || userRole === "admin";
+  const canManageAbono = userRole === "super" || userRole === "admin";
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCliente, setSelectedCliente] = useState<ClienteCredito | null>(
-    null,
-  );
+  const [editandoBusqueda, setEditandoBusqueda] = useState(false);
+  const [montoEdicionBusqueda, setMontoEdicionBusqueda] = useState("");
 
   const pagoEncontrado: PagoEncontrado | null = (() => {
     if (searchTerm.length < 3) return null;
@@ -129,18 +118,6 @@ export default function Creditos() {
     );
   }, [searchTerm, clientesConCredito, pagoEncontrado]);
 
-  const deudaGlobal = clientesConCredito.reduce(
-    (sum, c) => sum + c.totalDeuda,
-    0,
-  );
-
-  const ventasDelCliente = useMemo(() => {
-    if (!selectedCliente) return [];
-    return (creditosTotales as VentaCredito[]).filter(
-      (v) => v.cliente_id === selectedCliente.cliente_id,
-    );
-  }, [selectedCliente, creditosTotales]);
-
   const handleEliminarAbonoBuscado = async () => {
     if (!pagoEncontrado?.pago?.id) return;
 
@@ -154,7 +131,34 @@ export default function Creditos() {
     if (!result.isConfirmed) return;
 
     await eliminarAbono(pagoEncontrado.pago.id);
+    setEditandoBusqueda(false);
+    setMontoEdicionBusqueda("");
     setSearchTerm("");
+  };
+
+  const iniciarEdicionBusqueda = () => {
+    if (!pagoEncontrado?.pago) return;
+    setEditandoBusqueda(true);
+    setMontoEdicionBusqueda(String(Number(pagoEncontrado.pago.monto)));
+  };
+
+  const cancelarEdicionBusqueda = () => {
+    setEditandoBusqueda(false);
+    setMontoEdicionBusqueda("");
+  };
+
+  const handleGuardarAbonoBuscado = async () => {
+    if (!pagoEncontrado?.pago?.id) return;
+
+    const monto = Number(montoEdicionBusqueda);
+    if (!Number.isFinite(monto) || monto <= 0) {
+      showToast("error", "Ingresa un monto válido mayor a 0.");
+      return;
+    }
+
+    await editarAbono({ pago_id: pagoEncontrado.pago.id, monto });
+    setEditandoBusqueda(false);
+    setMontoEdicionBusqueda("");
   };
 
   if (isLoading) {
@@ -173,36 +177,38 @@ export default function Creditos() {
     : undefined;
 
   return (
-    <div className="p-4 md:p-6 w-full mx-auto space-y-6 animate-in fade-in duration-300">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-4 md:p-6 rounded-2xl md:rounded-4xl border shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="p-3 md:p-4 bg-red-500/10 text-red-500 rounded-xl md:rounded-2xl">
-            <CreditCard className="size-6 md:size-8" />
-          </div>
-          <div>
-            <h1 className="text-xl md:text-3xl font-black uppercase tracking-tight">
-              Cuentas por Cobrar
-            </h1>
-            <p className="text-sm font-bold text-muted-foreground mt-1">
-              Deuda Total:{" "}
-              <span className="text-foreground">
-                Q{formatMoney(deudaGlobal)}
-              </span>
-            </p>
-          </div>
-        </div>
+    <div className="p-4 md:p-6 w-full mx-auto space-y-4 animate-in fade-in duration-300">
+      <div className="mb-2 flex items-start justify-between gap-4">
+        <button
+          type="button"
+          onClick={() => router.push("/cermadsa/laarada")}
+          className="group inline-flex shrink-0 items-center gap-2 pt-1 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
+        >
+          <ArrowLeft className="size-5 transition-transform group-hover:-translate-x-0.5" />
+          <span className="text-xs font-bold uppercase tracking-widest">
+            Volver
+          </span>
+        </button>
 
-        <div className="relative w-full md:w-80 shrink-0">
-          <Search className="absolute left-4 top-3.5 size-4 text-muted-foreground" />
+        <div className="min-w-0 text-right">
+          <h1 className="text-base md:text-xl font-black text-foreground uppercase tracking-tight">
+            Cuentas por Cobrar
+          </h1>
+        </div>
+      </div>
+
+      {!pagoEncontrado && (
+        <div className="relative min-w-0 w-full">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="Buscar por cliente, NIT o pago..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-11 pl-11 pr-4 border rounded-xl bg-background text-sm font-medium outline-none focus:ring-2 focus:ring-red-500/20 transition-all"
+            className="h-10 w-full rounded-xl border-2 border-celeste-trifinio bg-transparent pl-9 pr-3 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-celeste-trifinio/30"
           />
         </div>
-      </div>
+      )}
 
       {pagoEncontrado ? (
         <div className="bg-card border-2 border-emerald-500/50 rounded-3xl p-8 animate-in zoom-in duration-300 shadow-2xl shadow-emerald-500/10">
@@ -244,9 +250,40 @@ export default function Creditos() {
                   <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">
                     Monto del Abono
                   </p>
-                  <p className="font-black text-3xl text-foreground">
-                    Q{formatMoney(pagoEncontrado.pago.monto)}
-                  </p>
+                  {editandoBusqueda ? (
+                    <div className="flex items-center gap-2">
+                      <span className="font-black text-3xl text-foreground">
+                        Q
+                      </span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0.01"
+                        step="0.01"
+                        value={montoEdicionBusqueda}
+                        onChange={(e) =>
+                          setMontoEdicionBusqueda(e.target.value)
+                        }
+                        onKeyDown={(e) => {
+                          if (
+                            e.key === "-" ||
+                            e.key === "e" ||
+                            e.key === "E" ||
+                            e.key === "+"
+                          )
+                            e.preventDefault();
+                          if (e.key === "Enter") void handleGuardarAbonoBuscado();
+                          if (e.key === "Escape") cancelarEdicionBusqueda();
+                        }}
+                        className="w-40 rounded-xl border-2 border-emerald-500/50 bg-transparent px-3 py-1 text-3xl font-black text-foreground outline-none focus:ring-2 focus:ring-emerald-500/30"
+                        autoFocus
+                      />
+                    </div>
+                  ) : (
+                    <p className="font-black text-3xl text-foreground">
+                      Q{formatMoney(pagoEncontrado.pago.monto)}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -260,16 +297,11 @@ export default function Creditos() {
 
                   return (
                     <div className={cn("overflow-hidden rounded-xl", felToneClass)}>
-                      <div className="flex items-center justify-between gap-3 border-b border-sky-200/70 px-3 py-2 dark:border-sky-800/70">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <FileCheck2 className="size-3.5 shrink-0" />
-                          <p className="truncate text-[10px] font-bold uppercase tracking-widest">
-                            Certificación ·{" "}
-                            {formatDateShort(dteFel.fecha_certificacion)}
-                          </p>
-                        </div>
-                        <p className="shrink-0 text-[10px] font-black uppercase">
-                          FEL: {formatFelNumero(dteFel.serie, dteFel.numero)}
+                      <div className="flex items-center gap-2 border-b border-sky-200/70 px-3 py-2 dark:border-sky-800/70">
+                        <FileCheck2 className="size-3.5 shrink-0" />
+                        <p className="truncate text-[10px] font-bold uppercase tracking-widest">
+                          Certificación ·{" "}
+                          {formatDateShort(dteFel.fecha_certificacion)}
                         </p>
                       </div>
                       <table className="w-full text-left text-xs">
@@ -278,12 +310,14 @@ export default function Creditos() {
                             <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
                               Receptor
                             </th>
-                            <td className="px-3 py-2 font-semibold">
+                            <td className="px-3 py-2 text-xs font-semibold">
                               {dteFel.nombre_receptor ||
                                 pagoEncontrado.venta.ven_clientes?.nombre ||
                                 "—"}
                             </td>
-                            <th className="w-12 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
+                          </tr>
+                          <tr className="border-b border-sky-200/50 dark:border-sky-800/50">
+                            <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
                               NIT
                             </th>
                             <td className="px-3 py-2 font-mono font-semibold">
@@ -291,18 +325,23 @@ export default function Creditos() {
                             </td>
                           </tr>
                           <tr className="border-b border-sky-200/50 dark:border-sky-800/50">
-                            <th className="px-3 py-2 text-[10px] font-bold uppercase opacity-70">
+                            <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
+                              FEL
+                            </th>
+                            <td className="break-all px-3 py-2 font-mono text-[11px] font-semibold">
+                              {formatFelNumero(dteFel.serie, dteFel.numero)}
+                            </td>
+                          </tr>
+                          <tr className="border-b border-sky-200/50 dark:border-sky-800/50">
+                            <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
                               UUID
                             </th>
-                            <td
-                              colSpan={3}
-                              className="break-all px-3 py-2 font-mono text-[11px] opacity-90"
-                            >
+                            <td className="break-all px-3 py-2 font-mono text-[11px] font-semibold">
                               {dteFel.uuid_infile || "—"}
                             </td>
                           </tr>
                           <tr>
-                            <td colSpan={4} className="px-3 py-2">
+                            <td colSpan={2} className="px-3 py-2">
                               <div className="grid grid-cols-3 gap-2 text-center">
                                 <div>
                                   <p className="text-[10px] font-bold uppercase opacity-70">
@@ -432,34 +471,56 @@ export default function Creditos() {
                 <Printer className="size-4" />
                 Imprimir Recibo
               </button>
-              {canDeleteAbono && (
-                <button
-                  onClick={handleEliminarAbonoBuscado}
-                  disabled={isDeletingAbono}
-                  className="mt-3 w-full flex items-center justify-center gap-3 py-4 bg-red-500 text-white font-black rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 uppercase tracking-widest text-xs cursor-pointer disabled:opacity-50"
-                >
-                  <Trash2 className="size-4" />
-                  Eliminar Abono
-                </button>
+              {canManageAbono && (
+                editandoBusqueda ? (
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <button
+                      onClick={cancelarEdicionBusqueda}
+                      disabled={isEditingAbono}
+                      className="flex items-center justify-center gap-2 py-4 bg-zinc-200 text-zinc-700 font-black rounded-xl hover:bg-zinc-300 transition-all uppercase tracking-widest text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
+                    >
+                      <X className="size-4" />
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleGuardarAbonoBuscado}
+                      disabled={isEditingAbono}
+                      className="flex items-center justify-center gap-2 py-4 bg-emerald-200 text-emerald-900 font-black rounded-xl hover:bg-emerald-300 transition-all uppercase tracking-widest text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed dark:bg-emerald-800/70 dark:text-emerald-50 dark:hover:bg-emerald-700/80"
+                    >
+                      {isEditingAbono ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Check className="size-4" />
+                      )}
+                      Guardar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <button
+                      onClick={iniciarEdicionBusqueda}
+                      disabled={isDeletingAbono}
+                      className="flex items-center justify-center gap-2 py-4 bg-amber-100 text-amber-800 font-black rounded-xl hover:bg-amber-200 transition-all uppercase tracking-widest text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed dark:bg-amber-950 dark:text-amber-300 dark:hover:bg-amber-900"
+                    >
+                      <Pencil className="size-4" />
+                      Editar Abono
+                    </button>
+                    <button
+                      onClick={handleEliminarAbonoBuscado}
+                      disabled={isDeletingAbono}
+                      className="flex items-center justify-center gap-2 py-4 bg-red-100 text-red-600 font-black rounded-xl hover:bg-red-200 transition-all uppercase tracking-widest text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900"
+                    >
+                      <Trash2 className="size-4" />
+                      Eliminar
+                    </button>
+                  </div>
+                )
               )}
             </div>
           </div>
         </div>
       ) : (
-        <>
-          <CreditosList
-            clientes={filtrados}
-            onSelectCliente={setSelectedCliente}
-          />
-
-          <DetalleCreditoModal
-            key={selectedCliente?.cliente_id ?? "credito-cerrado"}
-            isOpen={!!selectedCliente}
-            onClose={() => setSelectedCliente(null)}
-            cliente={selectedCliente}
-            ventasCliente={ventasDelCliente}
-          />
-        </>
+        <CreditosList clientes={filtrados} />
       )}
 
       <ReciboAbonoPrint />

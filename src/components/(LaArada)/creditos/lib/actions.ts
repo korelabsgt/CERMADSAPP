@@ -1,7 +1,12 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { PagoCreditoSchema, PagoCreditoValues } from "./zod";
+import {
+  EditarAbonoSchema,
+  EditarAbonoValues,
+  PagoCreditoSchema,
+  PagoCreditoValues,
+} from "./zod";
 import { revalidatePath } from "next/cache";
 import { requireAuthenticatedCajero } from "@/utils/require-authenticated-cajero";
 
@@ -182,6 +187,87 @@ export async function eliminarAbonoCredito(pagoId: string) {
         .update({ estado: "Entregado" })
         .eq("id", pago.venta_id);
     }
+  }
+
+  revalidatePath("/cermadsa/laarada/creditos");
+  revalidatePath("/cermadsa/laarada/pedidos");
+  revalidatePath("/cermadsa/laarada/clientes");
+
+  return { success: true };
+}
+
+export async function editarAbonoCredito(data: EditarAbonoValues) {
+  const role = await getUserRole();
+  if (!isSuperOrAdmin(role)) {
+    return { error: "No tienes permisos para editar abonos." };
+  }
+
+  const result = EditarAbonoSchema.safeParse(data);
+  if (!result.success) {
+    return { error: "Datos de abono inválidos." };
+  }
+
+  const supabase = await createClient();
+  const { pago_id, monto } = result.data;
+
+  const { data: pago, error: pagoFetchError } = await supabase
+    .from("ven_pagos")
+    .select("id, venta_id, monto")
+    .eq("id", pago_id)
+    .single();
+
+  if (pagoFetchError || !pago) {
+    return { error: "Abono no encontrado." };
+  }
+
+  const { data: venta, error: ventaError } = await supabase
+    .from("ven_ventas")
+    .select("id, total, estado, tipo_venta, ven_pagos(id, monto)")
+    .eq("id", pago.venta_id)
+    .single();
+
+  if (ventaError || !venta) {
+    return { error: ventaError?.message || "Venta no encontrada." };
+  }
+
+  if (venta.tipo_venta !== "Crédito") {
+    return { error: "Solo se pueden editar abonos de ventas a crédito." };
+  }
+
+  const otrosPagos = (venta.ven_pagos ?? [])
+    .filter((p: { id: string }) => p.id !== pago_id)
+    .reduce(
+      (acc: number, p: { monto: number }) => acc + Number(p.monto || 0),
+      0,
+    );
+  const maxPermitido = Number(venta.total) - otrosPagos;
+
+  if (monto > maxPermitido + 0.001) {
+    return {
+      error: `El monto no puede superar Q${maxPermitido.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`,
+    };
+  }
+
+  const { error: updateError } = await supabase
+    .from("ven_pagos")
+    .update({ monto })
+    .eq("id", pago_id);
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  const totalPagado = otrosPagos + monto;
+  if (totalPagado >= Number(venta.total)) {
+    await supabase
+      .from("ven_ventas")
+      .update({ estado: "Pagado" })
+      .eq("id", pago.venta_id);
+  } else if (venta.estado === "Pagado") {
+    await supabase
+      .from("ven_ventas")
+      .update({ estado: "Entregado" })
+      .eq("id", pago.venta_id);
   }
 
   revalidatePath("/cermadsa/laarada/creditos");

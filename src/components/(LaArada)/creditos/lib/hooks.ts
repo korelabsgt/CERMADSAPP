@@ -6,8 +6,14 @@ import {
   getVentasCredito,
   procesarPagoCredito,
   eliminarAbonoCredito,
+  editarAbonoCredito,
 } from "./actions";
-import { ClienteCredito, VentaCredito, PagoCreditoValues } from "./zod";
+import {
+  ClienteCredito,
+  VentaCredito,
+  PagoCreditoValues,
+  EditarAbonoValues,
+} from "./zod";
 import Swal from "sweetalert2";
 import { useTheme } from "next-themes";
 
@@ -144,6 +150,43 @@ export function useEliminarAbono() {
         ...config,
         icon: "success",
         title: "Abono eliminado",
+      });
+    },
+    onError: (error: Error) => {
+      Swal.fire({
+        ...config,
+        icon: "error",
+        title: "Error de conexión",
+        text: error.message,
+      });
+    },
+  });
+}
+
+export function useEditarAbono() {
+  const queryClient = useQueryClient();
+  const config = useSwalConfig();
+
+  return useMutation({
+    mutationFn: (data: EditarAbonoValues) => editarAbonoCredito(data),
+    onSuccess: (res: ActionResponse) => {
+      if (res.error) {
+        Swal.fire({
+          ...config,
+          icon: "error",
+          title: "Error",
+          text: res.error,
+          timer: 4000,
+        });
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: ["creditos"] });
+      queryClient.invalidateQueries({ queryKey: ["ventas"] });
+      queryClient.invalidateQueries({ queryKey: ["client_sales"] });
+      Swal.fire({
+        ...config,
+        icon: "success",
+        title: "Abono actualizado",
       });
     },
     onError: (error: Error) => {

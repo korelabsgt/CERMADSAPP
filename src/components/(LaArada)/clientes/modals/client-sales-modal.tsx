@@ -80,20 +80,6 @@ const formatFelNumero = (
 };
 
 const DIAS_SEMANA = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-const MESES_CORTOS = [
-  "ene",
-  "feb",
-  "mar",
-  "abr",
-  "may",
-  "jun",
-  "jul",
-  "ago",
-  "sep",
-  "oct",
-  "nov",
-  "dic",
-];
 
 const formatDate = (value?: string | null) => {
   if (!value) return "Sin fecha";
@@ -110,17 +96,22 @@ const formatDate = (value?: string | null) => {
   );
 
   const dia = DIAS_SEMANA[guatemala.getDay()];
-  const numero = guatemala.getDate();
-  const mes = MESES_CORTOS[guatemala.getMonth()];
+  const numero = String(guatemala.getDate()).padStart(2, "0");
+  const mes = String(guatemala.getMonth() + 1).padStart(2, "0");
   const anio = String(guatemala.getFullYear()).slice(-2);
 
   return `${dia} ${numero}/${mes}/${anio}`;
 };
 
+const getVentaCodigo = (sale: ClientSale) =>
+  sale.id
+    ? `${sale.id.substring(0, 3).toUpperCase()}-${sale.id.substring(3, 6).toUpperCase()}`
+    : "---";
+
 const getVentaLabel = (sale: ClientSale) =>
   sale.numero_recibo
     ? String(sale.numero_recibo).padStart(5, "0")
-    : sale.id.slice(0, 6).toUpperCase();
+    : getVentaCodigo(sale);
 
 const getComprobanteLabel = (sale: ClientSale) => {
   const dte = getFelCertificado(sale) ?? getDteDisplay(sale);
@@ -430,7 +421,7 @@ function ClientSalesModalContent({
                 <thead className="bg-muted/50 text-muted-foreground font-bold border-b uppercase">
                   <tr>
                     <th className="px-4 py-3">Fecha</th>
-                    <th className="px-4 py-3">Venta</th>
+                    <th className="px-4 py-3">Código</th>
                     <th className="px-4 py-3">Comprobante</th>
                     <th className="px-4 py-3">Pago</th>
                     <th className="px-4 py-3">Estado</th>
@@ -453,14 +444,14 @@ function ClientSalesModalContent({
                         key={sale.id}
                         className="hover:bg-muted/20 transition-colors"
                       >
-                        <td className="px-4 py-3 font-medium whitespace-nowrap">
+                        <td className="px-4 py-3 font-bold whitespace-nowrap">
                           <div className="flex items-center gap-2 uppercase">
                             <Calendar className="size-3.5 text-muted-foreground shrink-0" />
                             {formatDate(sale.fecha_entrega || sale.created_at)}
                           </div>
                         </td>
                         <td className="px-4 py-3 font-mono font-bold text-orange-500 whitespace-nowrap">
-                          #{getVentaLabel(sale)}
+                          #{getVentaCodigo(sale)}
                         </td>
                         <td className="px-4 py-3">
                           <button

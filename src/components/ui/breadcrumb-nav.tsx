@@ -71,13 +71,20 @@ export function BreadcrumbNav() {
                   <ChevronRight className="size-4 md:size-5 text-muted-foreground/40 shrink-0" />
                   <Link
                     href={href}
-                    className={`capitalize hover:text-foreground transition-colors truncate ${
+                    className={`hover:text-foreground transition-colors truncate ${
                       isLast
                         ? "text-foreground underline underline-offset-4 pointer-events-none text-xs md:text-lg"
                         : ""
                     }`}
                   >
-                    {segment.replace(/-/g, " ")}
+                    {segment
+                      .split("-")
+                      .filter(Boolean)
+                      .map(
+                        (part) =>
+                          part.charAt(0).toUpperCase() + part.slice(1),
+                      )
+                      .join(" ")}
                   </Link>
                 </motion.div>
               );

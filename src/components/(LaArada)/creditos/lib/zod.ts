@@ -9,6 +9,13 @@ export const PagoCreditoSchema = z.object({
 
 export type PagoCreditoValues = z.infer<typeof PagoCreditoSchema>;
 
+export const EditarAbonoSchema = z.object({
+  pago_id: z.string().min(1, "El ID del abono es requerido"),
+  monto: z.number().positive("El monto debe ser mayor a 0"),
+});
+
+export type EditarAbonoValues = z.infer<typeof EditarAbonoSchema>;
+
 export interface ClienteCredito {
   cliente_id: string;
   nombre: string;
