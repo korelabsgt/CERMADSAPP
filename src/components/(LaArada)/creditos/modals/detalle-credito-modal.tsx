@@ -252,86 +252,125 @@ function FelInfoPanel({
     <div className={cn("overflow-hidden rounded-xl", felToneClass)}>
       <div className="flex items-center gap-2 border-b border-sky-200/70 px-3 py-2 dark:border-sky-800/70">
         <FileCheck2 className="size-3.5 shrink-0" />
-        <p className="truncate text-[10px] font-bold uppercase tracking-widest">
+        <p className="truncate text-[10px] font-bold uppercase tracking-widest md:text-xs">
           Certificación · {formatDateShort(dte.fecha_certificacion)}
         </p>
       </div>
 
-      <table className="w-full text-left text-xs">
-        <tbody>
-          <tr className="border-b border-sky-200/50 dark:border-sky-800/50">
-            <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
-              Receptor
-            </th>
-            <td className="px-3 py-2 font-semibold">
-              {dte.nombre_receptor || clienteNombre}
-            </td>
-          </tr>
-          <tr className="border-b border-sky-200/50 dark:border-sky-800/50">
-            <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
-              NIT
-            </th>
-            <td className="px-3 py-2 font-mono font-semibold">
-              {dte.id_receptor || "—"}
-            </td>
-          </tr>
-          <tr className="border-b border-sky-200/50 dark:border-sky-800/50">
-            <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
-              FEL
-            </th>
-            <td className="px-3 py-2">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpen();
-                }}
-                className="break-all text-left font-mono text-[11px] font-semibold underline-offset-2 hover:underline cursor-pointer"
-              >
-                {formatFelNumero(dte.serie, dte.numero)}
-              </button>
-            </td>
-          </tr>
-          <tr className="border-b border-sky-200/50 dark:border-sky-800/50">
-            <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
-              UUID
-            </th>
-            <td className="break-all px-3 py-2 font-mono text-[11px] font-semibold">
-              {dte.uuid_infile || "—"}
-            </td>
-          </tr>
-          <tr>
-            <td colSpan={2} className="px-3 py-2">
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div>
-                  <p className="text-[10px] font-bold uppercase opacity-70">
-                    Base
-                  </p>
-                  <p className="font-semibold tabular-nums">
-                    Q{formatMoney(base)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase opacity-70">
-                    IVA
-                  </p>
-                  <p className="font-semibold tabular-nums">
-                    Q{formatMoney(iva)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase opacity-70">
-                    Total
-                  </p>
-                  <p className="font-black tabular-nums">
-                    Q{formatMoney(total)}
-                  </p>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="md:hidden">
+        <table className="w-full text-left text-xs">
+          <tbody>
+            <tr className="border-b border-sky-200/50 dark:border-sky-800/50">
+              <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
+                Receptor
+              </th>
+              <td className="px-3 py-2 font-semibold">
+                {dte.nombre_receptor || clienteNombre}
+              </td>
+            </tr>
+            <tr className="border-b border-sky-200/50 dark:border-sky-800/50">
+              <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
+                NIT
+              </th>
+              <td className="px-3 py-2 font-mono font-semibold">
+                {dte.id_receptor || "—"}
+              </td>
+            </tr>
+            <tr className="border-b border-sky-200/50 dark:border-sky-800/50">
+              <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
+                FEL
+              </th>
+              <td className="px-3 py-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpen();
+                  }}
+                  className="break-all text-left font-mono text-[11px] font-semibold underline-offset-2 hover:underline cursor-pointer"
+                >
+                  {formatFelNumero(dte.serie, dte.numero)}
+                </button>
+              </td>
+            </tr>
+            <tr className="border-b border-sky-200/50 dark:border-sky-800/50">
+              <th className="w-20 px-3 py-2 text-[10px] font-bold uppercase opacity-70">
+                UUID
+              </th>
+              <td className="break-all px-3 py-2 font-mono text-[11px] font-semibold">
+                {dte.uuid_infile || "—"}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div className="hidden md:grid md:grid-cols-2 md:text-sm">
+        <div className="flex min-w-0 border-b border-r border-sky-200/50 dark:border-sky-800/50">
+          <div className="w-24 shrink-0 px-4 py-3 text-xs font-bold uppercase opacity-70">
+            Receptor
+          </div>
+          <div className="min-w-0 flex-1 px-4 py-3 font-semibold">
+            {dte.nombre_receptor || clienteNombre}
+          </div>
+        </div>
+        <div className="flex min-w-0 border-b border-sky-200/50 dark:border-sky-800/50">
+          <div className="w-24 shrink-0 px-4 py-3 text-xs font-bold uppercase opacity-70">
+            NIT
+          </div>
+          <div className="min-w-0 flex-1 px-4 py-3 font-mono font-semibold">
+            {dte.id_receptor || "—"}
+          </div>
+        </div>
+        <div className="flex min-w-0 border-r border-sky-200/50 dark:border-sky-800/50">
+          <div className="w-24 shrink-0 px-4 py-3 text-xs font-bold uppercase opacity-70">
+            FEL
+          </div>
+          <div className="min-w-0 flex-1 px-4 py-3">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpen();
+              }}
+              className="break-all text-left font-mono text-sm font-semibold underline-offset-2 hover:underline cursor-pointer"
+            >
+              {formatFelNumero(dte.serie, dte.numero)}
+            </button>
+          </div>
+        </div>
+        <div className="flex min-w-0">
+          <div className="w-24 shrink-0 px-4 py-3 text-xs font-bold uppercase opacity-70">
+            UUID
+          </div>
+          <div className="min-w-0 flex-1 break-all px-4 py-3 font-mono text-sm font-semibold">
+            {dte.uuid_infile || "—"}
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-sky-200/50 px-3 py-2 dark:border-sky-800/50 md:px-4 md:py-3">
+        <div className="grid grid-cols-3 gap-2 text-center text-xs md:text-sm">
+          <div>
+            <p className="text-[10px] font-bold uppercase opacity-70 md:text-xs">
+              Base
+            </p>
+            <p className="font-semibold tabular-nums">Q{formatMoney(base)}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase opacity-70 md:text-xs">
+              IVA
+            </p>
+            <p className="font-semibold tabular-nums">Q{formatMoney(iva)}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase opacity-70 md:text-xs">
+              Total
+            </p>
+            <p className="font-black tabular-nums">Q{formatMoney(total)}</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
