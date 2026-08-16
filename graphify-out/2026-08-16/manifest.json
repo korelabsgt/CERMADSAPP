@@ -80,7 +80,7 @@
     "semantic_hash": "6fcfc0bf176a46ed9e03e95cdb8b5349"
   },
   "src/app/api/push/subscribe/route.ts": {
-    "mtime": 1774167537.223804,
+    "mtime": 1774167537.223805,
     "ast_hash": "bbf9f5830b8da8823d1cc1641fa39e58",
     "semantic_hash": "bbf9f5830b8da8823d1cc1641fa39e58"
   },
@@ -120,7 +120,7 @@
     "semantic_hash": "32851f988168575ca1e753fb566ddbb2"
   },
   "src/app/cermadsa/laarada/creditos/page.tsx": {
-    "mtime": 1785878051.567421,
+    "mtime": 1785874874.5259073,
     "ast_hash": "5f9114b8e63df8663cd6088fbc006efe",
     "semantic_hash": ""
   },
@@ -235,7 +235,7 @@
     "semantic_hash": "58bce2394a0da2884bf36fc134882f56"
   },
   "src/components/(LaArada)/clientes/modals/client-sales-modal.tsx": {
-    "mtime": 1785878051.3033361,
+    "mtime": 1785874314.9909475,
     "ast_hash": "12885e5b161af225fd0db3f0115ecce1",
     "semantic_hash": ""
   },
@@ -245,7 +245,7 @@
     "semantic_hash": "a390b85b4f510dc5b1dda4d88508026e"
   },
   "src/components/(LaArada)/creditos/components/creditos-list.tsx": {
-    "mtime": 1785878051.5224807,
+    "mtime": 1785876226.6981537,
     "ast_hash": "6e291145c28fe5040c43a52878af2dab",
     "semantic_hash": ""
   },
@@ -255,32 +255,32 @@
     "semantic_hash": "ca7e05f7dcfdd3371a29ecf790fc2212"
   },
   "src/components/(LaArada)/creditos/index.tsx": {
-    "mtime": 1785881129.136251,
-    "ast_hash": "ba30be38a90c487be35194b5ad9c6a58",
+    "mtime": 1785876225.363297,
+    "ast_hash": "daea15946998694d1922b6b7e6307bbd",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/creditos/lib/actions.ts": {
-    "mtime": 1785878051.318104,
+    "mtime": 1785872219.567965,
     "ast_hash": "3305ec02d8a892d2d438823e38021ab0",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/creditos/lib/hooks.ts": {
-    "mtime": 1785878051.4761593,
+    "mtime": 1785872239.3906653,
     "ast_hash": "4a6757adbfb91c75bca11f4e64c3d41e",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/creditos/lib/zod.ts": {
-    "mtime": 1785878051.327917,
+    "mtime": 1785872210.4841807,
     "ast_hash": "0d0cf47a022cd49a728b41b7d1b33b96",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx": {
-    "mtime": 1785881129.1072702,
-    "ast_hash": "e6c7095f4cdd234c1a3d29414b19bbb4",
+    "mtime": 1785877182.4503748,
+    "ast_hash": "1d7d0f6151878370300831ecc5254402",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/dashboard.tsx": {
-    "mtime": 1785885861.9172835,
+    "mtime": 1785856203.900933,
     "ast_hash": "959dd5d8f21177eedd8d0e3baf1ea2b8",
     "semantic_hash": "959dd5d8f21177eedd8d0e3baf1ea2b8"
   },
@@ -290,7 +290,7 @@
     "semantic_hash": "8b967a8b5594e2e649a36aaf76a1bffb"
   },
   "src/components/(LaArada)/estadisticas/index.tsx": {
-    "mtime": 1783799701.761646,
+    "mtime": 1783799701.761647,
     "ast_hash": "f0c191e5fc221f61515b6e920e51f3d8",
     "semantic_hash": "f0c191e5fc221f61515b6e920e51f3d8"
   },
@@ -355,7 +355,7 @@
     "semantic_hash": "bb3ee454893376dafb7d7f320de5be8e"
   },
   "src/components/(LaArada)/ventas/lib/actions.ts": {
-    "mtime": 1783799497.052551,
+    "mtime": 1783799497.052552,
     "ast_hash": "4743d0e137a61b126fe6a5c765db7f64",
     "semantic_hash": "4743d0e137a61b126fe6a5c765db7f64"
   },
@@ -640,7 +640,7 @@
     "semantic_hash": "3145c3127ea48eac16907442a48c31a7"
   },
   "src/components/ui/breadcrumb-nav.tsx": {
-    "mtime": 1785878051.5574124,
+    "mtime": 1785874846.0297332,
     "ast_hash": "6a329f06ac31063e256f1a4839d03eda",
     "semantic_hash": ""
   },
@@ -855,8 +855,8 @@
     "semantic_hash": ""
   },
   "src/global.d.ts": {
-    "mtime": 1785881160.6770544,
-    "ast_hash": "e511b01a808b1307718234d64bd5553a",
+    "mtime": 1785268953.1861057,
+    "ast_hash": "fb8214c6467938c43691a41c63101314",
     "semantic_hash": ""
   },
   "PROMPTS.md": {
@@ -935,22 +935,22 @@
     "semantic_hash": ""
   },
   "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts": {
-    "mtime": 1785880764.867557,
-    "ast_hash": "2ea2931a2451ecafda53176a6134708c",
+    "mtime": 1785874300.2006738,
+    "ast_hash": "ce5be117771cc4fa0171b4b2f9d0e281",
     "semantic_hash": ""
   },
   "src/app/cermadsa/laarada/creditos/[clienteSlug]/page.tsx": {
-    "mtime": 1785878051.5442135,
+    "mtime": 1785874845.814317,
     "ast_hash": "c9bcb9e0c38d2b0e475c98d4a0e1bd33",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/creditos/DetalleCreditoCliente.tsx": {
-    "mtime": 1785878051.5350919,
-    "ast_hash": "1bc627d7b08acabce253be447f547899",
+    "mtime": 1785874843.5048406,
+    "ast_hash": "8bbda31baef95a3fd7a5e078f418bf6e",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/creditos/lib/slug.ts": {
-    "mtime": 1785878051.513185,
+    "mtime": 1785874769.662017,
     "ast_hash": "819eeee6ec2d57cff3a7fcb6382ee63b",
     "semantic_hash": ""
   }

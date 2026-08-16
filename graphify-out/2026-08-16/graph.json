@@ -604,8 +604,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "package_dependencies_react_pdf_renderer",
-      "community": 19,
-      "community_name": "dependencies",
+      "community": 56,
+      "community_name": "@react-pdf/renderer",
       "norm_label": "@react-pdf/renderer"
     },
     {
@@ -615,8 +615,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "react_pdf_renderer",
-      "community": 19,
-      "community_name": "dependencies",
+      "community": 56,
+      "community_name": "@react-pdf/renderer",
       "norm_label": "@react-pdf/renderer"
     },
     {
@@ -692,8 +692,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "package_dependencies_supabase_supabase_js",
-      "community": 56,
-      "community_name": "@supabase/supabase-js",
+      "community": 19,
+      "community_name": "dependencies",
       "norm_label": "@supabase/supabase-js"
     },
     {
@@ -703,8 +703,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "supabase_supabase_js",
-      "community": 56,
-      "community_name": "@supabase/supabase-js",
+      "community": 19,
+      "community_name": "dependencies",
       "norm_label": "@supabase/supabase-js"
     },
     {
@@ -736,8 +736,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "package_dependencies_tanstack_react_query",
-      "community": 62,
-      "community_name": "@tanstack/react-query",
+      "community": 19,
+      "community_name": "dependencies",
       "norm_label": "@tanstack/react-query"
     },
     {
@@ -747,8 +747,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "tanstack_react_query",
-      "community": 62,
-      "community_name": "@tanstack/react-query",
+      "community": 19,
+      "community_name": "dependencies",
       "norm_label": "@tanstack/react-query"
     },
     {
@@ -758,8 +758,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "package_dependencies_browser_image_compression",
-      "community": 19,
-      "community_name": "dependencies",
+      "community": 81,
+      "community_name": "browser-image-compression",
       "norm_label": "browser-image-compression"
     },
     {
@@ -769,8 +769,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "browser_image_compression",
-      "community": 19,
-      "community_name": "dependencies",
+      "community": 81,
+      "community_name": "browser-image-compression",
       "norm_label": "browser-image-compression"
     },
     {
@@ -802,8 +802,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "package_dependencies_clsx",
-      "community": 23,
-      "community_name": "clsx",
+      "community": 19,
+      "community_name": "dependencies",
       "norm_label": "clsx"
     },
     {
@@ -813,8 +813,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "clsx",
-      "community": 23,
-      "community_name": "clsx",
+      "community": 19,
+      "community_name": "dependencies",
       "norm_label": "clsx"
     },
     {
@@ -890,8 +890,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "package_dependencies_jspdf",
-      "community": 37,
-      "community_name": "jspdf",
+      "community": 21,
+      "community_name": "export-reporte-pdf.ts",
       "norm_label": "jspdf"
     },
     {
@@ -901,8 +901,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "jspdf",
-      "community": 37,
-      "community_name": "jspdf",
+      "community": 21,
+      "community_name": "export-reporte-pdf.ts",
       "norm_label": "jspdf"
     },
     {
@@ -1044,8 +1044,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "package_dependencies_react_dom",
-      "community": 19,
-      "community_name": "dependencies",
+      "community": 14,
+      "community_name": "react-dom",
       "norm_label": "react-dom"
     },
     {
@@ -1055,8 +1055,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "react_dom",
-      "community": 19,
-      "community_name": "dependencies",
+      "community": 14,
+      "community_name": "react-dom",
       "norm_label": "react-dom"
     },
     {
@@ -1220,8 +1220,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "package_dependencies_xlsx",
-      "community": 19,
-      "community_name": "dependencies",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "xlsx"
     },
     {
@@ -1231,8 +1231,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "xlsx",
-      "community": 19,
-      "community_name": "dependencies",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "xlsx"
     },
     {
@@ -1847,7 +1847,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_cermadsa_admin_users_usuarios_page",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "usuarios/page.tsx"
     },
@@ -1858,7 +1858,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_app_cermadsa_admin_users_usuarios_page_signuppage",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "signuppage()"
     },
@@ -1936,7 +1936,7 @@
       "_origin": "ast",
       "id": "src_app_cermadsa_laarada_clientes_page",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "clientes/page.tsx"
     },
     {
@@ -1947,7 +1947,7 @@
       "_origin": "ast",
       "id": "src_app_cermadsa_laarada_clientes_page_clientespage",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "clientespage()"
     },
     {
@@ -1958,7 +1958,7 @@
       "_origin": "ast",
       "id": "src_app_cermadsa_laarada_contabilidad_page",
       "community": 76,
-      "community_name": "contabilidad/index.tsx",
+      "community_name": "useUser",
       "norm_label": "contabilidad/page.tsx"
     },
     {
@@ -1969,7 +1969,7 @@
       "_origin": "ast",
       "id": "src_app_cermadsa_laarada_contabilidad_page_ventaspage",
       "community": 76,
-      "community_name": "contabilidad/index.tsx",
+      "community_name": "useUser",
       "norm_label": "ventaspage()"
     },
     {
@@ -2046,7 +2046,7 @@
       "_origin": "ast",
       "id": "src_app_cermadsa_laarada_page",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "laarada/page.tsx"
     },
     {
@@ -2057,7 +2057,7 @@
       "_origin": "ast",
       "id": "src_app_cermadsa_laarada_page_laaradapage",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "laaradapage()"
     },
     {
@@ -2068,7 +2068,7 @@
       "_origin": "ast",
       "id": "src_app_cermadsa_laarada_productos_page",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "productos/page.tsx"
     },
     {
@@ -2079,7 +2079,7 @@
       "_origin": "ast",
       "id": "src_app_cermadsa_laarada_productos_page_productospage",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "productospage()"
     },
     {
@@ -2133,8 +2133,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_cermadsa_signup_page",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "signup/page.tsx"
     },
     {
@@ -2144,8 +2144,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_app_cermadsa_signup_page_signuppage",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "signuppage()"
     },
     {
@@ -2233,7 +2233,7 @@
       "_origin": "ast",
       "id": "src_app_layout",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "layout.tsx"
     },
     {
@@ -2244,7 +2244,7 @@
       "_origin": "ast",
       "id": "src_app_layout_geistsans",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "geistsans"
     },
     {
@@ -2255,7 +2255,7 @@
       "_origin": "ast",
       "id": "src_app_layout_geistmono",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "geistmono"
     },
     {
@@ -2266,7 +2266,7 @@
       "_origin": "ast",
       "id": "src_app_layout_viewport",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "viewport"
     },
     {
@@ -2277,7 +2277,7 @@
       "_origin": "ast",
       "id": "src_app_layout_metadata",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "metadata"
     },
     {
@@ -2288,7 +2288,7 @@
       "_origin": "ast",
       "id": "src_app_layout_rootlayout",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "rootlayout()"
     },
     {
@@ -2364,8 +2364,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_page",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "app/page.tsx"
     },
     {
@@ -2375,8 +2375,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_page_home",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "home()"
     },
     {
@@ -2430,8 +2430,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_laarada_admin_lib_actions",
-      "community": 0,
-      "community_name": "createClient",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "admin/lib/actions.ts"
     },
     {
@@ -2441,8 +2441,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_components_laarada_admin_lib_actions_getpendingdevicescount",
-      "community": 0,
-      "community_name": "createClient",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "getpendingdevicescount()"
     },
     {
@@ -2497,7 +2497,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_index",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "clientes/index.tsx"
     },
     {
@@ -2508,7 +2508,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_index_listadoclientes",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "listadoclientes()"
     },
     {
@@ -2519,7 +2519,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_actions",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "clientes/lib/actions.ts"
     },
     {
@@ -2530,7 +2530,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_actions_isventaanulada",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "isventaanulada()"
     },
     {
@@ -2541,7 +2541,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_actions_requiredeletepermission",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "requiredeletepermission()"
     },
     {
@@ -2552,7 +2552,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_actions_mapdeleteclienterror",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "mapdeleteclienterror()"
     },
     {
@@ -2563,7 +2563,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_actions_getclients",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "getclients()"
     },
     {
@@ -2574,7 +2574,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_actions_createclientaction",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "createclientaction()"
     },
     {
@@ -2585,7 +2585,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_actions_updateclientaction",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "updateclientaction()"
     },
     {
@@ -2596,7 +2596,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_actions_getclientdeletionpreview",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "getclientdeletionpreview()"
     },
     {
@@ -2607,7 +2607,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_actions_deleteclientaction",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "deleteclientaction()"
     },
     {
@@ -2618,7 +2618,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_actions_getclientsalesaction",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "getclientsalesaction()"
     },
     {
@@ -2629,7 +2629,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_hooks",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "clientes/lib/hooks.ts"
     },
     {
@@ -2640,7 +2640,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_hooks_actionresponse",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "actionresponse"
     },
     {
@@ -2651,7 +2651,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_hooks_useclients",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "useclients()"
     },
     {
@@ -2661,7 +2661,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_hooks_useclientsales",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "useclientsales()"
     },
@@ -2673,7 +2673,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_hooks_useswalconfig",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "useswalconfig()"
     },
     {
@@ -2684,7 +2684,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_hooks_usecreateclient",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "usecreateclient()"
     },
     {
@@ -2695,7 +2695,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_hooks_useupdateclient",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "useupdateclient()"
     },
     {
@@ -2706,7 +2706,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_hooks_usedeleteclient",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "usedeleteclient()"
     },
     {
@@ -2717,7 +2717,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_zod",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "clientes/lib/zod.ts"
     },
     {
@@ -2728,7 +2728,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_zod_clientschema",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "clientschema"
     },
     {
@@ -2739,7 +2739,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_lib_zod_clientformvalues",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "clientformvalues"
     },
     {
@@ -2750,7 +2750,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_modal",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "client-modal.tsx"
     },
     {
@@ -2761,7 +2761,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_modal_clientmodalprops",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "clientmodalprops"
     },
     {
@@ -2772,7 +2772,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_modal_clientmodal",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "clientmodal()"
     },
     {
@@ -2782,7 +2782,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "client-sales-modal.tsx"
     },
@@ -2793,7 +2793,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_filtrocomprobante",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "filtrocomprobante"
     },
@@ -2804,7 +2804,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_filtro_comprobante_options",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "filtro_comprobante_options"
     },
@@ -2815,7 +2815,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_dtedocumento",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "dtedocumento"
     },
@@ -2826,7 +2826,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_clientsale",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "clientsale"
     },
@@ -2837,7 +2837,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_salehasfel",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "salehasfel()"
     },
@@ -2848,7 +2848,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_getfelcertificado",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "getfelcertificado()"
     },
@@ -2859,7 +2859,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_getdtedisplay",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "getdtedisplay()"
     },
@@ -2870,7 +2870,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_formatmoney",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "formatmoney()"
     },
@@ -2881,7 +2881,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_formatfelnumero",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "formatfelnumero()"
     },
@@ -2892,7 +2892,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_dias_semana",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "dias_semana"
     },
@@ -2903,7 +2903,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_formatdate",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "formatdate()"
     },
@@ -2914,7 +2914,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_getventacodigo",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "getventacodigo()"
     },
@@ -2925,7 +2925,7 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_getventalabel",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "getventalabel()"
     },
@@ -2936,7 +2936,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_getcomprobantelabel",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "getcomprobantelabel()"
     },
@@ -2947,7 +2947,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_getpagolabel",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "getpagolabel()"
     },
@@ -2958,7 +2958,7 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_getguatemaladateparts",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "getguatemaladateparts()"
     },
@@ -2969,7 +2969,7 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_getorderdatestring",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "getorderdatestring()"
     },
@@ -2980,7 +2980,7 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_getweekslabels",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "getweekslabels()"
     },
@@ -2991,7 +2991,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_clientsalesmodalprops",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "clientsalesmodalprops"
     },
@@ -3002,7 +3002,7 @@
       "source_location": "L191",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_clientsalesmodal",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "clientsalesmodal()"
     },
@@ -3013,7 +3013,7 @@
       "source_location": "L201",
       "_origin": "ast",
       "id": "src_components_laarada_clientes_modals_client_sales_modal_clientsalesmodalcontent",
-      "community": 4,
+      "community": 17,
       "community_name": "client-sales-modal.tsx",
       "norm_label": "clientsalesmodalcontent()"
     },
@@ -3025,7 +3025,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_contabilidad_index",
       "community": 76,
-      "community_name": "contabilidad/index.tsx",
+      "community_name": "useUser",
       "norm_label": "contabilidad/index.tsx"
     },
     {
@@ -3036,7 +3036,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_contabilidad_index_getfilename",
       "community": 76,
-      "community_name": "contabilidad/index.tsx",
+      "community_name": "useUser",
       "norm_label": "getfilename()"
     },
     {
@@ -3047,7 +3047,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_contabilidad_index_full_access_roles",
       "community": 76,
-      "community_name": "contabilidad/index.tsx",
+      "community_name": "useUser",
       "norm_label": "full_access_roles"
     },
     {
@@ -3058,7 +3058,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_contabilidad_index_fel_only_roles",
       "community": 76,
-      "community_name": "contabilidad/index.tsx",
+      "community_name": "useUser",
       "norm_label": "fel_only_roles"
     },
     {
@@ -3069,7 +3069,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_contabilidad_index_contabilidadview",
       "community": 76,
-      "community_name": "contabilidad/index.tsx",
+      "community_name": "useUser",
       "norm_label": "contabilidadview()"
     },
     {
@@ -3080,7 +3080,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_contabilidad_index_statcard",
       "community": 76,
-      "community_name": "contabilidad/index.tsx",
+      "community_name": "useUser",
       "norm_label": "statcard()"
     },
     {
@@ -3392,32 +3392,10 @@
       "norm_label": "reportecreditototales"
     },
     {
-      "label": "AbonoCreditoRow",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L19",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_lib_export_reporte_pdf_abonocreditorow",
-      "community": 21,
-      "community_name": "export-reporte-pdf.ts",
-      "norm_label": "abonocreditorow"
-    },
-    {
-      "label": "AbonoCreditoVentaSection",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L26",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_lib_export_reporte_pdf_abonocreditoventasection",
-      "community": 21,
-      "community_name": "export-reporte-pdf.ts",
-      "norm_label": "abonocreditoventasection"
-    },
-    {
       "label": "LA_ARADA_ORANGE",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L36",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_la_arada_orange",
       "community": 21,
@@ -3428,7 +3406,7 @@
       "label": "LA_ARADA_ORANGE_LIGHT",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L37",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_la_arada_orange_light",
       "community": 21,
@@ -3439,7 +3417,7 @@
       "label": "LA_ARADA_ORANGE_BORDER",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L38",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_la_arada_orange_border",
       "community": 21,
@@ -3450,7 +3428,7 @@
       "label": "MUTED",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L40",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_muted",
       "community": 21,
@@ -3461,7 +3439,7 @@
       "label": "INK",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L41",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_ink",
       "community": 21,
@@ -3472,7 +3450,7 @@
       "label": "DIAS_SEMANA",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L43",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_dias_semana",
       "community": 21,
@@ -3483,7 +3461,7 @@
       "label": "buildReporteFilename()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L45",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_buildreportefilename",
       "community": 21,
@@ -3491,21 +3469,10 @@
       "norm_label": "buildreportefilename()"
     },
     {
-      "label": "buildAbonosFilename()",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L58",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_lib_export_reporte_pdf_buildabonosfilename",
-      "community": 21,
-      "community_name": "export-reporte-pdf.ts",
-      "norm_label": "buildabonosfilename()"
-    },
-    {
       "label": "formatFechaReporte()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L71",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_formatfechareporte",
       "community": 21,
@@ -3513,21 +3480,10 @@
       "norm_label": "formatfechareporte()"
     },
     {
-      "label": "formatFechaHoraReporte()",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L82",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_lib_export_reporte_pdf_formatfechahorareporte",
-      "community": 21,
-      "community_name": "export-reporte-pdf.ts",
-      "norm_label": "formatfechahorareporte()"
-    },
-    {
       "label": "isMobileDevice()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L98",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_ismobiledevice",
       "community": 21,
@@ -3538,7 +3494,7 @@
       "label": "downloadPdfBlob()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L103",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_downloadpdfblob",
       "community": 21,
@@ -3549,7 +3505,7 @@
       "label": "shareOrDownloadPdf()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L115",
+      "source_location": "L70",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_shareordownloadpdf",
       "community": 21,
@@ -3560,7 +3516,7 @@
       "label": "removeDarkBackground()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L141",
+      "source_location": "L96",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_removedarkbackground",
       "community": 21,
@@ -3571,7 +3527,7 @@
       "label": "loadLogoForPdf()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L164",
+      "source_location": "L119",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_loadlogoforpdf",
       "community": 21,
@@ -3582,7 +3538,7 @@
       "label": "drawBrandHeader()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L192",
+      "source_location": "L147",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_drawbrandheader",
       "community": 21,
@@ -3593,7 +3549,7 @@
       "label": "drawDocumentMeta()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L237",
+      "source_location": "L182",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_drawdocumentmeta",
       "community": 21,
@@ -3604,7 +3560,7 @@
       "label": "getTableColumnStyles()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L272",
+      "source_location": "L217",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_gettablecolumnstyles",
       "community": 21,
@@ -3612,54 +3568,10 @@
       "norm_label": "gettablecolumnstyles()"
     },
     {
-      "label": "getAbonosTableColumnStyles()",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L288",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_lib_export_reporte_pdf_getabonostablecolumnstyles",
-      "community": 21,
-      "community_name": "export-reporte-pdf.ts",
-      "norm_label": "getabonostablecolumnstyles()"
-    },
-    {
-      "label": "drawAbonosVentaMeta()",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L302",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_lib_export_reporte_pdf_drawabonosventameta",
-      "community": 21,
-      "community_name": "export-reporte-pdf.ts",
-      "norm_label": "drawabonosventameta()"
-    },
-    {
-      "label": "renderAbonosPagosTable()",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L371",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_lib_export_reporte_pdf_renderabonospagostable",
-      "community": 21,
-      "community_name": "export-reporte-pdf.ts",
-      "norm_label": "renderabonospagostable()"
-    },
-    {
-      "label": "exportAbonosPdf()",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L432",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_lib_export_reporte_pdf_exportabonospdf",
-      "community": 21,
-      "community_name": "export-reporte-pdf.ts",
-      "norm_label": "exportabonospdf()"
-    },
-    {
       "label": "exportReportePdf()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L464",
+      "source_location": "L233",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_lib_export_reporte_pdf_exportreportepdf",
       "community": 21,
@@ -3923,7 +3835,7 @@
       "label": "DetalleCreditoModalProps",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L40",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodalprops",
       "community": 9,
@@ -3934,7 +3846,7 @@
       "label": "DIAS_SEMANA",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L45",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_dias_semana",
       "community": 9,
@@ -3945,7 +3857,7 @@
       "label": "VistaCuenta",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L50",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_vistacuenta",
       "community": 9,
@@ -3956,7 +3868,7 @@
       "label": "FiltroAbonos",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L51",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_filtroabonos",
       "community": 9,
@@ -3967,7 +3879,7 @@
       "label": "FiltroEstadoReporte",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L52",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_filtroestadoreporte",
       "community": 9,
@@ -3978,7 +3890,7 @@
       "label": "PageSizeReporte",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L53",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_pagesizereporte",
       "community": 9,
@@ -3989,7 +3901,7 @@
       "label": "PAGE_SIZE_REPORTE_OPTIONS",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L55",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_page_size_reporte_options",
       "community": 9,
@@ -4000,7 +3912,7 @@
       "label": "FILTRO_ABONOS_OPTIONS",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L63",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_filtro_abonos_options",
       "community": 9,
@@ -4011,7 +3923,7 @@
       "label": "FILTRO_ESTADO_REPORTE_OPTIONS",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L64",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_filtro_estado_reporte_options",
       "community": 9,
@@ -4022,7 +3934,7 @@
       "label": "getVentaCodigo()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L73",
+      "source_location": "L67",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_getventacodigo",
       "community": 9,
@@ -4033,7 +3945,7 @@
       "label": "getVentaLabel()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L78",
+      "source_location": "L72",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_getventalabel",
       "community": 9,
@@ -4044,7 +3956,7 @@
       "label": "getTotalAbonos()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L83",
+      "source_location": "L77",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_gettotalabonos",
       "community": 9,
@@ -4055,7 +3967,7 @@
       "label": "getSaldoPendiente()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L89",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_getsaldopendiente",
       "community": 9,
@@ -4066,7 +3978,7 @@
       "label": "ventaEstaPagada()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L96",
+      "source_location": "L90",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_ventaestapagada",
       "community": 9,
@@ -4077,7 +3989,7 @@
       "label": "getAnioActualGuatemala()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L99",
+      "source_location": "L93",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_getanioactualguatemala",
       "community": 9,
@@ -4088,7 +4000,7 @@
       "label": "getRangoAnioActual()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L106",
+      "source_location": "L100",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_getrangoanioactual",
       "community": 9,
@@ -4099,7 +4011,7 @@
       "label": "getVentaFechaKey()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L114",
+      "source_location": "L108",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_getventafechakey",
       "community": 9,
@@ -4110,7 +4022,7 @@
       "label": "formatDateShort()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L131",
+      "source_location": "L125",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_formatdateshort",
       "community": 9,
@@ -4118,54 +4030,10 @@
       "norm_label": "formatdateshort()"
     },
     {
-      "label": "formatDateTimeShort()",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L149",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_modals_detalle_credito_modal_formatdatetimeshort",
-      "community": 9,
-      "community_name": "detalle-credito-modal.tsx",
-      "norm_label": "formatdatetimeshort()"
-    },
-    {
-      "label": "NOMBRE_PARTICULAS",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L172",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_modals_detalle_credito_modal_nombre_particulas",
-      "community": 9,
-      "community_name": "detalle-credito-modal.tsx",
-      "norm_label": "nombre_particulas"
-    },
-    {
-      "label": "esParticulaNombre()",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L189",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_modals_detalle_credito_modal_esparticulanombre",
-      "community": 9,
-      "community_name": "detalle-credito-modal.tsx",
-      "norm_label": "esparticulanombre()"
-    },
-    {
-      "label": "formatNombreCobro()",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L195",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_modals_detalle_credito_modal_formatnombrecobro",
-      "community": 9,
-      "community_name": "detalle-credito-modal.tsx",
-      "norm_label": "formatnombrecobro()"
-    },
-    {
       "label": "formatMoney()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L207",
+      "source_location": "L143",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_formatmoney",
       "community": 9,
@@ -4176,7 +4044,7 @@
       "label": "formatFelNumero()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L213",
+      "source_location": "L149",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_formatfelnumero",
       "community": 9,
@@ -4187,7 +4055,7 @@
       "label": "getFelCertificado()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L227",
+      "source_location": "L163",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_getfelcertificado",
       "community": 9,
@@ -4198,7 +4066,7 @@
       "label": "getComprobanteLabel()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L230",
+      "source_location": "L166",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_getcomprobantelabel",
       "community": 9,
@@ -4209,7 +4077,7 @@
       "label": "FelInfoPanel()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L236",
+      "source_location": "L172",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_felinfopanel",
       "community": 9,
@@ -4217,21 +4085,10 @@
       "norm_label": "felinfopanel()"
     },
     {
-      "label": "AbonoPagoMenu()",
-      "file_type": "code",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L378",
-      "_origin": "ast",
-      "id": "src_components_laarada_creditos_modals_detalle_credito_modal_abonopagomenu",
-      "community": 9,
-      "community_name": "detalle-credito-modal.tsx",
-      "norm_label": "abonopagomenu()"
-    },
-    {
       "label": "DetalleCreditoModal()",
       "file_type": "code",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L457",
+      "source_location": "L271",
       "_origin": "ast",
       "id": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
       "community": 9,
@@ -4246,7 +4103,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_dashboard",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "dashboard.tsx"
     },
     {
@@ -4257,7 +4114,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_dashboard_welcome_phrases",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "welcome_phrases"
     },
     {
@@ -4268,7 +4125,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_dashboard_dashboardlaarada",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "dashboardlaarada()"
     },
     {
@@ -4520,8 +4377,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_laarada_productos_components_stats_accordion",
-      "community": 14,
-      "community_name": "stats-accordion.tsx",
+      "community": 6,
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "stats-accordion.tsx"
     },
     {
@@ -4531,8 +4388,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_laarada_productos_components_stats_accordion_months",
-      "community": 14,
-      "community_name": "stats-accordion.tsx",
+      "community": 6,
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "months"
     },
     {
@@ -4542,8 +4399,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_components_laarada_productos_components_stats_accordion_statsaccordion",
-      "community": 14,
-      "community_name": "stats-accordion.tsx",
+      "community": 6,
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "statsaccordion()"
     },
     {
@@ -4553,8 +4410,8 @@
       "source_location": "L517",
       "_origin": "ast",
       "id": "src_components_laarada_productos_components_stats_accordion_statcard",
-      "community": 14,
-      "community_name": "stats-accordion.tsx",
+      "community": 6,
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "statcard()"
     },
     {
@@ -4564,8 +4421,8 @@
       "source_location": "L538",
       "_origin": "ast",
       "id": "src_components_laarada_productos_components_stats_accordion_yearlydetailcard",
-      "community": 14,
-      "community_name": "stats-accordion.tsx",
+      "community": 6,
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "yearlydetailcard()"
     },
     {
@@ -4576,7 +4433,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_index",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "productos/index.tsx"
     },
     {
@@ -4587,7 +4444,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_index_productocatalogo",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "productocatalogo"
     },
     {
@@ -4598,7 +4455,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_index_listadoproductos",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "listadoproductos()"
     },
     {
@@ -4609,7 +4466,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_actions",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "productos/lib/actions.ts"
     },
     {
@@ -4620,7 +4477,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_actions_getproducts",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "getproducts()"
     },
     {
@@ -4630,8 +4487,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_actions_getlowstockcount",
-      "community": 0,
-      "community_name": "createClient",
+      "community": 6,
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "getlowstockcount()"
     },
     {
@@ -4642,7 +4499,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_actions_createproduct",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "createproduct()"
     },
     {
@@ -4653,7 +4510,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_actions_updateproduct",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "updateproduct()"
     },
     {
@@ -4664,7 +4521,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_actions_deleteproduct",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "deleteproduct()"
     },
     {
@@ -4675,7 +4532,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_actions_getnextproductcode",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "getnextproductcode()"
     },
     {
@@ -4686,7 +4543,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_actions_getstockstats",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "getstockstats()"
     },
     {
@@ -4696,8 +4553,8 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_actions_getproductstats",
-      "community": 14,
-      "community_name": "stats-accordion.tsx",
+      "community": 6,
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "getproductstats()"
     },
     {
@@ -4708,7 +4565,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_actions_getallproductsstats",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "getallproductsstats()"
     },
     {
@@ -4719,7 +4576,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_hooks",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "productos/lib/hooks.ts"
     },
     {
@@ -4730,7 +4587,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_hooks_actionresponse",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "actionresponse"
     },
     {
@@ -4741,7 +4598,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_hooks_useproducts",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "useproducts()"
     },
     {
@@ -4752,7 +4609,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_hooks_useswalconfig",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "useswalconfig()"
     },
     {
@@ -4763,7 +4620,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_hooks_usecreateproduct",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "usecreateproduct()"
     },
     {
@@ -4774,7 +4631,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_hooks_useupdateproduct",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "useupdateproduct()"
     },
     {
@@ -4785,7 +4642,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_hooks_usedeleteproduct",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "usedeleteproduct()"
     },
     {
@@ -4796,7 +4653,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_zod",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "productos/lib/zod.ts"
     },
     {
@@ -4807,7 +4664,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_zod_productschema",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "productschema"
     },
     {
@@ -4818,7 +4675,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_lib_zod_productformvalues",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "productformvalues"
     },
     {
@@ -4829,7 +4686,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_modals_product_modal",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "product-modal.tsx"
     },
     {
@@ -4840,7 +4697,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_modals_product_modal_productmodalprops",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "productmodalprops"
     },
     {
@@ -4851,7 +4708,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_modals_product_modal_productmodal",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "productmodal()"
     },
     {
@@ -4862,7 +4719,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_modals_top_products_modal",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "top-products-modal.tsx"
     },
     {
@@ -4873,7 +4730,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_modals_top_products_modal_months",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "months"
     },
     {
@@ -4884,7 +4741,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_modals_top_products_modal_colors",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "colors"
     },
     {
@@ -4895,7 +4752,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_productos_modals_top_products_modal_topproductsmodal",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "topproductsmodal()"
     },
     {
@@ -4960,8 +4817,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_laarada_ventas_components_stats",
-      "community": 17,
-      "community_name": "components/stats.tsx",
+      "community": 80,
+      "community_name": "cn",
       "norm_label": "components/stats.tsx"
     },
     {
@@ -4971,8 +4828,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_laarada_ventas_components_stats_months",
-      "community": 17,
-      "community_name": "components/stats.tsx",
+      "community": 80,
+      "community_name": "cn",
       "norm_label": "months"
     },
     {
@@ -4982,8 +4839,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_laarada_ventas_components_stats_stats",
-      "community": 17,
-      "community_name": "components/stats.tsx",
+      "community": 80,
+      "community_name": "cn",
       "norm_label": "stats()"
     },
     {
@@ -4993,8 +4850,8 @@
       "source_location": "L508",
       "_origin": "ast",
       "id": "src_components_laarada_ventas_components_stats_statcard",
-      "community": 17,
-      "community_name": "components/stats.tsx",
+      "community": 80,
+      "community_name": "cn",
       "norm_label": "statcard()"
     },
     {
@@ -5004,8 +4861,8 @@
       "source_location": "L526",
       "_origin": "ast",
       "id": "src_components_laarada_ventas_components_stats_yearlydetailcard",
-      "community": 17,
-      "community_name": "components/stats.tsx",
+      "community": 80,
+      "community_name": "cn",
       "norm_label": "yearlydetailcard()"
     },
     {
@@ -5269,7 +5126,7 @@
       "_origin": "ast",
       "id": "src_components_laarada_ventas_lib_actions_getpendingorderscount",
       "community": 6,
-      "community_name": "useUser",
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "getpendingorderscount()"
     },
     {
@@ -6170,8 +6027,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_signup",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "signup.tsx"
     },
     {
@@ -6181,8 +6038,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_signup_signupprops",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "signupprops"
     },
     {
@@ -6192,8 +6049,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_signup_label",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "label()"
     },
     {
@@ -6203,8 +6060,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_signup_input",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "input()"
     },
     {
@@ -6214,8 +6071,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_signup_select",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "select()"
     },
     {
@@ -6225,8 +6082,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_signup_signup",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "signup()"
     },
     {
@@ -6236,8 +6093,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_actions",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "signup/actions.ts"
     },
     {
@@ -6247,8 +6104,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_actions_getadminclient",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "getadminclient()"
     },
     {
@@ -6258,8 +6115,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_actions_actionstate",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "actionstate"
     },
     {
@@ -6269,8 +6126,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_actions_signup",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "signup()"
     },
     {
@@ -6280,8 +6137,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_hooks",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "signup/hooks.ts"
     },
     {
@@ -6291,8 +6148,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_hooks_usesignuplogic",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "usesignuplogic()"
     },
     {
@@ -6302,8 +6159,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_schemas",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "signup/schemas.ts"
     },
     {
@@ -6313,8 +6170,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_schemas_authschema",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "authschema"
     },
     {
@@ -6324,8 +6181,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_base_auth_signup_schemas_authinput",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "authinput"
     },
     {
@@ -6335,8 +6192,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_home_about",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "about.tsx"
     },
     {
@@ -6346,8 +6203,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_base_home_about_aboutsection",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "aboutsection()"
     },
     {
@@ -6357,8 +6214,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_home_contact",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "contact.tsx"
     },
     {
@@ -6368,8 +6225,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_base_home_contact_contactsection",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "contactsection()"
     },
     {
@@ -6379,8 +6236,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_home_services",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "services.tsx"
     },
     {
@@ -6390,8 +6247,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_base_home_services_servicessection",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "servicessection()"
     },
     {
@@ -6588,8 +6445,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_components_base_users_profile_forms_infoperfil_select",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 80,
+      "community_name": "cn",
       "norm_label": "select()"
     },
     {
@@ -6885,7 +6742,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_users_usuarios_verusuarios",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "verusuarios.tsx"
     },
@@ -6896,7 +6753,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_base_users_usuarios_verusuarios_verusuarios",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "verusuarios()"
     },
@@ -6984,7 +6841,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_users_usuarios_lib_hooks",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "usuarios/lib/hooks.ts"
     },
@@ -6995,7 +6852,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_base_users_usuarios_lib_hooks_useusers",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "useusers()"
     },
@@ -7128,7 +6985,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_connectivityshell",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "connectivityshell.tsx"
     },
     {
@@ -7139,7 +6996,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_connectivityshell_statusconfig",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "statusconfig"
     },
     {
@@ -7150,7 +7007,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_connectivityshell_status_config",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "status_config"
     },
     {
@@ -7161,7 +7018,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_connectivityshell_bannerease",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "bannerease"
     },
     {
@@ -7172,7 +7029,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_connectivityshell_connectivityshell",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "connectivityshell()"
     },
     {
@@ -7183,7 +7040,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_lib_hooks",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "connectivity/lib/hooks.ts"
     },
     {
@@ -7194,7 +7051,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_lib_hooks_connectivitystatus",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "connectivitystatus"
     },
     {
@@ -7205,7 +7062,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_lib_hooks_pingresult",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "pingresult"
     },
     {
@@ -7216,7 +7073,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_lib_hooks_networkconnection",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "networkconnection"
     },
     {
@@ -7227,7 +7084,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_lib_hooks_getnetworkconnection",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "getnetworkconnection()"
     },
     {
@@ -7238,7 +7095,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_lib_hooks_isslowconnection",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "isslowconnection()"
     },
     {
@@ -7249,7 +7106,7 @@
       "_origin": "ast",
       "id": "src_components_base_connectivity_lib_hooks_useconnectivity",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "useconnectivity()"
     },
     {
@@ -7314,8 +7171,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_imgs_imageuploader",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "imageuploader.tsx"
     },
     {
@@ -7325,8 +7182,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_base_imgs_imageuploader_swaltheme",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "swaltheme()"
     },
     {
@@ -7336,8 +7193,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_base_imgs_imageuploader_showimageerror",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "showimageerror()"
     },
     {
@@ -7347,8 +7204,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_components_base_imgs_imageuploader_showuploaderror",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "showuploaderror()"
     },
     {
@@ -7358,8 +7215,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_base_imgs_imageuploader_imageuploaderhandle",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "imageuploaderhandle"
     },
     {
@@ -7369,8 +7226,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_components_base_imgs_imageuploader_imageuploaderprops",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "imageuploaderprops"
     },
     {
@@ -7380,8 +7237,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "src_components_base_imgs_imageuploader_imageuploader",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "imageuploader"
     },
     {
@@ -7457,8 +7314,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_layout_menu",
-      "community": 0,
-      "community_name": "createClient",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "menu.tsx"
     },
     {
@@ -7468,8 +7325,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_base_layout_menu_la_arada_links",
-      "community": 0,
-      "community_name": "createClient",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "la_arada_links"
     },
     {
@@ -7479,8 +7336,8 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "src_components_base_layout_menu_menuprops",
-      "community": 0,
-      "community_name": "createClient",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "menuprops"
     },
     {
@@ -7490,8 +7347,8 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "src_components_base_layout_menu_menu",
-      "community": 0,
-      "community_name": "createClient",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "menu()"
     },
     {
@@ -7501,8 +7358,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_layout_header",
-      "community": 0,
-      "community_name": "createClient",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "header.tsx"
     },
     {
@@ -7512,8 +7369,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_base_layout_header_header",
-      "community": 0,
-      "community_name": "createClient",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "header()"
     },
     {
@@ -7557,7 +7414,7 @@
       "_origin": "ast",
       "id": "src_components_base_providers_queryproviders",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "queryproviders.tsx"
     },
     {
@@ -7568,7 +7425,7 @@
       "_origin": "ast",
       "id": "src_components_base_providers_queryproviders_providers",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "providers()"
     },
     {
@@ -7578,7 +7435,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_base_providers_userprovider",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "userprovider.tsx"
     },
@@ -7589,7 +7446,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_base_providers_userprovider_usercontext",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "usercontext"
     },
@@ -7600,8 +7457,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_base_providers_userprovider_userprovider",
-      "community": 32,
-      "community_name": "layout.tsx",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "userprovider()"
     },
     {
@@ -7611,7 +7468,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_components_base_providers_userprovider_useuser",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "useuser()"
     },
@@ -7623,7 +7480,7 @@
       "_origin": "ast",
       "id": "src_components_base_theme_provider",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "provider.tsx"
     },
     {
@@ -7634,7 +7491,7 @@
       "_origin": "ast",
       "id": "src_components_base_theme_provider_themeprovider",
       "community": 32,
-      "community_name": "layout.tsx",
+      "community_name": "SignUp.tsx",
       "norm_label": "themeprovider()"
     },
     {
@@ -7677,7 +7534,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ui_pushnotificationtoggle",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "pushnotificationtoggle.tsx"
     },
@@ -7688,7 +7545,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_ui_pushnotificationtoggle_pushnotificationtoggle",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "pushnotificationtoggle()"
     },
@@ -7732,8 +7589,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ui_aurora_text",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "aurora-text.tsx"
     },
     {
@@ -7743,8 +7600,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_components_ui_aurora_text_auroratextprops",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "auroratextprops"
     },
     {
@@ -7754,8 +7611,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_ui_aurora_text_auroratext",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "auroratext"
     },
     {
@@ -7908,8 +7765,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ui_breadcrumb_nav",
-      "community": 0,
-      "community_name": "createClient",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "breadcrumb-nav.tsx"
     },
     {
@@ -7919,8 +7776,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_ui_breadcrumb_nav_breadcrumbnav",
-      "community": 0,
-      "community_name": "createClient",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "breadcrumbnav()"
     },
     {
@@ -8271,8 +8128,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ui_dot_pattern",
-      "community": 88,
-      "community_name": "utils.ts",
+      "community": 0,
+      "community_name": "createClient",
       "norm_label": "dot-pattern.tsx"
     },
     {
@@ -8282,8 +8139,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_ui_dot_pattern_dotpatternprops",
-      "community": 88,
-      "community_name": "utils.ts",
+      "community": 0,
+      "community_name": "createClient",
       "norm_label": "dotpatternprops"
     },
     {
@@ -8293,8 +8150,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_ui_dot_pattern_dotpattern",
-      "community": 88,
-      "community_name": "utils.ts",
+      "community": 0,
+      "community_name": "createClient",
       "norm_label": "dotpattern()"
     },
     {
@@ -8645,8 +8502,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ui_input",
-      "community": 88,
-      "community_name": "utils.ts",
+      "community": 0,
+      "community_name": "createClient",
       "norm_label": "input.tsx"
     },
     {
@@ -8656,8 +8513,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_components_ui_input_input",
-      "community": 88,
-      "community_name": "utils.ts",
+      "community": 0,
+      "community_name": "createClient",
       "norm_label": "input()"
     },
     {
@@ -8689,8 +8546,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ui_magic_card",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 88,
+      "community_name": "utils.ts",
       "norm_label": "magic-card.tsx"
     },
     {
@@ -8700,8 +8557,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_ui_magic_card_magiccardprops",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 88,
+      "community_name": "utils.ts",
       "norm_label": "magiccardprops"
     },
     {
@@ -8711,8 +8568,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_ui_magic_card_magiccard",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 88,
+      "community_name": "utils.ts",
       "norm_label": "magiccard()"
     },
     {
@@ -8909,8 +8766,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ui_select",
-      "community": 80,
-      "community_name": "cn",
+      "community": 23,
+      "community_name": "select.tsx",
       "norm_label": "select.tsx"
     },
     {
@@ -8920,8 +8777,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_ui_select_select",
-      "community": 80,
-      "community_name": "cn",
+      "community": 23,
+      "community_name": "select.tsx",
       "norm_label": "select()"
     },
     {
@@ -8931,8 +8788,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_ui_select_selectgroup",
-      "community": 80,
-      "community_name": "cn",
+      "community": 23,
+      "community_name": "select.tsx",
       "norm_label": "selectgroup()"
     },
     {
@@ -8942,8 +8799,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_ui_select_selectvalue",
-      "community": 80,
-      "community_name": "cn",
+      "community": 23,
+      "community_name": "select.tsx",
       "norm_label": "selectvalue()"
     },
     {
@@ -8953,8 +8810,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_components_ui_select_selecttrigger",
-      "community": 80,
-      "community_name": "cn",
+      "community": 23,
+      "community_name": "select.tsx",
       "norm_label": "selecttrigger()"
     },
     {
@@ -8964,8 +8821,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "src_components_ui_select_selectcontent",
-      "community": 80,
-      "community_name": "cn",
+      "community": 23,
+      "community_name": "select.tsx",
       "norm_label": "selectcontent()"
     },
     {
@@ -8975,8 +8832,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "src_components_ui_select_selectlabel",
-      "community": 80,
-      "community_name": "cn",
+      "community": 23,
+      "community_name": "select.tsx",
       "norm_label": "selectlabel()"
     },
     {
@@ -8986,8 +8843,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "src_components_ui_select_selectitem",
-      "community": 80,
-      "community_name": "cn",
+      "community": 23,
+      "community_name": "select.tsx",
       "norm_label": "selectitem()"
     },
     {
@@ -8997,8 +8854,8 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "src_components_ui_select_selectseparator",
-      "community": 80,
-      "community_name": "cn",
+      "community": 23,
+      "community_name": "select.tsx",
       "norm_label": "selectseparator()"
     },
     {
@@ -9008,8 +8865,8 @@
       "source_location": "L143",
       "_origin": "ast",
       "id": "src_components_ui_select_selectscrollupbutton",
-      "community": 80,
-      "community_name": "cn",
+      "community": 23,
+      "community_name": "select.tsx",
       "norm_label": "selectscrollupbutton()"
     },
     {
@@ -9019,8 +8876,8 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "src_components_ui_select_selectscrolldownbutton",
-      "community": 80,
-      "community_name": "cn",
+      "community": 23,
+      "community_name": "select.tsx",
       "norm_label": "selectscrolldownbutton()"
     },
     {
@@ -9360,8 +9217,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ui_typing_animation",
-      "community": 88,
-      "community_name": "utils.ts",
+      "community": 6,
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "typing-animation.tsx"
     },
     {
@@ -9371,8 +9228,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_ui_typing_animation_typinganimationprops",
-      "community": 88,
-      "community_name": "utils.ts",
+      "community": 6,
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "typinganimationprops"
     },
     {
@@ -9382,8 +9239,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_ui_typing_animation_typinganimation",
-      "community": 88,
-      "community_name": "utils.ts",
+      "community": 6,
+      "community_name": "productos/lib/actions.ts",
       "norm_label": "typinganimation()"
     },
     {
@@ -9407,17 +9264,6 @@
       "community": 73,
       "community_name": "global.d.ts",
       "norm_label": "*.css"
-    },
-    {
-      "label": "jspdf",
-      "file_type": "code",
-      "source_file": "src/global.d.ts",
-      "source_location": "L3",
-      "_origin": "ast",
-      "id": "src_global_d_jspdf",
-      "community": 73,
-      "community_name": "global.d.ts",
-      "norm_label": "jspdf"
     },
     {
       "label": "useInfile.ts",
@@ -9669,7 +9515,7 @@
       "_origin": "ast",
       "id": "src_lib_notifications",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "notifications.ts"
     },
     {
@@ -9680,7 +9526,7 @@
       "_origin": "ast",
       "id": "src_lib_notifications_applyswallayerstyles",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "applyswallayerstyles()"
     },
     {
@@ -9691,7 +9537,7 @@
       "_origin": "ast",
       "id": "src_lib_notifications_wiresearchableclientpicker",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "wiresearchableclientpicker()"
     },
     {
@@ -9702,7 +9548,7 @@
       "_origin": "ast",
       "id": "src_lib_notifications_applyreassignswalstyles",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "applyreassignswalstyles()"
     },
     {
@@ -9713,7 +9559,7 @@
       "_origin": "ast",
       "id": "src_lib_notifications_getswaltheme",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "getswaltheme()"
     },
     {
@@ -9724,7 +9570,7 @@
       "_origin": "ast",
       "id": "src_lib_notifications_showconfirm",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "showconfirm()"
     },
     {
@@ -9735,7 +9581,7 @@
       "_origin": "ast",
       "id": "src_lib_notifications_showreassignclientdialog",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "showreassignclientdialog()"
     },
     {
@@ -9745,8 +9591,8 @@
       "source_location": "L245",
       "_origin": "ast",
       "id": "src_lib_notifications_showtoast",
-      "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community": 9,
+      "community_name": "detalle-credito-modal.tsx",
       "norm_label": "showtoast()"
     },
     {
@@ -9757,7 +9603,7 @@
       "_origin": "ast",
       "id": "src_lib_notifications_showalert",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "showalert()"
     },
     {
@@ -10186,7 +10032,7 @@
       "_origin": "ast",
       "id": "src_utils_client_delete_messages",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "client-delete-messages.ts"
     },
     {
@@ -10197,7 +10043,7 @@
       "_origin": "ast",
       "id": "src_utils_client_delete_messages_getactivesalestransfermessage",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "getactivesalestransfermessage()"
     },
     {
@@ -10208,7 +10054,7 @@
       "_origin": "ast",
       "id": "src_utils_client_delete_messages_getactivesalesreassignerror",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "getactivesalesreassignerror()"
     },
     {
@@ -10219,7 +10065,7 @@
       "_origin": "ast",
       "id": "src_utils_client_delete_messages_getactivesalesnocandidateserror",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "getactivesalesnocandidateserror()"
     },
     {
@@ -10230,7 +10076,7 @@
       "_origin": "ast",
       "id": "src_utils_client_delete_messages_getannulledsaleswithoutclientmessage",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "getannulledsaleswithoutclientmessage()"
     },
     {
@@ -10241,7 +10087,7 @@
       "_origin": "ast",
       "id": "src_utils_client_delete_messages_getannulledsalesunlinkmessage",
       "community": 4,
-      "community_name": "client-sales-modal.tsx",
+      "community_name": "clientes/index.tsx",
       "norm_label": "getannulledsalesunlinkmessage()"
     },
     {
@@ -10251,8 +10097,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_utils_general_password_generator",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "password-generator.ts"
     },
     {
@@ -10262,8 +10108,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_utils_general_password_generator_generatestrongpassword",
-      "community": 5,
-      "community_name": "InfoUser.tsx",
+      "community": 32,
+      "community_name": "SignUp.tsx",
       "norm_label": "generatestrongpassword()"
     },
     {
@@ -10361,8 +10207,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_utils_supabase_client",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "client.ts"
     },
     {
@@ -10372,8 +10218,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_utils_supabase_client_createclient",
-      "community": 3,
-      "community_name": "ventas/lib/actions.ts",
+      "community": 76,
+      "community_name": "useUser",
       "norm_label": "createclient()"
     },
     {
@@ -10427,7 +10273,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_utils_vapid",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "vapid.ts"
     },
@@ -10438,7 +10284,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_utils_vapid_urlbase64touint8array",
-      "community": 6,
+      "community": 76,
       "community_name": "useUser",
       "norm_label": "urlbase64touint8array()"
     },
@@ -12336,6 +12182,54 @@
       "source": "package_dependencies_jspdf",
       "target": "jspdf",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/(LaArada)/contabilidad/index.tsx",
+      "source_location": "L280",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_laarada_contabilidad_index_contabilidadview",
+      "target": "package_dependencies_jspdf"
+    },
+    {
+      "relation": "references",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
+      "source_location": "L152",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_laarada_creditos_lib_export_reporte_pdf_drawbrandheader",
+      "target": "package_dependencies_jspdf"
+    },
+    {
+      "relation": "references",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
+      "source_location": "L194",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_laarada_creditos_lib_export_reporte_pdf_drawdocumentmeta",
+      "target": "package_dependencies_jspdf"
+    },
+    {
+      "relation": "references",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
+      "source_location": "L349",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportreportepdf",
+      "target": "package_dependencies_jspdf"
     },
     {
       "relation": "imports",
@@ -17472,7 +17366,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/index.tsx",
-      "source_location": "L304",
+      "source_location": "L305",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_index_creditos",
@@ -17508,7 +17402,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/index.tsx",
-      "source_location": "L333",
+      "source_location": "L309",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_index_creditos",
@@ -18029,40 +17923,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L19",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_abonocreditorow",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L26",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_abonocreditoventasection",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L58",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_buildabonosfilename",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L45",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18073,7 +17934,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L43",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18084,7 +17945,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L103",
+      "source_location": "L58",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18095,18 +17956,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L302",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_drawabonosventameta",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L192",
+      "source_location": "L147",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18117,7 +17967,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L237",
+      "source_location": "L182",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18128,18 +17978,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L432",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_exportabonospdf",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L464",
+      "source_location": "L233",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18150,18 +17989,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L82",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_formatfechahorareporte",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L71",
+      "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18172,18 +18000,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L288",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_getabonostablecolumnstyles",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L272",
+      "source_location": "L217",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18194,7 +18011,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L41",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18205,7 +18022,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L98",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18216,7 +18033,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L36",
+      "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18227,7 +18044,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L38",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18238,7 +18055,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L37",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18249,7 +18066,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L164",
+      "source_location": "L119",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18260,7 +18077,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L40",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18271,22 +18088,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L141",
+      "source_location": "L96",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
       "target": "src_components_laarada_creditos_lib_export_reporte_pdf_removedarkbackground",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L371",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_renderabonospagostable",
       "confidence_score": 1.0
     },
     {
@@ -18315,7 +18121,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L115",
+      "source_location": "L70",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf",
@@ -18327,7 +18133,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L31",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -18339,7 +18145,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L581",
+      "source_location": "L350",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportreportepdf",
@@ -18351,19 +18157,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L461",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportabonospdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_buildabonosfilename",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L221",
+      "source_location": "L170",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf_drawbrandheader",
@@ -18375,19 +18169,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L221",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf_drawbrandheader",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_formatfechahorareporte",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L118",
+      "source_location": "L73",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf_shareordownloadpdf",
@@ -18399,7 +18181,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L135",
+      "source_location": "L90",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf_shareordownloadpdf",
@@ -18411,19 +18193,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L461",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportabonospdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_shareordownloadpdf",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L581",
+      "source_location": "L350",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportreportepdf",
@@ -18435,7 +18205,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L185",
+      "source_location": "L140",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf_loadlogoforpdf",
@@ -18447,19 +18217,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L444",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportabonospdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_loadlogoforpdf",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L477",
+      "source_location": "L246",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportreportepdf",
@@ -18471,19 +18229,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L446",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportabonospdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_drawbrandheader",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L479",
+      "source_location": "L248",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportreportepdf",
@@ -18495,7 +18241,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L480",
+      "source_location": "L249",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportreportepdf",
@@ -18507,7 +18253,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L523",
+      "source_location": "L292",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportreportepdf",
@@ -18515,71 +18261,11 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L404",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf_renderabonospagostable",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_getabonostablecolumnstyles",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L450",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportabonospdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_drawabonosventameta",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts",
-      "source_location": "L457",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_lib_export_reporte_pdf_exportabonospdf",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_renderabonospagostable",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L31",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_exportabonospdf",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L770",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
-      "target": "src_components_laarada_creditos_lib_export_reporte_pdf_exportabonospdf"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L31",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -18592,7 +18278,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L704",
+      "source_location": "L513",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -18729,7 +18415,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L32",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -18777,7 +18463,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L32",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -18790,7 +18476,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L497",
+      "source_location": "L311",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -18801,7 +18487,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L32",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -18814,7 +18500,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L498",
+      "source_location": "L312",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -18825,7 +18511,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L32",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -18838,7 +18524,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L499",
+      "source_location": "L313",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19052,7 +18738,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L33",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19064,7 +18750,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L33",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19076,7 +18762,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L41",
+      "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodalprops",
@@ -19088,7 +18774,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L33",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19100,7 +18786,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L33",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19112,7 +18798,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L33",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19124,7 +18810,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L42",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodalprops",
@@ -19159,18 +18845,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L378",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
-      "target": "src_components_laarada_creditos_modals_detalle_credito_modal_abonopagomenu",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L457",
+      "source_location": "L271",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19181,7 +18856,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L40",
+      "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19192,7 +18867,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L45",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19203,18 +18878,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L189",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
-      "target": "src_components_laarada_creditos_modals_detalle_credito_modal_esparticulanombre",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L236",
+      "source_location": "L172",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19225,7 +18889,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L63",
+      "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19236,7 +18900,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L64",
+      "source_location": "L58",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19247,7 +18911,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L51",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19258,7 +18922,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L52",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19269,7 +18933,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L131",
+      "source_location": "L125",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19284,17 +18948,6 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
-      "target": "src_components_laarada_creditos_modals_detalle_credito_modal_formatdatetimeshort",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L213",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
       "target": "src_components_laarada_creditos_modals_detalle_credito_modal_formatfelnumero",
       "confidence_score": 1.0
     },
@@ -19302,7 +18955,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L207",
+      "source_location": "L143",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19313,18 +18966,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L195",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
-      "target": "src_components_laarada_creditos_modals_detalle_credito_modal_formatnombrecobro",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L99",
+      "source_location": "L93",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19335,7 +18977,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L230",
+      "source_location": "L166",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19346,7 +18988,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L227",
+      "source_location": "L163",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19357,7 +18999,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L106",
+      "source_location": "L100",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19368,7 +19010,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L89",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19379,7 +19021,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L83",
+      "source_location": "L77",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19390,7 +19032,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L73",
+      "source_location": "L67",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19401,7 +19043,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L114",
+      "source_location": "L108",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19412,7 +19054,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L78",
+      "source_location": "L72",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19423,18 +19065,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L172",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
-      "target": "src_components_laarada_creditos_modals_detalle_credito_modal_nombre_particulas",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L55",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19445,7 +19076,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L53",
+      "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19456,7 +19087,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L96",
+      "source_location": "L90",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19467,7 +19098,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L50",
+      "source_location": "L44",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
@@ -19484,54 +19115,6 @@
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
       "target": "src_components_laarada_ventas_modals_receipt_modal",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
-      "target": "src_components_ui_popover",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
-      "target": "src_components_ui_popover_popover",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
-      "target": "src_components_ui_popover_popovercontent",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal",
-      "target": "src_components_ui_popover_popovertrigger",
       "confidence_score": 1.0
     },
     {
@@ -19599,7 +19182,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L680",
+      "source_location": "L489",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19611,7 +19194,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L81",
+      "source_location": "L75",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_getventalabel",
@@ -19623,7 +19206,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L520",
+      "source_location": "L334",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19635,7 +19218,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L233",
+      "source_location": "L169",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_getcomprobantelabel",
@@ -19647,7 +19230,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L675",
+      "source_location": "L484",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19659,7 +19242,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L93",
+      "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_getsaldopendiente",
@@ -19671,7 +19254,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L746",
+      "source_location": "L1067",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19683,7 +19266,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L97",
+      "source_location": "L91",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_ventaestapagada",
@@ -19695,7 +19278,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L502",
+      "source_location": "L316",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19707,7 +19290,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L107",
+      "source_location": "L101",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_getrangoanioactual",
@@ -19719,7 +19302,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L482",
+      "source_location": "L296",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19731,7 +19314,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L551",
+      "source_location": "L365",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19743,7 +19326,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L679",
+      "source_location": "L488",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19755,7 +19338,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L256",
+      "source_location": "L193",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_felinfopanel",
@@ -19767,55 +19350,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L755",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
-      "target": "src_components_laarada_creditos_modals_detalle_credito_modal_formatdatetimeshort",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L191",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal_esparticulanombre",
-      "target": "src_components_laarada_creditos_modals_detalle_credito_modal_nombre_particulas"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L198",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal_formatnombrecobro",
-      "target": "src_components_laarada_creditos_modals_detalle_credito_modal_esparticulanombre",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L764",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
-      "target": "src_components_laarada_creditos_modals_detalle_credito_modal_formatnombrecobro",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L682",
+      "source_location": "L491",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19827,7 +19362,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L358",
+      "source_location": "L243",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_felinfopanel",
@@ -19839,7 +19374,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L292",
+      "source_location": "L204",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_felinfopanel",
@@ -19851,7 +19386,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L232",
+      "source_location": "L168",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_getcomprobantelabel",
@@ -19863,7 +19398,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L1082",
+      "source_location": "L831",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19875,7 +19410,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L231",
+      "source_location": "L167",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_getcomprobantelabel",
@@ -19887,7 +19422,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L681",
+      "source_location": "L490",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19900,7 +19435,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L252",
+      "source_location": "L188",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_felinfopanel",
@@ -19912,7 +19447,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L492",
+      "source_location": "L306",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19924,7 +19459,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L847",
+      "source_location": "L592",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19936,7 +19471,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L710",
+      "source_location": "L519",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -19948,7 +19483,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/(LaArada)/creditos/modals/detalle-credito-modal.tsx",
-      "source_location": "L1109",
+      "source_location": "L858",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_laarada_creditos_modals_detalle_credito_modal_detallecreditomodal",
@@ -32641,17 +32176,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/global.d.ts",
-      "source_location": "L4",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_global_d",
-      "target": "src_global_d_jspdf",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "src/hooks/useInfile.ts",
       "source_location": "L54",
       "weight": 1.0,
@@ -35082,5 +34606,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "40045373da04fcaa0613095abbd7bca60ae30acc"
+  "built_at_commit": "2383823d537415b31a3570dd3a80809708c94b04"
 }

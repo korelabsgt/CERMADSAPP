@@ -1,16 +1,16 @@
-# Graph Report - cermadsapp  (2026-08-16)
+# Graph Report - cermadsapp  (2026-08-04)
 
 ## Corpus Check
-- 181 files · ~91,756 words
+- 181 files · ~90,211 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1025 nodes · 2049 edges · 80 communities (42 shown, 38 thin omitted)
+- 1011 nodes · 2021 edges · 79 communities (42 shown, 37 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 5 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `40045373`
+- Built from commit: `2383823d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -19,9 +19,9 @@
 - lib/infile.ts
 - ventas-view.tsx
 - ventas/lib/actions.ts
-- client-sales-modal.tsx
+- clientes/index.tsx
 - InfoUser.tsx
-- useUser
+- productos/lib/actions.ts
 - devDependencies
 - estadisticas/stats.tsx
 - detalle-credito-modal.tsx
@@ -29,16 +29,16 @@
 - dropdown-menu.tsx
 - dialog.tsx
 - components.json
-- stats-accordion.tsx
+- react-dom
 - form.tsx
 - DevicesAccordion.tsx
-- components/stats.tsx
+- client-sales-modal.tsx
 - @sweetalert2/theme-dark
 - dependencies
 - (settings)/hooks.ts
 - export-reporte-pdf.ts
 - weather/route.ts
-- clsx
+- select.tsx
 - sheet.tsx
 - cropImage.ts
 - dock.tsx
@@ -47,11 +47,10 @@
 - Guía: subir y eliminar imágenes (`components/imgs`)
 - notificaciones_resumen.md
 - src/proxy.ts
-- layout.tsx
+- SignUp.tsx
 - install-graphify.md
 - README.md
 - eslint.config.mjs
-- jspdf
 - framer-motion
 - @hookform/resolvers
 - jspdf-autotable
@@ -70,20 +69,20 @@
 - web-push
 - react-easy-crop
 - react-hook-form
-- @supabase/supabase-js
+- @react-pdf/renderer
 - react-toastify
 - recharts
 - @simplewebauthn/server
 - @supabase/ssr
 - sweetalert2
-- @tanstack/react-query
 - tailwind-merge
 - file-saver
 - postcss.config.mjs
 - health/route.ts
 - global.d.ts
-- contabilidad/index.tsx
+- useUser
 - cn
+- browser-image-compression
 - date-fns
 - @radix-ui/react-separator
 - @simplewebauthn/browser
@@ -94,34 +93,34 @@
 1. `cn()` - 157 edges
 2. `createClient()` - 73 edges
 3. `useUser()` - 32 edges
-4. `DetalleCreditoModal()` - 23 edges
+4. `DetalleCreditoModal()` - 20 edges
 5. `compilerOptions` - 16 edges
 6. `ClientSalesModalContent()` - 14 edges
 7. `createClient()` - 14 edges
 8. `Creditos()` - 12 edges
 9. `ListadoClientes()` - 10 edges
-10. `ReceiptModal()` - 10 edges
+10. `exportReportePdf()` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `ContabilidadView()` --references--> `jspdf`  [EXTRACTED]
+  src/components/(LaArada)/contabilidad/index.tsx → package.json
 - `ScaledDocument()` --references--> `react`  [EXTRACTED]
   src/components/(LaArada)/ventas/modals/receipt-modal.tsx → package.json
-- `ContabilidadView()` --references--> `xlsx`  [EXTRACTED]
-  src/components/(LaArada)/contabilidad/index.tsx → package.json
-- `FormItem()` --references--> `react`  [EXTRACTED]
-  src/components/ui/form.tsx → package.json
-- `useFormField()` --references--> `react`  [EXTRACTED]
-  src/components/ui/form.tsx → package.json
-- `RootLayout()` --calls--> `createClient()`  [EXTRACTED]
-  src/app/layout.tsx → src/utils/supabase/server.ts
+- `drawBrandHeader()` --references--> `jspdf`  [EXTRACTED]
+  src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts → package.json
+- `drawDocumentMeta()` --references--> `jspdf`  [EXTRACTED]
+  src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts → package.json
+- `exportReportePdf()` --references--> `jspdf`  [EXTRACTED]
+  src/components/(LaArada)/creditos/lib/export-reporte-pdf.ts → package.json
 
 ## Import Cycles
 - None detected.
 
-## Communities (80 total, 38 thin omitted)
+## Communities (79 total, 37 thin omitted)
 
 ### Community 0 - "createClient"
 Cohesion: 0.05
-Nodes (57): logout(), POST(), DELETE(), POST(), checkDeviceRequest(), createDeviceRequest(), notifyAdminsOfArrival(), notifySpecialRoles() (+49 more)
+Nodes (53): logout(), POST(), DELETE(), POST(), checkDeviceRequest(), createDeviceRequest(), notifyAdminsOfArrival(), notifySpecialRoles() (+45 more)
 
 ### Community 1 - "lib/infile.ts"
 Cohesion: 0.08
@@ -132,20 +131,20 @@ Cohesion: 0.16
 Nodes (15): ClientRowActionsProps, getGuatemalaDateParts(), getOrderDateString(), getWeeksLabels(), ListView(), MONTH_SHORT, MonthYearPicker(), shiftMonth() (+7 more)
 
 ### Community 3 - "ventas/lib/actions.ts"
-Cohesion: 0.07
-Nodes (46): ImageUploader, ImageUploaderHandle, ImageUploaderProps, showImageError(), showUploadError(), swalTheme(), Estadisticas(), ListadoVentas() (+38 more)
+Cohesion: 0.09
+Nodes (37): Estadisticas(), ListadoVentas(), createVenta(), getCatalogos(), getUserRole(), getVendedores(), getVentas(), isSuperOrAdmin() (+29 more)
 
-### Community 4 - "client-sales-modal.tsx"
-Cohesion: 0.07
-Nodes (55): ListadoClientes(), createClientAction(), deleteClientAction(), getClientDeletionPreview(), getClients(), getClientSalesAction(), isVentaAnulada(), mapDeleteClientError() (+47 more)
+### Community 4 - "clientes/index.tsx"
+Cohesion: 0.13
+Nodes (32): ListadoClientes(), createClientAction(), deleteClientAction(), getClientDeletionPreview(), getClients(), getClientSalesAction(), isVentaAnulada(), mapDeleteClientError() (+24 more)
 
 ### Community 5 - "InfoUser.tsx"
-Cohesion: 0.06
-Nodes (42): ActionState, getAdminClient(), signup(), useSignupLogic(), AuthInput, authSchema, Input(), Label() (+34 more)
+Cohesion: 0.14
+Nodes (24): InfoPerfil(), InfoPerfilProps, Input(), Label(), InfoUser(), InfoUserProps, StatusSwitch(), UserStatusToggle() (+16 more)
 
-### Community 6 - "useUser"
+### Community 6 - "productos/lib/actions.ts"
 Cohesion: 0.09
-Nodes (31): UserContext, useUser(), useUsers(), VerUsuarios(), DashboardLaArada(), WELCOME_PHRASES, ListadoProductos(), ProductoCatalogo (+23 more)
+Nodes (33): DashboardLaArada(), WELCOME_PHRASES, MONTHS, StatCard(), StatsAccordion(), YearlyDetailCard(), ListadoProductos(), ProductoCatalogo (+25 more)
 
 ### Community 7 - "devDependencies"
 Cohesion: 0.06
@@ -157,7 +156,7 @@ Nodes (22): EstadisticasDataSkeleton(), EstadisticasPageSkeleton(), CHART_COLORS
 
 ### Community 9 - "detalle-credito-modal.tsx"
 Cohesion: 0.06
-Nodes (66): CreditosList(), CreditosListProps, formatDeuda(), PAGE_SIZE_OPTIONS, PageSize, ReciboAbonoPrint(), DetalleCreditoCliente(), Creditos() (+58 more)
+Nodes (63): CreditosList(), CreditosListProps, formatDeuda(), PAGE_SIZE_OPTIONS, PageSize, ReciboAbonoPrint(), DetalleCreditoCliente(), Creditos() (+55 more)
 
 ### Community 10 - "compilerOptions"
 Cohesion: 0.07
@@ -175,10 +174,6 @@ Nodes (14): COLORS, MONTHS, StatsModalProps, Button(), buttonVariants, Dialog(),
 Cohesion: 0.10
 Nodes (19): aliases, components, hooks, lib, ui, utils, iconLibrary, registries (+11 more)
 
-### Community 14 - "stats-accordion.tsx"
-Cohesion: 0.40
-Nodes (5): MONTHS, StatCard(), StatsAccordion(), YearlyDetailCard(), getProductStats()
-
 ### Community 15 - "form.tsx"
 Cohesion: 0.16
 Nodes (14): react, react, ScaledDocument(), FormControl(), FormDescription(), FormFieldContext, FormFieldContextValue, FormItem() (+6 more)
@@ -187,25 +182,29 @@ Nodes (14): react, react, ScaledDocument(), FormControl(), FormDescription(), Fo
 Cohesion: 0.17
 Nodes (11): authorizeDevice(), denyDevice(), supabaseAdmin, supabaseServiceKey, supabaseUrl, AuthorizeButton(), Device, DevicesAccordion() (+3 more)
 
-### Community 17 - "components/stats.tsx"
-Cohesion: 0.40
-Nodes (4): MONTHS, StatCard(), Stats(), YearlyDetailCard()
+### Community 17 - "client-sales-modal.tsx"
+Cohesion: 0.16
+Nodes (22): useClientSales(), ClientSale, ClientSalesModal(), ClientSalesModalContent(), ClientSalesModalProps, DIAS_SEMANA, DteDocumento, FILTRO_COMPROBANTE_OPTIONS (+14 more)
 
 ### Community 19 - "dependencies"
-Cohesion: 0.18
-Nodes (11): browser-image-compression, class-variance-authority, dependencies, browser-image-compression, class-variance-authority, react-dom, @react-pdf/renderer, xlsx (+3 more)
+Cohesion: 0.22
+Nodes (9): class-variance-authority, clsx, dependencies, class-variance-authority, clsx, @supabase/supabase-js, @tanstack/react-query, @supabase/supabase-js (+1 more)
 
 ### Community 20 - "(settings)/hooks.ts"
 Cohesion: 0.31
 Nodes (7): getAppSettings(), updateAppSettings(), useAppSettings(), useUpdateAppSettings(), AppSettings(), appSettingsSchema, AppSettingsUpdate
 
 ### Community 21 - "export-reporte-pdf.ts"
-Cohesion: 0.12
-Nodes (27): AbonoCreditoRow, AbonoCreditoVentaSection, buildAbonosFilename(), buildReporteFilename(), DIAS_SEMANA, downloadPdfBlob(), drawAbonosVentaMeta(), drawBrandHeader() (+19 more)
+Cohesion: 0.14
+Nodes (21): jspdf, jspdf, buildReporteFilename(), DIAS_SEMANA, downloadPdfBlob(), drawBrandHeader(), drawDocumentMeta(), exportReportePdf() (+13 more)
 
 ### Community 22 - "weather/route.ts"
 Cohesion: 0.35
 Nodes (10): buildSummary(), DayWeather, fetchEnsembleMonth(), fillMonthGaps(), GET(), getGuatemalaToday(), mergeDays(), parseDailyWeather() (+2 more)
+
+### Community 23 - "select.tsx"
+Cohesion: 0.18
+Nodes (7): SelectContent(), SelectItem(), SelectLabel(), SelectScrollDownButton(), SelectScrollUpButton(), SelectSeparator(), SelectTrigger()
 
 ### Community 24 - "sheet.tsx"
 Cohesion: 0.18
@@ -239,9 +238,9 @@ Nodes (13): 1. INSTALACION DE DEPENDENCIAS, 2. ESTRUCTURA DE ARCHIVOS, 3. VARIAB
 Cohesion: 0.60
 Nodes (3): config, proxy(), createClient()
 
-### Community 32 - "layout.tsx"
-Cohesion: 0.12
-Nodes (18): geistMono, geistSans, metadata, RootLayout(), viewport, bannerEase, ConnectivityShell(), STATUS_CONFIG (+10 more)
+### Community 32 - "SignUp.tsx"
+Cohesion: 0.06
+Nodes (34): geistMono, geistSans, metadata, RootLayout(), viewport, ActionState, getAdminClient(), signup() (+26 more)
 
 ### Community 33 - "install-graphify.md"
 Cohesion: 0.22
@@ -251,37 +250,37 @@ Nodes (8): En un proyecto nuevo o diferente, En un proyecto nuevo o diferente, G
 Cohesion: 0.40
 Nodes (4): Deploy on Vercel, Getting Started, Learn More, thecarsplacelotinc
 
-### Community 76 - "contabilidad/index.tsx"
-Cohesion: 0.36
-Nodes (5): ContabilidadView(), FEL_ONLY_ROLES, FULL_ACCESS_ROLES, getFileName(), StatCard()
+### Community 76 - "useUser"
+Cohesion: 0.09
+Nodes (27): xlsx, ImageUploader, ImageUploaderHandle, ImageUploaderProps, showImageError(), showUploadError(), swalTheme(), Header() (+19 more)
 
 ### Community 80 - "cn"
-Cohesion: 0.09
-Nodes (30): Avatar(), AvatarBadge(), AvatarFallback(), AvatarGroup(), AvatarGroupCount(), AvatarImage(), Card(), CardAction() (+22 more)
+Cohesion: 0.11
+Nodes (28): Select(), MONTHS, StatCard(), Stats(), YearlyDetailCard(), Avatar(), AvatarBadge(), AvatarFallback() (+20 more)
 
 ### Community 88 - "utils.ts"
-Cohesion: 0.09
-Nodes (14): Dashboard(), Badge(), badgeVariants, BorderBeam(), BorderBeamProps, DotPattern(), DotPatternProps, Input() (+6 more)
+Cohesion: 0.11
+Nodes (11): Dashboard(), Badge(), badgeVariants, BorderBeam(), BorderBeamProps, MagicCard(), MagicCardProps, Separator() (+3 more)
 
 ## Knowledge Gaps
-- **279 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+274 more)
+- **276 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+271 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **38 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **37 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `createClient`, `ventas-view.tsx`, `ventas/lib/actions.ts`, `client-sales-modal.tsx`, `InfoUser.tsx`, `useUser`, `estadisticas/stats.tsx`, `detalle-credito-modal.tsx`, `dropdown-menu.tsx`, `dialog.tsx`, `stats-accordion.tsx`, `form.tsx`, `DevicesAccordion.tsx`, `components/stats.tsx`, `sheet.tsx`, `dock.tsx`, `particles.tsx`, `layout.tsx`, `contabilidad/index.tsx`, `utils.ts`?**
-  _High betweenness centrality (0.343) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `dependencies` to `devDependencies`, `form.tsx`, `@sweetalert2/theme-dark`, `clsx`, `jspdf`, `framer-motion`, `@hookform/resolvers`, `jspdf-autotable`, `lucide-react`, `motion`, `next`, `next-themes`, `@radix-ui/react-avatar`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-label`, `@radix-ui/react-popover`, `@radix-ui/react-select`, `@radix-ui/react-slot`, `web-push`, `react-easy-crop`, `react-hook-form`, `@supabase/supabase-js`, `react-toastify`, `recharts`, `@simplewebauthn/server`, `@supabase/ssr`, `sweetalert2`, `@tanstack/react-query`, `tailwind-merge`, `file-saver`, `date-fns`, `@radix-ui/react-separator`, `@simplewebauthn/browser`, `zod`?**
-  _High betweenness centrality (0.212) - this node is a cross-community bridge._
-- **Why does `ContabilidadView()` connect `contabilidad/index.tsx` to `ventas/lib/actions.ts`, `cn`, `dependencies`, `useUser`?**
-  _High betweenness centrality (0.102) - this node is a cross-community bridge._
+- **Why does `cn()` connect `cn` to `createClient`, `ventas-view.tsx`, `ventas/lib/actions.ts`, `InfoUser.tsx`, `productos/lib/actions.ts`, `estadisticas/stats.tsx`, `detalle-credito-modal.tsx`, `dropdown-menu.tsx`, `dialog.tsx`, `form.tsx`, `DevicesAccordion.tsx`, `client-sales-modal.tsx`, `select.tsx`, `sheet.tsx`, `dock.tsx`, `particles.tsx`, `SignUp.tsx`, `useUser`, `utils.ts`?**
+  _High betweenness centrality (0.333) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `dependencies` to `devDependencies`, `react-dom`, `form.tsx`, `@sweetalert2/theme-dark`, `export-reporte-pdf.ts`, `framer-motion`, `@hookform/resolvers`, `jspdf-autotable`, `lucide-react`, `motion`, `next`, `next-themes`, `@radix-ui/react-avatar`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-label`, `@radix-ui/react-popover`, `@radix-ui/react-select`, `@radix-ui/react-slot`, `web-push`, `react-easy-crop`, `react-hook-form`, `@react-pdf/renderer`, `react-toastify`, `recharts`, `@simplewebauthn/server`, `@supabase/ssr`, `sweetalert2`, `tailwind-merge`, `file-saver`, `useUser`, `browser-image-compression`, `date-fns`, `@radix-ui/react-separator`, `@simplewebauthn/browser`, `zod`?**
+  _High betweenness centrality (0.197) - this node is a cross-community bridge._
+- **Why does `ContabilidadView()` connect `useUser` to `cn`, `ventas/lib/actions.ts`, `export-reporte-pdf.ts`?**
+  _High betweenness centrality (0.114) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `rsc` to the rest of the system?**
-  _279 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _276 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `createClient` be split into smaller, more focused modules?**
-  _Cohesion score 0.05078855920876771 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05185185185185185 - nodes in this community are weakly interconnected._
 - **Should `lib/infile.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.07759562841530054 - nodes in this community are weakly interconnected._
 - **Should `ventas/lib/actions.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.07168458781362007 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09254901960784313 - nodes in this community are weakly interconnected._
