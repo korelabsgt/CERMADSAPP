@@ -44,6 +44,30 @@ export const PagoVentaSchema = z.object({
 
 export type PagoVentaValues = z.infer<typeof PagoVentaSchema>;
 
+export const PagoDesgloseSchema = z.object({
+  preventa_monto: z.coerce.number().min(0).default(0),
+  efectivo_monto: z.coerce.number().min(0).default(0),
+  transferencia_monto: z.coerce.number().min(0).default(0),
+  numero_boleta: z.string().optional().or(z.literal("")),
+  banco: z.string().optional().or(z.literal("")),
+  fecha_transferencia: z.string().optional().or(z.literal("")),
+  img_comprobante_url: z.string().nullable().optional(),
+});
+
+export type PagoDesgloseValues = z.infer<typeof PagoDesgloseSchema>;
+
+export const VentaConPagosSchema = z.object({
+  cliente_id: z.string().uuid("Seleccione un cliente válido"),
+  tipo_comprobante: z.enum(["Recibo", "NIT", "C/F"]).default("Recibo"),
+  fecha_entrega: z.string().optional().or(z.literal("")),
+  observaciones: z.string().optional(),
+  total: z.coerce.number().min(0, "El total no puede ser negativo"),
+  detalles: z.array(DetalleSchema).min(1, "Debe agregar al menos un producto"),
+  pago: PagoDesgloseSchema,
+});
+
+export type VentaConPagosValues = z.infer<typeof VentaConPagosSchema>;
+
 export type ProductoCatalogo = {
   id: string;
   nombre: string;

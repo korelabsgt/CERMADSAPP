@@ -27,6 +27,7 @@ import {
   Package,
   Banknote,
   ArrowRightLeft,
+  Wallet,
 } from "lucide-react";
 import ClientModal from "../../clientes/modals/client-modal";
 import AddProductModal from "./add-product-modal";
@@ -35,6 +36,11 @@ import { cn } from "@/lib/utils";
 import { updateEstadoVenta } from "../lib/actions";
 import { createClient } from "@/utils/supabase/client";
 import Swal from "sweetalert2";
+import {
+  useSaldoCliente,
+  useAplicarPreventa,
+} from "@/components/(LaArada)/preventas/lib/hooks";
+import { ReciboPreventa } from "@/components/(LaArada)/preventas/lib/zod";
 
 interface SaleModalProps {
   isOpen: boolean;
@@ -68,10 +74,13 @@ export default function SaleModal({
   const updateMutation = useUpdateVenta();
   const updatePagoMutation = useUpdateVentaPago();
   const updateTipoVentaMutation = useUpdateVentaTipoVenta();
+  const aplicarPreventaMutation = useAplicarPreventa();
 
   const [modals, setModals] = useState({ client: false, product: false });
   const [clientSearch, setClientSearch] = useState("");
   const [showClientList, setShowClientList] = useState(false);
+  const [usarPreventa, setUsarPreventa] = useState(false);
+  const [montoPreventa, setMontoPreventa] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<VentaFormValues>({
@@ -112,6 +121,11 @@ export default function SaleModal({
   const tipoVenta = watch("tipo_venta");
   const metodoPago = watch("metodo_pago");
   const imgComprobante = watch("img_comprobante_url");
+  const totalVenta = watch("total") || 0;
+
+  const { data: saldoCliente = 0 } = useSaldoCliente(
+    !ventaToEdit ? selectedClientId || null : null,
+  );
 
   const isAnulado =
     String(ventaToEdit?.estado || "")
@@ -243,6 +257,11 @@ export default function SaleModal({
       detalles.reduce((acc, curr) => acc + (curr.subtotal || 0), 0),
     );
   }, [detalles, setValue]);
+
+  useEffect(() => {
+    setUsarPreventa(false);
+    setMontoPreventa("");
+  }, [selectedClientId, isOpen]);
 
   const filteredClients = useMemo(() => {
     if (!catalogos?.clientes || clientSearch.length < 2) return [];
@@ -383,10 +402,31 @@ export default function SaleModal({
       ? await updateMutation.mutateAsync({ id: ventaToEdit.id, data })
       : await createMutation.mutateAsync(data);
     if (res?.success) {
+      const nuevaVentaId = (res as { ventaId?: string }).ventaId;
+
+      if (!ventaToEdit && nuevaVentaId && usarPreventa) {
+        const montoNum = Number(montoPreventa);
+        if (montoNum > 0) {
+          const aplic = await aplicarPreventaMutation.mutateAsync({
+            cliente_id: data.cliente_id,
+            venta_id: nuevaVentaId,
+            monto: montoNum,
+          });
+          if ("success" in aplic) {
+            window.dispatchEvent(
+              new CustomEvent<ReciboPreventa>("imprimir-preventa", {
+                detail: aplic.recibo,
+              }),
+            );
+          }
+        }
+      }
+
       reset();
       setClientSearch("");
+      setUsarPreventa(false);
+      setMontoPreventa("");
       onClose();
-      const nuevaVentaId = (res as { ventaId?: string }).ventaId;
       if (!ventaToEdit && nuevaVentaId && onCreated) {
         onCreated(nuevaVentaId);
       }
@@ -579,6 +619,15 @@ export default function SaleModal({
                       </button>
                     )}
                   </div>
+                  {selectedClientId && !ventaToEdit && saldoCliente > 0 && (
+                    <div className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                      <Wallet className="size-3.5" />
+                      Saldo a favor: Q
+                      {saldoCliente.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 <div className="md:col-span-3 space-y-1.5">
@@ -820,6 +869,100 @@ export default function SaleModal({
                       </button>
                     </div>
                   </div>
+
+                  {!ventaToEdit && saldoCliente > 0 && (
+                    <div className="space-y-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = !usarPreventa;
+                          setUsarPreventa(next);
+                          setMontoPreventa(
+                            next
+                              ? Math.min(saldoCliente, totalVenta).toFixed(2)
+                              : "",
+                          );
+                        }}
+                        className={cn(
+                          "flex h-10 w-full items-center justify-between gap-2 rounded-lg border px-3 text-sm font-bold transition-all cursor-pointer",
+                          usarPreventa
+                            ? "border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                            : "border-border bg-background hover:bg-muted/50",
+                        )}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Wallet className="size-4 shrink-0" />
+                          Aplicar saldo a favor
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Disp. Q
+                          {saldoCliente.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </button>
+
+                      {usarPreventa && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <label className="text-[10px] font-bold uppercase text-muted-foreground">
+                            Monto a aplicar (máx Q
+                            {Math.min(saldoCliente, totalVenta).toLocaleString(
+                              "en-US",
+                              { minimumFractionDigits: 2 },
+                            )}
+                            )
+                          </label>
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            min="0.01"
+                            step="0.01"
+                            value={montoPreventa}
+                            onChange={(e) => {
+                              const max = Math.min(saldoCliente, totalVenta);
+                              if (e.target.value === "") {
+                                setMontoPreventa("");
+                                return;
+                              }
+                              let val = Number(e.target.value);
+                              if (val > max) val = max;
+                              if (val < 0) val = 0;
+                              setMontoPreventa(String(val));
+                            }}
+                            onKeyDown={(e) => {
+                              if (["-", "e", "E", "+"].includes(e.key))
+                                e.preventDefault();
+                            }}
+                            className="h-10 w-full rounded-lg border border-emerald-500/40 bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/30"
+                          />
+                          {(() => {
+                            const aplicado = Math.min(
+                              Number(montoPreventa) || 0,
+                              saldoCliente,
+                              totalVenta,
+                            );
+                            const restante = Math.max(totalVenta - aplicado, 0);
+                            return (
+                              <div className="flex items-center justify-between rounded-lg border bg-background p-2.5 text-xs">
+                                <span className="font-bold text-emerald-600">
+                                  Preventa: Q
+                                  {aplicado.toLocaleString("en-US", {
+                                    minimumFractionDigits: 2,
+                                  })}
+                                </span>
+                                <span className="font-bold text-foreground">
+                                  Restante ({metodoPago}): Q
+                                  {restante.toLocaleString("en-US", {
+                                    minimumFractionDigits: 2,
+                                  })}
+                                </span>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {metodoPago === "Transferencia" && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">

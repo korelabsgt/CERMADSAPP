@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { getVentas, createVenta, getCatalogos, updateVenta, updateVentaPago, updateVentaTipoVenta, getVendedores } from "./actions";
-import { VentaFormValues, PagoVentaValues } from "./zod";
+import { getVentas, createVenta, crearVentaConPagos, getCatalogos, updateVenta, updateVentaPago, updateVentaTipoVenta, getVendedores } from "./actions";
+import { VentaFormValues, PagoVentaValues, VentaConPagosValues } from "./zod";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 
@@ -73,6 +73,31 @@ export function useCreateVenta() {
       } else {
         queryClient.invalidateQueries({ queryKey: ["ventas"] });
         queryClient.invalidateQueries({ queryKey: ["catalogos"] });
+        Swal.fire({
+          toast: true,
+          position: "top",
+          icon: "success",
+          title: "Venta creada correctamente",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    },
+  });
+}
+
+export function useCrearVentaConPagos() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: VentaConPagosValues) => crearVentaConPagos(data),
+    onSuccess: (res) => {
+      if (res?.error) {
+        Swal.fire({ icon: "error", title: "Error", text: res.error });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["ventas"] });
+        queryClient.invalidateQueries({ queryKey: ["catalogos"] });
+        queryClient.invalidateQueries({ queryKey: ["creditos"] });
+        queryClient.invalidateQueries({ queryKey: ["preventas"] });
         Swal.fire({
           toast: true,
           position: "top",

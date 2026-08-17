@@ -156,9 +156,19 @@ export default function DashboardLaArada() {
       desc: "Gestión de Ventas y despachos.",
       color: "border-orange-500/20 bg-orange-500/5 dark:border-orange-500/40",
       className: canViewContabilidad
-        ? "md:col-span-2 md:row-span-1"
-        : "md:col-span-2 md:row-span-2",
+        ? "md:col-span-3 md:row-span-1"
+        : "md:col-span-6 md:row-span-1",
       allowedRoles: ["super", "admin", "ventas", "user"],
+    },
+    {
+      id: "contabilidad",
+      href: "/cermadsa/laarada/contabilidad",
+      label: "Contabilidad",
+      iconKey: "hrxrggwa",
+      desc: "Gestión financiera y reportes.",
+      color: "border-indigo-500/20 bg-indigo-500/5 dark:border-indigo-500/40",
+      className: "md:col-span-3 md:row-span-1",
+      allowedRoles: ["super", "admin", "contabilidad", "tec-admin"],
     },
     {
       id: "clientes",
@@ -167,7 +177,17 @@ export default function DashboardLaArada() {
       iconKey: "xkrgmuxd",
       desc: "Cartera de clientes.",
       color: "border-blue-500/20 bg-blue-500/5 dark:border-blue-500/40",
-      className: "md:col-span-1 md:row-span-1",
+      className: "md:col-span-2 md:row-span-1",
+      allowedRoles: ["super", "admin", "ventas"],
+    },
+    {
+      id: "preventas",
+      href: "/cermadsa/laarada/preventas",
+      label: "Preventas",
+      iconKey: "rhmhivzj",
+      desc: "Saldo a favor y anticipos.",
+      color: "border-sky-500/20 bg-sky-500/5 dark:border-sky-500/40",
+      className: "md:col-span-2 md:row-span-1",
       allowedRoles: ["super", "admin", "ventas"],
     },
     {
@@ -177,18 +197,8 @@ export default function DashboardLaArada() {
       iconKey: "qrhmobcu",
       desc: "Gestión de cobros.",
       color: "border-red-500/20 bg-red-500/5 dark:border-red-500/40",
-      className: "md:col-span-1 md:row-span-1",
-      allowedRoles: ["super", "admin", "ventas", "tec-admin", "contabilidad"],
-    },
-    {
-      id: "contabilidad",
-      href: "/cermadsa/laarada/contabilidad",
-      label: "Contabilidad",
-      iconKey: "hrxrggwa",
-      desc: "Gestión financiera y reportes.",
-      color: "border-indigo-500/20 bg-indigo-500/5 dark:border-indigo-500/40",
       className: "md:col-span-2 md:row-span-1",
-      allowedRoles: ["super", "admin", "contabilidad", "tec-admin"],
+      allowedRoles: ["super", "admin", "ventas", "tec-admin", "contabilidad"],
     },
     {
       id: "productos",
@@ -197,7 +207,7 @@ export default function DashboardLaArada() {
       iconKey: "gbzbfgyf",
       desc: "Inventario.",
       color: "border-amber-500/20 bg-amber-500/5 dark:border-amber-500/40",
-      className: "md:col-span-2 md:row-span-1",
+      className: "md:col-span-6 md:row-span-1",
       allowedRoles: ["super", "admin", "ventas", "tec-admin", "contabilidad"],
     },
     /* {
@@ -239,7 +249,7 @@ export default function DashboardLaArada() {
           </header>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[120px] md:auto-rows-[200px]">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 auto-rows-[120px] md:auto-rows-[200px]">
           {menuItems.filter(item => item.allowedRoles.includes(effectiveRole)).map((item, idx) => (
             <Skeleton
               key={idx}
@@ -250,7 +260,7 @@ export default function DashboardLaArada() {
             />
           ))}
           {canViewStats && (
-            <Skeleton className="rounded-4xl md:rounded-[2.5rem] md:col-span-2" />
+            <Skeleton className="rounded-4xl md:rounded-[2.5rem] md:col-span-6" />
           )}
         </div>
       </div>
@@ -356,7 +366,7 @@ export default function DashboardLaArada() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[150px] md:auto-rows-[200px]"
+          className="grid grid-cols-1 md:grid-cols-6 gap-4 auto-rows-[150px] md:auto-rows-[200px]"
         >
               {visibleMenuItems.map((item) => (
                 <motion.div
@@ -406,7 +416,6 @@ export default function DashboardLaArada() {
                     <div
                       className={cn(
                         "p-3 md:p-3 bg-gray-50 rounded-xl md:rounded-2xl border border-border/50 shadow-sm",
-                        item.id === "ventas" && !canViewContabilidad && "md:p-5",
                       )}
                     >
                       <AnimatedIcon
@@ -414,9 +423,6 @@ export default function DashboardLaArada() {
                         target={`#card-${item.id}`}
                         className={cn(
                           "w-14 h-14 md:w-20 md:h-20",
-                          item.id === "ventas" &&
-                            !canViewContabilidad &&
-                            "w-16 h-16 md:w-24 md:h-24",
                         )}
                       />
                     </div>
@@ -440,7 +446,7 @@ export default function DashboardLaArada() {
                 <motion.div
                   id="stats-widget"
                   whileHover={{ scale: 1.02, y: -5 }}
-                  className="group relative overflow-hidden rounded-4xl md:rounded-[2.5rem] border border-purple-500/20 bg-purple-500/5 dark:border-purple-500/40 flex shadow-sm cursor-pointer md:col-span-2"
+                  className="group relative overflow-hidden rounded-4xl md:rounded-[2.5rem] border border-purple-500/20 bg-purple-500/5 dark:border-purple-500/40 flex shadow-sm cursor-pointer md:col-span-6"
                 >
                   <Link href="/cermadsa/laarada/estadisticas" className="w-full h-full flex flex-row items-center justify-start gap-4 md:gap-6 p-4 md:p-6 outline-none relative z-10">
                     <div className="relative z-10 shrink-0">

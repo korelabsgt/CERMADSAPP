@@ -1041,12 +1041,12 @@ export default function DetalleCreditoModal({
                     </button>
                   </div>
 
-                  <div className="rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-sm">
+                  <div className="rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">
                     <div className="overflow-x-auto overscroll-x-contain">
                   <table className="w-full min-w-[50rem] text-xs md:text-sm text-left">
-                    <thead className="border-b border-zinc-200 bg-zinc-50 font-bold text-zinc-500">
+                    <thead className="border-b border-zinc-200 bg-zinc-50 font-bold text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300">
                       <tr>
-                        <th className="sticky left-0 z-20 bg-zinc-50 px-4 py-3 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)]">
+                        <th className="sticky left-0 z-20 bg-zinc-50 px-4 py-3 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-800/60">
                           Venta
                         </th>
                         <th className="px-4 py-3">Fecha</th>
@@ -1057,12 +1057,12 @@ export default function DetalleCreditoModal({
                         <th className="px-4 py-3 w-14" />
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100">
+                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
                       {ventasReporte.length === 0 ? (
                         <tr>
                           <td
                             colSpan={7}
-                            className="px-4 py-8 text-center font-bold text-zinc-500"
+                            className="px-4 py-8 text-center font-bold text-zinc-500 dark:text-zinc-400"
                           >
                             {busquedaReporte.trim()
                               ? "No se encontró esa venta."
@@ -1089,9 +1089,9 @@ export default function DetalleCreditoModal({
                             <tr
                               key={venta.id}
                               onClick={() => irAAbonarVenta(venta)}
-                              className="cursor-pointer transition-colors hover:bg-zinc-50/80"
+                              className="cursor-pointer transition-colors hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40"
                             >
-                              <td className="sticky left-0 z-10 bg-white px-4 py-3 font-mono font-bold text-orange-500 whitespace-nowrap shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)]">
+                              <td className="sticky left-0 z-10 bg-white px-4 py-3 font-mono font-bold text-orange-500 whitespace-nowrap shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-900 dark:text-orange-400">
                                 #{ventaCodigo}
                               </td>
                               <td className="px-4 py-3 font-bold whitespace-nowrap">
@@ -1109,8 +1109,8 @@ export default function DetalleCreditoModal({
                                   className={cn(
                                     "inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold transition-opacity hover:opacity-80 cursor-pointer whitespace-nowrap",
                                     dteFel
-                                      ? "border border-sky-200 bg-sky-100 text-sky-600"
-                                      : "border border-amber-200 bg-amber-100 text-amber-700",
+                                      ? "border border-sky-200 bg-sky-100 text-sky-600 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-400"
+                                      : "border border-amber-200 bg-amber-100 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-400",
                                   )}
                                 >
                                   {comprobanteLabel}
@@ -1119,10 +1119,10 @@ export default function DetalleCreditoModal({
                               <td className="px-4 py-3 text-right font-semibold tabular-nums whitespace-nowrap">
                                 Q{formatMoney(deuda)}
                               </td>
-                              <td className="px-4 py-3 text-right font-semibold tabular-nums text-emerald-600 whitespace-nowrap">
+                              <td className="px-4 py-3 text-right font-semibold tabular-nums text-emerald-600 whitespace-nowrap dark:text-emerald-400">
                                 Q{formatMoney(abonosTotal)}
                               </td>
-                              <td className="px-4 py-3 text-right font-black tabular-nums text-red-500 whitespace-nowrap">
+                              <td className="px-4 py-3 text-right font-black tabular-nums text-red-500 whitespace-nowrap dark:text-red-400">
                                 Q{formatMoney(saldo)}
                               </td>
                               <td className="px-4 py-3 text-right whitespace-nowrap">
@@ -1132,7 +1132,7 @@ export default function DetalleCreditoModal({
                                     e.stopPropagation();
                                     irAAbonarVenta(venta);
                                   }}
-                                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 transition-colors hover:bg-red-100 hover:text-red-600 cursor-pointer"
+                                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 transition-colors hover:bg-red-100 hover:text-red-600 cursor-pointer dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-red-950 dark:hover:text-red-400"
                                   aria-label={
                                     puedeAbonar
                                       ? `Abonar venta #${ventaCodigo}`
@@ -1148,9 +1148,9 @@ export default function DetalleCreditoModal({
                       )}
                     </tbody>
                     {ventasReporte.length > 0 ? (
-                      <tfoot className="border-t border-zinc-200 bg-zinc-50 font-black text-[10px]">
+                      <tfoot className="border-t border-zinc-200 bg-zinc-50 font-black text-[10px] dark:border-zinc-700 dark:bg-zinc-800/60">
                         <tr>
-                          <td className="sticky left-0 z-10 bg-zinc-50 px-4 py-3 text-zinc-500 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)]">
+                          <td className="sticky left-0 z-10 bg-zinc-50 px-4 py-3 text-zinc-500 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-800/60 dark:text-zinc-400">
                             Totales
                           </td>
                           <td colSpan={2} className="px-4 py-3" />
@@ -1163,7 +1163,7 @@ export default function DetalleCreditoModal({
                               ),
                             )}
                           </td>
-                          <td className="px-4 py-3 text-right tabular-nums text-sm text-emerald-600">
+                          <td className="px-4 py-3 text-right tabular-nums text-sm text-emerald-600 dark:text-emerald-400">
                             Q
                             {formatMoney(
                               ventasReporte.reduce(
@@ -1172,7 +1172,7 @@ export default function DetalleCreditoModal({
                               ),
                             )}
                           </td>
-                          <td className="px-4 py-3 text-right tabular-nums text-sm text-red-500">
+                          <td className="px-4 py-3 text-right tabular-nums text-sm text-red-500 dark:text-red-400">
                             Q
                             {formatMoney(
                               ventasReporte.reduce((sum, v) => {
@@ -1225,7 +1225,7 @@ export default function DetalleCreditoModal({
                             pageSizeReporte === "all" ||
                             safeCurrentPageReporte === 1
                           }
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border-2 border-celeste-trifinio text-foreground transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border-2 border-celeste-trifinio text-foreground transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer dark:hover:bg-zinc-800"
                           aria-label="Página anterior"
                         >
                           <ChevronLeft className="size-4" />
@@ -1247,7 +1247,7 @@ export default function DetalleCreditoModal({
                             safeCurrentPageReporte === totalPagesReporte ||
                             totalPagesReporte === 0
                           }
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border-2 border-celeste-trifinio text-foreground transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border-2 border-celeste-trifinio text-foreground transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer dark:hover:bg-zinc-800"
                           aria-label="Página siguiente"
                         >
                           <ChevronRight className="size-4" />
@@ -1325,9 +1325,9 @@ export default function DetalleCreditoModal({
                       return (
                         <div
                           key={venta.id}
-                          className="overflow-hidden rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-sm"
+                          className="overflow-hidden rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                         >
-                          <div className="flex flex-col gap-4 border-b border-zinc-200 bg-zinc-50/80 p-5">
+                          <div className="flex flex-col gap-4 border-b border-zinc-200 bg-zinc-50/80 p-5 dark:border-zinc-700 dark:bg-zinc-800/60">
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
                                 <p className="text-lg font-bold text-foreground">
@@ -1530,7 +1530,7 @@ export default function DetalleCreditoModal({
 
                               {saldoPendiente > 0 ? (
                                 <div className="flex items-center gap-2">
-                                  <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border-2 border-celeste-trifinio bg-white px-4 py-2.5 focus-within:ring-2 focus-within:ring-celeste-trifinio/30">
+                                  <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border-2 border-celeste-trifinio bg-transparent px-4 py-2.5 focus-within:ring-2 focus-within:ring-celeste-trifinio/30 dark:bg-zinc-900/50">
                                     <span className="text-sm font-black text-muted-foreground">
                                       Q
                                     </span>
@@ -1597,12 +1597,12 @@ export default function DetalleCreditoModal({
                                 </div>
                               ) : null}
 
-                              <div className="rounded-xl border border-zinc-200 bg-white shadow-sm">
+                              <div className="rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
                                 <div className="overflow-x-auto overscroll-x-contain">
                                   <table className="w-full min-w-[32rem] text-left text-xs md:text-sm">
-                                    <thead className="border-b border-zinc-200 bg-zinc-50 font-bold text-zinc-500">
+                                    <thead className="border-b border-zinc-200 bg-zinc-50 font-bold text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300">
                                       <tr>
-                                        <th className="sticky left-0 z-30 w-[5.5rem] min-w-[5.5rem] max-w-[5.5rem] bg-zinc-50 px-2 py-3 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-800">
+                                        <th className="sticky left-0 z-30 w-[5.5rem] min-w-[5.5rem] max-w-[5.5rem] bg-zinc-50 px-2 py-3 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-800/60">
                                           Abono
                                         </th>
                                         <th className="w-[9.5rem] px-2 py-3">
@@ -1614,13 +1614,13 @@ export default function DetalleCreditoModal({
                                         </th>
                                       </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-zinc-100">
+                                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
                                       {!venta.ven_pagos ||
                                       venta.ven_pagos.length === 0 ? (
                                         <tr>
                                           <td
                                             colSpan={4}
-                                            className="px-4 py-8 text-center text-sm font-bold text-zinc-500"
+                                            className="px-4 py-8 text-center text-sm font-bold text-zinc-500 dark:text-zinc-400"
                                           >
                                             No hay abonos registrados.
                                           </td>
@@ -1629,7 +1629,7 @@ export default function DetalleCreditoModal({
                                         <tr>
                                           <td
                                             colSpan={4}
-                                            className="px-4 py-8 text-center text-sm font-bold text-zinc-500"
+                                            className="px-4 py-8 text-center text-sm font-bold text-zinc-500 dark:text-zinc-400"
                                           >
                                             No se encontró ese abono.
                                           </td>
@@ -1638,9 +1638,9 @@ export default function DetalleCreditoModal({
                                         pagosFiltrados.map((pago, idx) => (
                                           <tr
                                             key={pago.id || idx}
-                                            className="group transition-colors hover:bg-zinc-50"
+                                            className="group transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
                                           >
-                                            <td className="sticky left-0 z-20 w-[5.5rem] min-w-[5.5rem] max-w-[5.5rem] whitespace-nowrap bg-white px-2 py-3 font-mono text-[11px] font-bold text-orange-500 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] group-hover:bg-zinc-50 dark:bg-zinc-900 dark:group-hover:bg-zinc-800">
+                                            <td className="sticky left-0 z-20 w-[5.5rem] min-w-[5.5rem] max-w-[5.5rem] whitespace-nowrap bg-white px-2 py-3 font-mono text-[11px] font-bold text-orange-500 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] group-hover:bg-zinc-50 dark:bg-zinc-900 dark:text-orange-400 dark:group-hover:bg-zinc-800">
                                               #{getPagoLabel(pago)}
                                             </td>
                                             <td className="whitespace-nowrap px-2 py-3 text-[11px] font-bold">

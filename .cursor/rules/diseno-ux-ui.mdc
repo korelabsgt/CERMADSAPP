@@ -11,6 +11,31 @@ alwaysApply: true
 - Tema oscuro: fondo de página `zinc-900`; cards y componentes en un tono de gris más claro (`zinc-800`).
 - La UI usa tonos zinc para fondos de superficie.
 
+## Teléfono y escritorio (layouts distintos)
+
+Toda interfaz tiene **dos layouts**: teléfono (`< md`) y escritorio (`md+`). No se deja el de teléfono en pantalla grande ni el de escritorio ilegible en el teléfono.
+
+- **Teléfono:** datos de arriba hacia abajo, un campo por línea (etiqueta y valor). Imagen a ancho completo. Botones `w-full`. Tablas → tarjetas apiladas.
+- **Escritorio:** aprovechar el ancho: imagen a la izquierda, campos en grid/filas, montos a ambos lados, tablas reales.
+- Prohibido un único `flex-col` para ambos tamaños.
+
+## Menús flotantes (dropdown, popover, select)
+
+Superficies flotantes de Radix/shadcn (`DropdownMenuContent`, `PopoverContent`, `SelectContent` en `components/ui/`):
+
+- **Fondo sólido obligatorio** — nunca transparente ni `bg-transparent`.
+- Claro: `bg-zinc-100 text-foreground border border-zinc-200`.
+- Oscuro: `dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-700`.
+- Hover/focus en ítems: `focus:bg-zinc-200 dark:focus:bg-zinc-700` (no `bg-accent` ni `bg-popover` sin token).
+- `rounded-xl`, `shadow-none` (borde define el contorno).
+- En `globals.css`, `--color-popover` y `--color-card` deben existir en `@theme inline` si se usa `bg-popover`.
+
+### Prohibido en menús flotantes
+
+- Fondos transparentes o semitransparentes que dejen ver la tabla o contenido detrás.
+- `bg-popover` sin token en tema (produce transparencia).
+- Solo borde sin fondo sólido.
+
 ## Botones (UI general)
 
 Siempre `cursor-pointer`; deshabilitado: `cursor-not-allowed` y `disabled:opacity-50`.

@@ -13,6 +13,7 @@ import imageCompression from "browser-image-compression";
 import ImageEditorModal from "./ImageEditorModal";
 import { Loader2, Upload, Camera, Trash2, X } from "lucide-react";
 import { useUser } from "@/components/(base)/providers/UserProvider";
+import { cn } from "@/lib/utils";
 import Swal from "sweetalert2";
 
 const swalTheme = () => {
@@ -71,6 +72,8 @@ interface ImageUploaderProps {
   previewClassName?: string;
   /** Clase CSS para el contenedor drop zone */
   className?: string;
+  /** En móvil: Subir + Cámara. En escritorio: solo Subir */
+  camaraSoloEnMobile?: boolean;
 }
 
 const ImageUploader = forwardRef<ImageUploaderHandle, ImageUploaderProps>(
@@ -89,10 +92,13 @@ const ImageUploader = forwardRef<ImageUploaderHandle, ImageUploaderProps>(
       onEstadoChange,
       previewClassName,
       className,
+      camaraSoloEnMobile = false,
     },
     ref,
   ) {
     const supabase = createClient();
+    const supabaseRef = useRef(supabase);
+    supabaseRef.current = supabase;
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [loadingPreview, setLoadingPreview] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -119,42 +125,149 @@ const ImageUploader = forwardRef<ImageUploaderHandle, ImageUploaderProps>(
       clientY: number;
       bgX: number;
       bgY: number;
-    }>({ show: false, clientX: 0, clientY: 0, bgX: 0, bgY: 0 });
+      bgW: number;
+      bgH: number;
+    }>({
+      show: false,
+      clientX: 0,
+      clientY: 0,
+      bgX: 0,
+      bgY: 0,
+      bgW: 0,
+      bgH: 0,
+    });
     const MAGNIFIER_SIZE = 250;
     const ZOOM_LEVEL = 2.5;
 
+    const getImageRenderMetrics = (img: HTMLImageElement) => {
+      const rect = img.getBoundingClientRect();
+      const natW = img.naturalWidth;
+      const natH = img.naturalHeight;
+      if (!natW || !natH) return null;
+
+      const scale = Math.min(rect.width / natW, rect.height / natH);
+      const renderedW = natW * scale;
+      const renderedH = natH * scale;
+      const offsetX = (rect.width - renderedW) / 2;
+      const offsetY = (rect.height - renderedH) / 2;
+
+      return { rect, renderedW, renderedH, offsetX, offsetY };
+    };
+
     const updateMagnifier = (clientX: number, clientY: number) => {
-      if (!imgRef.current) return;
-      const rect = imgRef.current.getBoundingClientRect();
-      const x = clientX - rect.left;
-      const y = clientY - rect.top;
-      // Ocultar la lupa cerca de la esquina superior derecha para no tapar
-      // el botón de eliminar y poder pulsarlo.
-      if (x > rect.width - 72 && y < 72) {
+      const img = imgRef.current;
+      if (!img) return;
+
+      const metrics = getImageRenderMetrics(img);
+      if (!metrics) return;
+
+      const { rect, renderedW, renderedH, offsetX, offsetY } = metrics;
+      const containerX = clientX - rect.left;
+      const containerY = clientY - rect.top;
+      const x = containerX - offsetX;
+      const y = containerY - offsetY;
+
+      if (x < 0 || y < 0 || x > renderedW || y > renderedH) {
         setMagnifier((m) => ({ ...m, show: false }));
         return;
       }
-      const bgX = (x / rect.width) * 100;
-      const bgY = (y / rect.height) * 100;
-      setMagnifier({ show: true, clientX, clientY, bgX, bgY });
-    };
 
-    // Generar signed URL para el preview
-    useEffect(() => {
-      if (!currentImagePath) {
-        setPreviewUrl(null);
+      if (containerX > rect.width - 48 && containerY < 48) {
+        setMagnifier((m) => ({ ...m, show: false }));
         return;
       }
 
+      const bgW = renderedW * ZOOM_LEVEL;
+      const bgH = renderedH * ZOOM_LEVEL;
+      const minBgX = MAGNIFIER_SIZE - bgW;
+      const minBgY = MAGNIFIER_SIZE - bgH;
+      const bgX = Math.min(
+        0,
+        Math.max(minBgX, -(x * ZOOM_LEVEL - MAGNIFIER_SIZE / 2)),
+      );
+      const bgY = Math.min(
+        0,
+        Math.max(minBgY, -(y * ZOOM_LEVEL - MAGNIFIER_SIZE / 2)),
+      );
+
+      setMagnifier({
+        show: true,
+        clientX,
+        clientY,
+        bgX,
+        bgY,
+        bgW,
+        bgH,
+      });
+    };
+
+    // Generar signed URL / blob para el preview
+    useEffect(() => {
+      if (!currentImagePath) {
+        setPreviewUrl(null);
+        setLoadingPreview(false);
+        return;
+      }
+
+      let cancelled = false;
+      let objectUrl: string | null = null;
+      const raw = currentImagePath.trim();
+
+      if (/^https?:\/\//i.test(raw)) {
+        setPreviewUrl(raw);
+        setLoadingPreview(false);
+        return;
+      }
+
+      const objectPath = raw
+        .replace(/^\/+/, "")
+        .replace(new RegExp(`^${bucketName}/`), "");
+
       setLoadingPreview(true);
-      supabase.storage
-        .from(bucketName)
-        .createSignedUrl(currentImagePath, signedUrlExpiresIn)
-        .then(({ data, error }) => {
-          setPreviewUrl(error ? null : (data?.signedUrl ?? null));
+
+      const load = async () => {
+        const signed = await supabaseRef.current.storage
+          .from(bucketName)
+          .createSignedUrl(objectPath, signedUrlExpiresIn);
+
+        if (cancelled) return;
+
+        if (!signed.error && signed.data?.signedUrl) {
+          setPreviewUrl((prev) => {
+            if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+            return signed.data!.signedUrl;
+          });
           setLoadingPreview(false);
-        });
-    }, [currentImagePath, bucketName, supabase, signedUrlExpiresIn]);
+          return;
+        }
+
+        const downloaded = await supabaseRef.current.storage
+          .from(bucketName)
+          .download(objectPath);
+
+        if (cancelled) return;
+
+        if (!downloaded.error && downloaded.data) {
+          objectUrl = URL.createObjectURL(downloaded.data);
+          setPreviewUrl((prev) => {
+            if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+            return objectUrl!;
+          });
+          setLoadingPreview(false);
+          return;
+        }
+
+        setPreviewUrl((prev) => (prev?.startsWith("blob:") ? prev : null));
+        setLoadingPreview(false);
+      };
+
+      void load();
+
+      return () => {
+        cancelled = true;
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+      };
+    }, [currentImagePath, bucketName, signedUrlExpiresIn]);
 
     const isProcessing = uploading || deleting || disabled;
     const canAcceptDrop =
@@ -497,12 +610,14 @@ const ImageUploader = forwardRef<ImageUploaderHandle, ImageUploaderProps>(
 
         if (uploadError) throw uploadError;
 
-        // 4. Borrar anterior si existe
-        if (currentImagePath) {
+        const localPreview = URL.createObjectURL(jpegBlob);
+        setPreviewUrl(localPreview);
+        setLoadingPreview(false);
+
+        if (currentImagePath && currentImagePath !== newPath) {
           await supabase.storage.from(bucketName).remove([currentImagePath]);
         }
 
-        // 5. Callback
         await onUploadSuccess(newPath);
       } catch (err: any) {
         console.error("Error al subir imagen:", err);
@@ -533,9 +648,16 @@ const ImageUploader = forwardRef<ImageUploaderHandle, ImageUploaderProps>(
       try {
         await supabase.storage.from(bucketName).remove([currentImagePath]);
         await onDeleteSuccess();
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error al eliminar:", err);
-        await showUploadError(err?.message || "No se pudo eliminar la imagen.");
+        try {
+          await onDeleteSuccess();
+        } catch {
+          /* ignore */
+        }
+        const message =
+          err instanceof Error ? err.message : "No se pudo eliminar la imagen.";
+        await showUploadError(message);
       } finally {
         setDeleting(false);
       }
@@ -634,13 +756,9 @@ const ImageUploader = forwardRef<ImageUploaderHandle, ImageUploaderProps>(
                 <Loader2 className="animate-spin text-gray-400" size={28} />
               </div>
             ) : previewUrl ? (
-              <div
-                className={
-                  botonesExternos ? "w-full" : "w-full flex justify-center"
-                }
-              >
+              <div className="w-full">
                 <div
-                  className={`group relative ${botonesExternos ? "w-full cursor-zoom-in" : "inline-block cursor-zoom-in"}`}
+                  className="group relative w-full cursor-zoom-in"
                   onMouseMove={(e) => updateMagnifier(e.clientX, e.clientY)}
                   onMouseLeave={() =>
                     setMagnifier((m) => ({ ...m, show: false }))
@@ -664,8 +782,8 @@ const ImageUploader = forwardRef<ImageUploaderHandle, ImageUploaderProps>(
                     }}
                     className={
                       botonesExternos
-                        ? "w-full max-h-[calc(95vh-11rem)] object-contain select-none block"
-                        : `${previewClassName || "max-h-[460px]"} object-contain rounded-lg shadow-md select-none`
+                        ? "block w-full max-h-[calc(95vh-11rem)] object-contain select-none"
+                        : `block w-full ${previewClassName || "max-h-[460px]"} object-contain rounded-lg shadow-md select-none`
                     }
                     draggable={false}
                   />
@@ -697,9 +815,26 @@ const ImageUploader = forwardRef<ImageUploaderHandle, ImageUploaderProps>(
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-red-500 italic">
-                No se pudo cargar la vista previa.
-              </p>
+              <div className="flex w-full flex-col items-center gap-3 py-2">
+                <p className="text-sm text-red-500 italic">
+                  No se pudo cargar la vista previa.
+                </p>
+                {tienePermisoSubir && (
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isProcessing}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-red-100 px-3 text-xs font-bold text-red-600 transition-colors hover:bg-red-200 cursor-pointer dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {deleting ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
+                    Quitar y volver a subir
+                  </button>
+                )}
+              </div>
             )
           ) : null}
 
@@ -715,7 +850,12 @@ const ImageUploader = forwardRef<ImageUploaderHandle, ImageUploaderProps>(
         )}
 
           {!botonesExternos && (
-            <div className="flex gap-2 flex-wrap justify-center">
+            <div
+              className={cn(
+                "flex gap-2 justify-center",
+                camaraSoloEnMobile ? "w-full sm:w-auto" : "flex-wrap",
+              )}
+            >
               {tienePermisoSubir && (
                 <>
                   {!currentImagePath && (
@@ -724,21 +864,27 @@ const ImageUploader = forwardRef<ImageUploaderHandle, ImageUploaderProps>(
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isProcessing}
-                        className="flex items-center justify-center gap-2 h-10 px-3 rounded-lg border border-blue-500 bg-blue-500/10 text-sm font-bold text-blue-600 dark:text-blue-300 transition-all cursor-pointer hover:bg-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className={cn(
+                          "flex items-center justify-center gap-2 h-10 px-3 rounded-lg border border-blue-500 bg-blue-500/10 text-sm font-bold text-blue-600 dark:text-blue-300 transition-all cursor-pointer hover:bg-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed",
+                          camaraSoloEnMobile && "min-w-0 flex-1 sm:flex-none",
+                        )}
                       >
                         {uploading ? (
                           <Loader2 size={14} className="animate-spin" />
                         ) : (
                           <Upload size={14} />
                         )}
-                        Galería
+                        {camaraSoloEnMobile ? "Subir" : "Galería"}
                       </button>
 
                       <button
                         type="button"
                         onClick={() => cameraInputRef.current?.click()}
                         disabled={isProcessing}
-                        className="flex items-center justify-center gap-2 h-10 px-3 rounded-lg border border-blue-500 bg-blue-500/10 text-sm font-bold text-blue-600 dark:text-blue-300 transition-all cursor-pointer hover:bg-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className={cn(
+                          "flex items-center justify-center gap-2 h-10 px-3 rounded-lg border border-blue-500 bg-blue-500/10 text-sm font-bold text-blue-600 dark:text-blue-300 transition-all cursor-pointer hover:bg-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed",
+                          camaraSoloEnMobile && "min-w-0 flex-1 sm:hidden",
+                        )}
                       >
                         <Camera size={14} />
                         Cámara
@@ -811,8 +957,8 @@ const ImageUploader = forwardRef<ImageUploaderHandle, ImageUploaderProps>(
                 left: magnifier.clientX - MAGNIFIER_SIZE / 2,
                 top: magnifier.clientY - MAGNIFIER_SIZE / 2,
                 backgroundImage: `url(${previewUrl})`,
-                backgroundSize: `${(imgRef.current?.width || 300) * ZOOM_LEVEL}px ${(imgRef.current?.height || 400) * ZOOM_LEVEL}px`,
-                backgroundPosition: `${magnifier.bgX}% ${magnifier.bgY}%`,
+                backgroundSize: `${magnifier.bgW}px ${magnifier.bgH}px`,
+                backgroundPosition: `${magnifier.bgX}px ${magnifier.bgY}px`,
                 backgroundRepeat: "no-repeat",
               }}
             />,

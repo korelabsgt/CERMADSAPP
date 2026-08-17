@@ -1,9 +1,20 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { VentaSchema, VentaFormValues, PagoVentaSchema, PagoVentaValues } from "./zod";
+import {
+  VentaSchema,
+  VentaFormValues,
+  PagoVentaSchema,
+  PagoVentaValues,
+  VentaConPagosSchema,
+  VentaConPagosValues,
+} from "./zod";
 import { revalidatePath } from "next/cache";
 import { requireAuthenticatedCajero } from "@/utils/require-authenticated-cajero";
+import {
+  getSaldoCliente,
+  aplicarPreventa,
+} from "@/components/(LaArada)/preventas/lib/actions";
 
 const BUCKET_COMPROBANTES = "ventas-comprobantes";
 
@@ -231,6 +242,159 @@ export async function createVenta(data: VentaFormValues) {
 
   revalidatePath("/cermadsa/laarada/pedidos");
   return { success: true, ventaId: venta.id };
+}
+
+export async function crearVentaConPagos(data: VentaConPagosValues) {
+  const result = VentaConPagosSchema.safeParse(data);
+  if (!result.success) return { error: "Datos inválidos" };
+
+  const supabase = await createClient();
+  const { detalles, pago, ...cabecera } = result.data;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Sesión expirada" };
+
+  const cajero = await requireAuthenticatedCajero(supabase);
+  if (!cajero.ok) return { error: cajero.error };
+
+  const EPS = 0.001;
+  const total = Number(cabecera.total);
+
+  let preventaMonto = Math.max(0, Number(pago.preventa_monto) || 0);
+  if (preventaMonto > total) preventaMonto = total;
+  if (preventaMonto > 0) {
+    const saldo = await getSaldoCliente(cabecera.cliente_id);
+    if (preventaMonto > saldo + EPS) {
+      return { error: "El saldo a favor no cubre el monto indicado." };
+    }
+  }
+
+  const efectivoMonto = Math.max(0, Number(pago.efectivo_monto) || 0);
+  const transferenciaMonto = Math.max(0, Number(pago.transferencia_monto) || 0);
+  if (preventaMonto + efectivoMonto + transferenciaMonto > total + EPS) {
+    return { error: "El pago supera el total de la venta." };
+  }
+
+  const restanteCredito = Number(
+    (total - preventaMonto - efectivoMonto - transferenciaMonto).toFixed(2),
+  );
+  const esCredito = restanteCredito > EPS;
+  const tipoVenta = esCredito ? "Crédito" : "Contado";
+
+  const usaTransferencia = transferenciaMonto > 0;
+  const metodoVenta = usaTransferencia
+    ? "Transferencia"
+    : efectivoMonto > 0
+      ? "Efectivo"
+      : null;
+
+  const { data: venta, error: errVenta } = await supabase
+    .from("ven_ventas")
+    .insert({
+      cliente_id: cabecera.cliente_id,
+      tipo_venta: tipoVenta,
+      tipo_comprobante: cabecera.tipo_comprobante,
+      total,
+      fecha_entrega: cabecera.fecha_entrega || new Date().toISOString(),
+      observaciones: cabecera.observaciones,
+      usuario_id: user.id,
+      estado: "Pendiente",
+      metodo_pago: metodoVenta,
+      numero_boleta: usaTransferencia ? pago.numero_boleta || null : null,
+      banco: usaTransferencia ? pago.banco || null : null,
+      fecha_transferencia:
+        usaTransferencia && pago.fecha_transferencia
+          ? pago.fecha_transferencia
+          : null,
+      img_comprobante_url: usaTransferencia
+        ? pago.img_comprobante_url || null
+        : null,
+    })
+    .select()
+    .single();
+
+  if (errVenta || !venta)
+    return { error: errVenta?.message || "Error al crear la venta" };
+
+  const detallesFinal = detalles.map((d) => ({
+    venta_id: venta.id,
+    producto_id: d.producto_id,
+    cantidad: d.cantidad,
+    precio_aplicado: d.precio_unitario,
+    subtotal: d.subtotal,
+  }));
+
+  const { error: errDetalle } = await supabase
+    .from("ven_detalle")
+    .insert(detallesFinal);
+  if (errDetalle) return { error: "Error al guardar productos" };
+
+  for (const item of detalles) {
+    const { data: prodData } = await supabase
+      .from("inv_productos")
+      .select("stock_actual")
+      .eq("id", item.producto_id)
+      .single();
+
+    if (prodData) {
+      const nuevoStock = prodData.stock_actual - item.cantidad;
+      const { error: errStock } = await supabase
+        .from("inv_productos")
+        .update({ stock_actual: nuevoStock })
+        .eq("id", item.producto_id);
+      if (errStock)
+        console.error(
+          `Error descontando stock del producto ${item.producto_id}`,
+        );
+    }
+  }
+
+  if (efectivoMonto > 0) {
+    const { error: errPago } = await supabase.from("ven_pagos").insert({
+      venta_id: venta.id,
+      monto: efectivoMonto,
+      metodo_pago: "Efectivo",
+      usuario_id: cajero.userId,
+    });
+    if (errPago) return { error: "Error al registrar el pago en efectivo." };
+  }
+
+  if (transferenciaMonto > 0) {
+    const { error: errPago } = await supabase.from("ven_pagos").insert({
+      venta_id: venta.id,
+      monto: transferenciaMonto,
+      metodo_pago: "Transferencia",
+      usuario_id: cajero.userId,
+    });
+    if (errPago)
+      return { error: "Error al registrar el pago por transferencia." };
+  }
+
+  let reciboPreventa: unknown = null;
+  if (preventaMonto > 0) {
+    const aplic = await aplicarPreventa({
+      cliente_id: cabecera.cliente_id,
+      venta_id: venta.id,
+      monto: preventaMonto,
+    });
+    if ("error" in aplic) return { error: aplic.error };
+    reciboPreventa = aplic.recibo;
+
+    await supabase.from("ven_pagos").insert({
+      venta_id: venta.id,
+      monto: preventaMonto,
+      metodo_pago: "Preventa",
+      usuario_id: cajero.userId,
+    });
+  }
+
+  revalidatePath("/cermadsa/laarada/pedidos");
+  revalidatePath("/cermadsa/laarada/creditos");
+  revalidatePath("/cermadsa/laarada/preventas", "layout");
+
+  return { success: true, ventaId: venta.id, reciboPreventa };
 }
 
 export async function updateVenta(id: string, data: VentaFormValues) {

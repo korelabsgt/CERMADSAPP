@@ -11,11 +11,16 @@ import {
 } from "lucide-react";
 import { useVentas, useVendedores } from "./lib/hooks";
 import SaleModal from "./modals/sale-modal";
+import SaleWizard from "./modals/sale-wizard";
 import ReceiptModal from "./modals/receipt-modal";
 import StatusModal from "./modals/status-modal";
 import ListView from "./components/ventas-view";
 import MonitorView from "./components/monitor-view";
-
+import ReciboPreventaPrint from "@/components/(LaArada)/preventas/components/recibo-preventa-print";
+import {
+  readLaAradaSimulatedRole,
+  writeLaAradaSimulatedRole,
+} from "@/components/(LaArada)/lib/simulated-role";
 import { useUser } from "@/components/(base)/providers/UserProvider";
 
 export default function ListadoVentas() {
@@ -29,6 +34,10 @@ export default function ListadoVentas() {
   const [selectedVendedor, setSelectedVendedor] = useState<string>("all");
 
   useEffect(() => {
+    if (realRole === "super") {
+      setEffectiveRole(readLaAradaSimulatedRole(realRole));
+      return;
+    }
     if (realRole) setEffectiveRole(realRole);
   }, [realRole]);
 
@@ -113,7 +122,11 @@ export default function ListadoVentas() {
               </span>
               <select
                 value={effectiveRole}
-                onChange={(e) => setEffectiveRole(e.target.value)}
+                onChange={(e) => {
+                  const role = e.target.value;
+                  setEffectiveRole(role);
+                  writeLaAradaSimulatedRole(role);
+                }}
                 className="bg-transparent text-xs font-bold text-yellow-700 outline-none cursor-pointer w-full sm:w-auto"
               >
                 <option value="super">SUPER (Real)</option>
@@ -220,12 +233,20 @@ export default function ListadoVentas() {
         />
       )}
 
-      {canManage && (
+      {canManage && ventaToEdit && (
         <SaleModal
           isOpen={isSaleModalOpen}
           onClose={() => setIsSaleModalOpen(false)}
           ventaToEdit={ventaToEdit}
           effectiveRole={effectiveRole}
+          onCreated={(ventaId) => setSelectedVentaId(ventaId)}
+        />
+      )}
+
+      {canManage && !ventaToEdit && (
+        <SaleWizard
+          isOpen={isSaleModalOpen}
+          onClose={() => setIsSaleModalOpen(false)}
           onCreated={(ventaId) => setSelectedVentaId(ventaId)}
         />
       )}
@@ -241,6 +262,8 @@ export default function ListadoVentas() {
         onClose={() => setStatusVenta(null)}
         venta={statusVenta}
       />
+
+      <ReciboPreventaPrint />
     </div>
   );
 }

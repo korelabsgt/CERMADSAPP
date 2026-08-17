@@ -603,7 +603,8 @@ export default function ReceiptModal({
           <div className="shrink-0 flex flex-col gap-3 p-4 border-b bg-muted/50">
             <div className="flex justify-between items-center">
               <h2 className="text-base font-bold flex items-center gap-2">
-                <FileText className="size-5" /> Generar Recibo o FEL
+                <FileText className="size-5" />
+                {isReadonly ? "Recibo de venta" : "Generar Recibo o FEL"}
               </h2>
               <button
                 onClick={onClose}
@@ -633,17 +634,19 @@ export default function ReceiptModal({
                       <Receipt className="size-4" /> Recibo
                     </button>
                   )}
-                  <button
-                    onClick={() => setTab("factura")}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer ${
-                      tab === "factura"
-                        ? "bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/40 shadow"
-                        : "bg-background border border-sky-500 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950"
-                    }`}
-                  >
-                    <FileCheck2 className="size-4" /> Factura Electrónica
-                    (INFILE)
-                  </button>
+                  {!isReadonly && (
+                    <button
+                      onClick={() => setTab("factura")}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                        tab === "factura"
+                          ? "bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/40 shadow"
+                          : "bg-background border border-sky-500 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950"
+                      }`}
+                    >
+                      <FileCheck2 className="size-4" /> Factura Electrónica
+                      (INFILE)
+                    </button>
+                  )}
                 </>
               )}
             </div>
