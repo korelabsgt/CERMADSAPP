@@ -18,6 +18,7 @@ import {
   ResponsiveContainer,
   LabelList,
 } from "recharts";
+import type { LabelProps } from "recharts";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
@@ -52,19 +53,20 @@ function formatChartPeakAmount(val: number) {
 }
 
 function createBarAmountLabel(maxValue: number, minValue: number) {
-  return function BarAmountLabel({
-    x,
-    y,
-    width,
-    value,
-  }: {
-    x?: number;
-    y?: number;
-    width?: number;
-    value?: number;
-  }) {
-    if (x == null || y == null || width == null || !value || value <= 0) {
-      return null;
+  return function BarAmountLabel(props: LabelProps) {
+    const x = Number(props.x);
+    const y = Number(props.y);
+    const width = Number(props.width);
+    const value = Number(props.value);
+
+    if (
+      Number.isNaN(x) ||
+      Number.isNaN(y) ||
+      Number.isNaN(width) ||
+      !value ||
+      value <= 0
+    ) {
+      return <g />;
     }
 
     const isMax = value === maxValue;
@@ -547,7 +549,7 @@ export default function Stats({ orders }: { orders: any[] }) {
           </div>
 
           {!isAnual && (
-            <div className="flex flex-col divide-y divide-border/40 border-b border-border/40 bg-background">
+            <div className="grid grid-cols-3 divide-x divide-border/40 border-b border-border/40 bg-background">
               <MobilePromStat
                 label="Prom. activo"
                 hint="c/ventas"
@@ -905,7 +907,6 @@ export default function Stats({ orders }: { orders: any[] }) {
                     })}
                     <LabelList
                       dataKey="total"
-                      isAnimationActive={false}
                       content={barAmountLabel}
                     />
                   </Bar>
@@ -963,16 +964,14 @@ function MobilePromStat({
   hint?: string;
 }) {
   return (
-    <div className="px-4 py-2.5 flex flex-col gap-1">
-      <div className="flex items-baseline gap-1.5 min-w-0 flex-wrap">
-        <p className="text-[11px] uppercase tracking-wide text-muted-foreground leading-tight">
-          {label}
-        </p>
-        {hint && (
-          <p className="text-[10px] text-muted-foreground/70 leading-tight">{hint}</p>
-        )}
-      </div>
-      <div className="text-sm font-bold tabular-nums leading-tight">{value}</div>
+    <div className="min-w-0 px-2 py-3 text-center">
+      <p className="text-[10px] uppercase tracking-wide text-muted-foreground leading-tight">
+        {label}
+      </p>
+      <div className="text-xs font-bold tabular-nums mt-1 leading-tight">{value}</div>
+      {hint && (
+        <p className="text-[10px] text-muted-foreground/70 mt-0.5">{hint}</p>
+      )}
     </div>
   );
 }
@@ -987,18 +986,18 @@ function MobileMetricRow({
   hint?: string;
 }) {
   return (
-    <div className="px-4 py-2.5 flex flex-col gap-1">
-      <div className="min-w-0">
-        <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold leading-tight">
+    <div className="flex items-center justify-between gap-3 px-4 py-3">
+      <div className="min-w-0 flex-1">
+        <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold leading-tight">
           {label}
         </p>
         {hint && (
-          <p className="text-[11px] text-muted-foreground/80 mt-0.5 leading-snug">
+          <p className="text-xs text-muted-foreground/80 mt-0.5 leading-snug">
             {hint}
           </p>
         )}
       </div>
-      <div className="text-sm font-bold tabular-nums leading-tight">{value}</div>
+      <div className="text-xs font-bold tabular-nums shrink-0 text-right">{value}</div>
     </div>
   );
 }
@@ -1032,31 +1031,37 @@ function WeatherSummaryBanner({
   const Icon = getWeatherIcon(summary.dominantCode);
 
   return (
-    <div className="border-t border-border/40 px-4 md:px-5 py-3 md:py-4 bg-gradient-to-r from-sky-500/[0.07] via-sky-500/[0.03] to-transparent">
-      <p className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground font-medium leading-tight min-w-0">
-        <Icon className="size-3.5 shrink-0 text-sky-500" strokeWidth={2.2} />
-        <span className="truncate">Clima del mes · {LA_ARADA_LOCATION}</span>
-      </p>
-      <p className="text-2xl font-bold tabular-nums mt-1">
-        {summary.avgTempMin.toFixed(0)}° – {summary.avgTempMax.toFixed(0)}°C
-      </p>
-      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1.5 text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">
-          {summary.dominantLabel}
-        </span>
-        {summary.totalPrecipitation > 0 && (
-          <span className="flex items-center gap-1">
-            <Droplets className="size-3.5 text-sky-500" />
-            {summary.totalPrecipitation.toFixed(1)} mm
+    <div className="border-t border-border/40 px-4 md:px-5 py-4 md:py-4 bg-gradient-to-r from-sky-500/[0.07] via-sky-500/[0.03] to-transparent flex items-center gap-3.5 md:items-start md:gap-5">
+      <div className="size-12 md:size-14 shrink-0 rounded-2xl bg-sky-500/15 border border-sky-500/20 flex items-center justify-center">
+        <Icon className="size-6 md:size-7 text-sky-500" strokeWidth={2} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground font-medium leading-tight">
+          Clima del mes · {LA_ARADA_LOCATION}
+        </p>
+        <p className="text-2xl font-bold tabular-nums mt-1 leading-none">
+          {summary.avgTempMin.toFixed(0)}° – {summary.avgTempMax.toFixed(0)}°C
+        </p>
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-2 text-xs md:text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">
+            {summary.dominantLabel}
           </span>
-        )}
-        <span>
-          {summary.daysWithData >= daysInMonth
-            ? "Mes completo"
-            : `${summary.daysWithData}/${daysInMonth} días`}
-        </span>
+          {summary.totalPrecipitation > 0 && (
+            <span className="flex items-center gap-1">
+              <Droplets className="size-3.5 text-sky-500" />
+              {summary.totalPrecipitation.toFixed(1)} mm
+            </span>
+          )}
+          <span>
+            {summary.daysWithData >= daysInMonth
+              ? "Mes completo"
+              : `${summary.daysWithData}/${daysInMonth} días`}
+          </span>
+        </div>
         {summary.rainyDays > 0 && (
-          <span>{summary.rainyDays} días lluviosos</span>
+          <p className="text-xs text-muted-foreground mt-1">
+            {summary.rainyDays} días lluviosos
+          </p>
         )}
       </div>
     </div>
