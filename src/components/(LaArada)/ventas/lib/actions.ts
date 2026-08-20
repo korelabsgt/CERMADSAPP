@@ -59,31 +59,42 @@ export async function getCatalogos() {
 
 export async function getVentas(vendedorId?: string) {
   const supabase = await createClient();
-  let query = supabase
-    .from("ven_ventas")
-    .select(
-      `
-      *,
-      ven_clientes (nombre, nit),
-      dte_documentos (id, estado, uuid_infile, serie, numero, id_receptor, nombre_receptor, gran_total, fecha_certificacion),
-      ven_detalle (
-        id,
-        producto_id,
-        cantidad,
-        precio_aplicado,
-        subtotal,
-        inv_productos (nombre, medida)
-      )
-    `,
-    );
+  const PAGE_SIZE = 1000;
+  const ventas: any[] = [];
 
-  if (vendedorId && vendedorId !== "all") {
-    query = query.eq("usuario_id", vendedorId);
+  for (let from = 0; ; from += PAGE_SIZE) {
+    let query = supabase
+      .from("ven_ventas")
+      .select(
+        `
+        *,
+        ven_clientes (nombre, nit),
+        dte_documentos (id, estado, uuid_infile, serie, numero, id_receptor, nombre_receptor, gran_total, fecha_certificacion),
+        ven_detalle (
+          id,
+          producto_id,
+          cantidad,
+          precio_aplicado,
+          subtotal,
+          inv_productos (nombre, medida)
+        )
+      `,
+      );
+
+    if (vendedorId && vendedorId !== "all") {
+      query = query.eq("usuario_id", vendedorId);
+    }
+
+    const { data, error } = await query
+      .order("created_at", { ascending: false })
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) throw new Error(error.message);
+
+    if (!data || data.length === 0) break;
+    ventas.push(...data);
+    if (data.length < PAGE_SIZE) break;
   }
-
-  const { data: ventas, error } = await query.order("created_at", { ascending: false });
-
-  if (error) throw new Error(error.message);
 
   const usuarioIds = Array.from(
     new Set(ventas.map((v) => v.usuario_id).filter(Boolean)),

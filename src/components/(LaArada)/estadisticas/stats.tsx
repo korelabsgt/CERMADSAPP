@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, type ReactNode, type RefObject } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, type ReactNode, type RefObject } from "react";
 import {
   TrendingUp,
   CalendarDays,
@@ -16,8 +16,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceLine,
-  Label,
+  LabelList,
 } from "recharts";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -30,6 +29,7 @@ import {
   type WeatherSummary,
 } from "@/lib/weather";
 import { EstadisticasDataSkeleton } from "./estadisticas-skeleton";
+import { PeriodPicker, toPeriodKey } from "./PeriodPicker";
 
 const CHART_COLORS = {
   default: "#4D9FE8",
@@ -39,13 +39,84 @@ const CHART_COLORS = {
 const BAR_SIZE_MONTHLY = 32;
 const BAR_SIZE_ANNUAL = 48;
 const BAR_Z_INDEX = 500;
-const REF_LINE_Z_INDEX = 100;
 
 function formatCompactMoney(val: number) {
   const n = Number(val || 0);
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k`;
   return n.toFixed(0);
+}
+
+function formatChartPeakAmount(val: number) {
+  return formatCompactMoney(val).replace(/k$/i, "K").replace(/m$/i, "M");
+}
+
+function createBarAmountLabel(maxValue: number, minValue: number) {
+  return function BarAmountLabel({
+    x,
+    y,
+    width,
+    value,
+  }: {
+    x?: number;
+    y?: number;
+    width?: number;
+    value?: number;
+  }) {
+    if (x == null || y == null || width == null || !value || value <= 0) {
+      return null;
+    }
+
+    const isMax = value === maxValue;
+    const isMin = value === minValue && minValue !== maxValue;
+    const color = isMax
+      ? CHART_COLORS.max
+      : isMin
+        ? CHART_COLORS.min
+        : CHART_COLORS.default;
+    const amount = formatChartPeakAmount(value);
+    const centerX = x + width / 2;
+
+    if (isMax || isMin) {
+      return (
+        <g>
+          <text
+            x={centerX}
+            y={y - 16}
+            textAnchor="middle"
+            fill={color}
+            fontSize={9}
+            fontWeight={900}
+          >
+            {isMax ? "MÁX" : "MÍN"}
+          </text>
+          <text
+            x={centerX}
+            y={y - 4}
+            textAnchor="middle"
+            fill={color}
+            fontSize={10}
+            fontWeight={900}
+          >
+            {amount}
+          </text>
+        </g>
+      );
+    }
+
+    return (
+      <text
+        x={centerX}
+        y={y - 5}
+        textAnchor="middle"
+        fill={color}
+        fontSize={9}
+        fontWeight={900}
+      >
+        {amount}
+      </text>
+    );
+  };
 }
 
 const MONTHS = [
@@ -156,18 +227,28 @@ export default function Stats({ orders }: { orders: any[] }) {
     );
   }, [orders]);
 
-  const availableYears = useMemo(() => {
-    if (validOrders.length === 0) return [currentYearVal];
-    const years = new Set<number>([currentYearVal]);
+  const periodsWithData = useMemo(() => {
+    const periods = new Set<string>();
     validOrders.forEach((item: any) => {
-      let d = item.fecha_entrega || item.created_at;
-      if (d) {
-        if (typeof d === "string" && d.length === 10) d += "T12:00:00";
-        years.add(new Date(d).getFullYear());
+      let dateString = item.fecha_entrega || item.created_at;
+      if (!dateString) return;
+      if (typeof dateString === "string" && dateString.length === 10) {
+        dateString = `${dateString}T12:00:00`;
       }
+      const date = new Date(dateString);
+      periods.add(toPeriodKey(date.getFullYear(), date.getMonth()));
     });
+    return periods;
+  }, [validOrders]);
+
+  const yearsWithData = useMemo(() => {
+    const years = new Set<number>();
+    periodsWithData.forEach((key) => {
+      years.add(Number(key.split("-")[0]));
+    });
+    if (years.size === 0) years.add(currentYearVal);
     return Array.from(years).sort((a, b) => b - a);
-  }, [validOrders, currentYearVal]);
+  }, [periodsWithData, currentYearVal]);
 
   const chartInfo = useMemo(() => {
     if (validOrders.length === 0)
@@ -291,21 +372,30 @@ export default function Stats({ orders }: { orders: any[] }) {
     const validMonths = processedMonths.filter((m) => m.isValid);
     if (validMonths.length === 0) return null;
 
-    const highestMonth = validMonths.reduce(
-      (prev, curr) => (curr.total > prev.total ? curr : prev),
-      validMonths[0],
-    );
-    const lowestMonth = validMonths.reduce(
-      (prev, curr) => (curr.total < prev.total ? curr : prev),
-      validMonths[0],
-    );
+    const monthsWithSales = validMonths.filter((m) => m.total > 0);
+
+    const highestMonth =
+      monthsWithSales.length > 0
+        ? monthsWithSales.reduce(
+            (prev, curr) => (curr.total > prev.total ? curr : prev),
+            monthsWithSales[0],
+          )
+        : null;
+
+    const lowestMonth =
+      monthsWithSales.length > 0
+        ? monthsWithSales.reduce(
+            (prev, curr) => (curr.total < prev.total ? curr : prev),
+            monthsWithSales[0],
+          )
+        : null;
 
     const totalYear = yearData.reduce(
       (acc, curr) => acc + Number(curr.total || 0),
       0,
     );
-    const divisor = selectedYear === currentYearVal ? currentMonthIdx + 1 : 12;
-    const avgYear = totalYear / divisor;
+    const avgYear =
+      monthsWithSales.length > 0 ? totalYear / monthsWithSales.length : 0;
 
     const chartData = processedMonths.map((m) => ({
       name: m.shortName,
@@ -358,17 +448,46 @@ export default function Stats({ orders }: { orders: any[] }) {
 
   const barSize = isAnual ? BAR_SIZE_ANNUAL : BAR_SIZE_MONTHLY;
 
+  const barAmountLabel = useMemo(
+    () => createBarAmountLabel(currentMax, currentMin),
+    [currentMax, currentMin],
+  );
+
+  const chartYMax = useMemo(() => {
+    const peak = Math.max(currentMax, currentAvg, 1);
+    const padded = peak * 1.1;
+    if (padded <= 10_000) return Math.ceil(padded / 2_000) * 2_000;
+    if (padded <= 50_000) return Math.ceil(padded / 5_000) * 5_000;
+    if (padded <= 200_000) return Math.ceil(padded / 10_000) * 10_000;
+    return Math.ceil(padded / 50_000) * 50_000;
+  }, [currentMax, currentAvg]);
+
+  const weatherAxisHeight = isAnual ? 28 : 52;
+  const desktopChartHeight = isAnual ? 400 : 430;
+
+  const handleWeatherHover = useCallback(
+    (day: number, x: number, y: number) => {
+      setHoveredWeatherDay(day);
+      setWeatherTooltipPos({ x, y });
+    },
+    [],
+  );
+
+  const handleWeatherLeave = useCallback(() => {
+    setHoveredWeatherDay(null);
+  }, []);
+
   const showDataSkeleton = !isAnual && weatherLoading;
 
   return (
     <div className="w-full flex flex-col gap-3 relative text-foreground animate-in fade-in duration-300">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center shrink-0 gap-2">
-        <div className="flex items-center gap-2 text-orange-500 font-bold uppercase text-xs tracking-widest">
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center shrink-0 gap-2">
+        <div className="flex items-center justify-center sm:justify-start gap-2 text-orange-500 font-bold uppercase text-xs tracking-widest">
           <TrendingUp className="size-3.5 shrink-0" />
           <span>Ingresos y Ventas</span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto">
           <div className="flex items-center bg-background p-0.5 rounded-lg border border-border/50 shadow-sm">
             <button
               onClick={() => setViewMode("mensual")}
@@ -394,32 +513,18 @@ export default function Stats({ orders }: { orders: any[] }) {
             </button>
           </div>
 
-          <div className="flex items-center bg-background rounded-lg border border-border/50 shrink-0 overflow-hidden shadow-sm">
-            {!isAnual && (
-              <select
-                className="bg-transparent font-black uppercase tracking-widest text-xs outline-none cursor-pointer p-2 pr-1.5 border-r border-border/50 hover:bg-muted/50"
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              >
-                {MONTHS.map((month, index) => (
-                  <option key={month} value={index}>
-                    {month}
-                  </option>
-                ))}
-              </select>
-            )}
-            <select
-              className="bg-transparent font-black uppercase tracking-widest text-xs outline-none cursor-pointer p-2 pl-2 hover:bg-muted/50"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-            >
-              {availableYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
+          <PeriodPicker
+            mode={isAnual ? "anual" : "mensual"}
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            periodsWithData={periodsWithData}
+            yearsWithData={yearsWithData}
+            onSelectMonth={(year, month) => {
+              setSelectedYear(year);
+              setSelectedMonth(month);
+            }}
+            onSelectYear={setSelectedYear}
+          />
         </div>
       </div>
 
@@ -442,14 +547,14 @@ export default function Stats({ orders }: { orders: any[] }) {
           </div>
 
           {!isAnual && (
-            <div className="grid grid-cols-3 divide-x divide-border/40 border-b border-border/40 bg-background">
+            <div className="flex flex-col divide-y divide-border/40 border-b border-border/40 bg-background">
               <MobilePromStat
                 label="Prom. activo"
                 hint="c/ventas"
                 value={
                   <CurrencyValue
                     amount={currentAvg}
-                    className="text-orange-500 text-base"
+                    className="text-orange-500"
                   />
                 }
               />
@@ -457,20 +562,14 @@ export default function Stats({ orders }: { orders: any[] }) {
                 label="Prom. mes"
                 hint={`${daysInMonth}d`}
                 value={
-                  <CurrencyValue
-                    amount={monthlyCalendarAvg}
-                    className="text-base"
-                  />
+                  <CurrencyValue amount={monthlyCalendarAvg} />
                 }
               />
               <MobilePromStat
                 label="Prom. anual"
                 hint="/mes"
                 value={
-                  <CurrencyValue
-                    amount={yearlyInfo?.avgYear || 0}
-                    className="text-base"
-                  />
+                  <CurrencyValue amount={yearlyInfo?.avgYear || 0} />
                 }
               />
             </div>
@@ -545,8 +644,8 @@ export default function Stats({ orders }: { orders: any[] }) {
         </div>
 
         {/* Escritorio: grid de 6 columnas */}
-        <div className="hidden md:grid lg:grid-cols-6 divide-x divide-border/40">
-          <div className="col-span-2 px-4 py-3 flex flex-col justify-center gap-3">
+        <div className="hidden md:grid lg:grid-cols-6 divide-x divide-border/40 items-start">
+          <div className="col-span-2 px-4 py-2.5 flex flex-col gap-2">
             <div>
               <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
                 {isAnual
@@ -692,25 +791,51 @@ export default function Stats({ orders }: { orders: any[] }) {
               />
             </div>
 
-            <div className="hidden md:block w-full h-[calc(100vh-22rem)] min-h-[420px] xl:min-h-[480px] xl:h-[calc(100vh-18rem)]">
+            <div className="hidden md:block w-full">
+              {(currentMax > 0 || currentMin > 0 || currentAvg > 0) && (
+                <div className="w-full flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:gap-x-8 mb-2 text-[11px] font-black uppercase tracking-wider text-center">
+                  {currentMax > 0 && (
+                    <span className="text-[#28C07A] inline-flex items-baseline gap-1">
+                      Max:
+                      <CurrencyValue amount={currentMax} />
+                    </span>
+                  )}
+                  {currentMin > 0 && (
+                    <span className="text-[#E85D5D] inline-flex items-baseline gap-1">
+                      Min:
+                      <CurrencyValue amount={currentMin} />
+                    </span>
+                  )}
+                  {currentAvg > 0 && (
+                    <span className="text-[#4D9FE8] inline-flex items-baseline gap-1">
+                      Prom:
+                      <CurrencyValue amount={currentAvg} />
+                    </span>
+                  )}
+                </div>
+              )}
+              <div className="w-full" style={{ height: desktopChartHeight }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={chartDataWithWeather}
                   margin={{
-                    top: 28,
-                    right: 52,
+                    top: 24,
+                    right: 24,
                     left: 8,
-                    bottom: !isAnual ? 72 : 12,
+                    bottom: 8,
                   }}
                   barCategoryGap={!isAnual ? "6%" : "12%"}
                 >
                   <CartesianGrid
                     strokeDasharray="4 4"
-                    vertical={false}
-                    stroke="#88888815"
+                    vertical
+                    horizontal
+                    stroke="#88888828"
                   />
                   <XAxis
                     dataKey="name"
+                    height={weatherAxisHeight}
+                    tickMargin={0}
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
@@ -720,11 +845,8 @@ export default function Stats({ orders }: { orders: any[] }) {
                             <WeatherAxisTick
                               {...props}
                               weatherByDay={weatherByDay}
-                              onHover={(day, x, y) => {
-                                setHoveredWeatherDay(day);
-                                setWeatherTooltipPos({ x, y });
-                              }}
-                              onLeave={() => setHoveredWeatherDay(null)}
+                              onHover={handleWeatherHover}
+                              onLeave={handleWeatherLeave}
                             />
                           )
                         : { fill: "#888", fontWeight: "900", dy: 10 }
@@ -735,7 +857,7 @@ export default function Stats({ orders }: { orders: any[] }) {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
-                    domain={[0, "auto"]}
+                    domain={[0, chartYMax]}
                     tick={{ fill: "#888", fontWeight: "900" }}
                     tickFormatter={(val) =>
                       `Q${Number(val).toLocaleString("en-US")}`
@@ -753,67 +875,13 @@ export default function Stats({ orders }: { orders: any[] }) {
                       />
                     }
                   />
-                  {currentMax > 0 && (
-                    <ReferenceLine
-                      y={currentMax}
-                      stroke={CHART_COLORS.max}
-                      strokeDasharray="5 5"
-                      strokeWidth={2}
-                      zIndex={REF_LINE_Z_INDEX}
-                    >
-                      <Label
-                        value="MÁX"
-                        position="insideTopRight"
-                        fill={CHART_COLORS.max}
-                        fontSize={11}
-                        fontWeight="900"
-                        offset={8}
-                      />
-                    </ReferenceLine>
-                  )}
-                  {currentMin > 0 && (
-                    <ReferenceLine
-                      y={currentMin}
-                      stroke={CHART_COLORS.min}
-                      strokeDasharray="5 5"
-                      strokeWidth={2}
-                      zIndex={REF_LINE_Z_INDEX}
-                    >
-                      <Label
-                        value="MÍN"
-                        position="insideBottomRight"
-                        fill={CHART_COLORS.min}
-                        fontSize={10}
-                        fontWeight="900"
-                        dy={-10}
-                      />
-                    </ReferenceLine>
-                  )}
-                  {currentAvg > 0 && (
-                    <ReferenceLine
-                      y={currentAvg}
-                      stroke={CHART_COLORS.default}
-                      strokeDasharray="6 4"
-                      strokeWidth={2}
-                      strokeOpacity={0.7}
-                      zIndex={REF_LINE_Z_INDEX}
-                    >
-                      <Label
-                        value="PROM"
-                        position="insideBottomRight"
-                        fill={CHART_COLORS.default}
-                        fontSize={9}
-                        fontWeight="900"
-                        dy={-4}
-                      />
-                    </ReferenceLine>
-                  )}
                   <Bar
                     dataKey="total"
                     radius={[4, 4, 0, 0]}
                     maxBarSize={barSize}
                     minPointSize={2}
-                    animationDuration={800}
+                    isAnimationActive={false}
+                    activeBar={false}
                     zIndex={BAR_Z_INDEX}
                   >
                     {chartDataWithWeather.map((entry, index) => {
@@ -835,23 +903,26 @@ export default function Stats({ orders }: { orders: any[] }) {
                         />
                       );
                     })}
+                    <LabelList
+                      dataKey="total"
+                      isAnimationActive={false}
+                      content={barAmountLabel}
+                    />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+              </div>
             </div>
           </>
         )}
         {!isAnual && !weatherLoading && weatherHasForecast === false && (
-          <p className="text-[10px] text-muted-foreground/70 mt-2 pt-1 text-center shrink-0 italic">
+          <ChartClimateFooter variant="empty">
             Aún no hay pronóstico de clima disponible para {MONTHS[selectedMonth]}{" "}
             {selectedYear}
-          </p>
+          </ChartClimateFooter>
         )}
         {!isAnual && !weatherLoading && weatherHasForecast && (
-          <p className="text-[10px] text-muted-foreground/70 mt-2 pt-1 text-center shrink-0">
-            Clima en {LA_ARADA_LOCATION} · atenuado = pronóstico · más atenuado =
-            pronóstico extendido
-          </p>
+          <ChartClimateFooter />
         )}
       </div>
         </>
@@ -892,16 +963,16 @@ function MobilePromStat({
   hint?: string;
 }) {
   return (
-    <div className="min-w-0 px-2.5 py-3.5 text-center">
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground leading-tight">
-        {label}
-      </p>
-      <div className="font-bold tabular-nums text-base mt-1.5 leading-tight">
-        {value}
+    <div className="px-4 py-2.5 flex flex-col gap-1">
+      <div className="flex items-baseline gap-1.5 min-w-0 flex-wrap">
+        <p className="text-[11px] uppercase tracking-wide text-muted-foreground leading-tight">
+          {label}
+        </p>
+        {hint && (
+          <p className="text-[10px] text-muted-foreground/70 leading-tight">{hint}</p>
+        )}
       </div>
-      {hint && (
-        <p className="text-[11px] text-muted-foreground/70 mt-1">{hint}</p>
-      )}
+      <div className="text-sm font-bold tabular-nums leading-tight">{value}</div>
     </div>
   );
 }
@@ -916,20 +987,18 @@ function MobileMetricRow({
   hint?: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 px-4 py-3.5">
-      <div className="min-w-0 flex-1">
-        <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+    <div className="px-4 py-2.5 flex flex-col gap-1">
+      <div className="min-w-0">
+        <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold leading-tight">
           {label}
         </p>
         {hint && (
-          <p className="text-sm text-muted-foreground/80 mt-1 leading-snug">
+          <p className="text-[11px] text-muted-foreground/80 mt-0.5 leading-snug">
             {hint}
           </p>
         )}
       </div>
-      <div className="text-lg font-bold tabular-nums shrink-0 text-right">
-        {value}
-      </div>
+      <div className="text-sm font-bold tabular-nums leading-tight">{value}</div>
     </div>
   );
 }
@@ -945,21 +1014,17 @@ function WeatherSummaryBanner({
 }) {
   if (!summary || !hasForecast) {
     return (
-      <div className="border-t border-border/40 px-4 md:px-5 py-4 md:py-4 bg-muted/20 flex items-center gap-3 md:gap-4">
-        <div className="size-12 md:size-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground text-xl md:text-xl shrink-0">
-          —
-        </div>
-        <div className="min-w-0">
-          <p className="text-xs md:text-xs uppercase tracking-wider text-muted-foreground font-medium leading-tight">
-            Clima · {LA_ARADA_LOCATION}
-          </p>
-          <p className="text-base md:text-base font-semibold text-muted-foreground mt-1">
-            Sin pronóstico disponible
-          </p>
-          <p className="text-sm md:text-sm text-muted-foreground/70 mt-0.5 italic">
-            Aún no hay pronóstico para este mes
-          </p>
-        </div>
+      <div className="border-t border-border/40 px-4 md:px-5 py-3 md:py-4 bg-muted/20">
+        <p className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground font-medium leading-tight">
+          <span className="text-muted-foreground">—</span>
+          Clima · {LA_ARADA_LOCATION}
+        </p>
+        <p className="text-base font-semibold text-muted-foreground mt-1">
+          Sin pronóstico disponible
+        </p>
+        <p className="text-sm text-muted-foreground/70 mt-0.5 italic">
+          Aún no hay pronóstico para este mes
+        </p>
       </div>
     );
   }
@@ -967,36 +1032,32 @@ function WeatherSummaryBanner({
   const Icon = getWeatherIcon(summary.dominantCode);
 
   return (
-    <div className="border-t border-border/40 px-4 md:px-5 py-4 md:py-4 bg-gradient-to-r from-sky-500/[0.07] via-sky-500/[0.03] to-transparent flex items-center gap-3.5 md:gap-5">
-      <div className="size-12 md:size-14 shrink-0 rounded-2xl bg-sky-500/15 border border-sky-500/20 flex items-center justify-center">
-        <Icon className="size-6 md:size-7 text-sky-500" strokeWidth={2} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs md:text-xs uppercase tracking-wider text-muted-foreground font-medium leading-tight">
-          Clima del mes · {LA_ARADA_LOCATION}
-        </p>
-        <p className="text-2xl md:text-2xl font-bold tabular-nums mt-1">
-          {summary.avgTempMin.toFixed(0)}° – {summary.avgTempMax.toFixed(0)}°C
-        </p>
-        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-2 text-sm md:text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">
-            {summary.dominantLabel}
+    <div className="border-t border-border/40 px-4 md:px-5 py-3 md:py-4 bg-gradient-to-r from-sky-500/[0.07] via-sky-500/[0.03] to-transparent">
+      <p className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground font-medium leading-tight min-w-0">
+        <Icon className="size-3.5 shrink-0 text-sky-500" strokeWidth={2.2} />
+        <span className="truncate">Clima del mes · {LA_ARADA_LOCATION}</span>
+      </p>
+      <p className="text-2xl font-bold tabular-nums mt-1">
+        {summary.avgTempMin.toFixed(0)}° – {summary.avgTempMax.toFixed(0)}°C
+      </p>
+      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1.5 text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">
+          {summary.dominantLabel}
+        </span>
+        {summary.totalPrecipitation > 0 && (
+          <span className="flex items-center gap-1">
+            <Droplets className="size-3.5 text-sky-500" />
+            {summary.totalPrecipitation.toFixed(1)} mm
           </span>
-          {summary.totalPrecipitation > 0 && (
-            <span className="flex items-center gap-1">
-              <Droplets className="size-3.5 text-sky-500" />
-              {summary.totalPrecipitation.toFixed(1)} mm
-            </span>
-          )}
-          <span>
-            {summary.daysWithData >= daysInMonth
-              ? "Mes completo"
-              : `${summary.daysWithData}/${daysInMonth} días`}
-          </span>
-          {summary.rainyDays > 0 && (
-            <span>{summary.rainyDays} días lluviosos</span>
-          )}
-        </div>
+        )}
+        <span>
+          {summary.daysWithData >= daysInMonth
+            ? "Mes completo"
+            : `${summary.daysWithData}/${daysInMonth} días`}
+        </span>
+        {summary.rainyDays > 0 && (
+          <span>{summary.rainyDays} días lluviosos</span>
+        )}
       </div>
     </div>
   );
@@ -1012,13 +1073,15 @@ function MetricCell({
   hint?: string;
 }) {
   return (
-    <div className="px-4 py-3 min-w-0 flex flex-col justify-center">
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium truncate">
+    <div className="px-3 py-2 min-w-0 flex flex-col">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium truncate leading-tight">
         {label}
       </p>
-      <div className="text-lg font-bold tabular-nums mt-1 truncate">{value}</div>
+      <div className="text-base font-bold tabular-nums mt-0.5 truncate leading-tight">
+        {value}
+      </div>
       {hint && (
-        <p className="text-[10px] text-muted-foreground/80 mt-0.5 truncate">
+        <p className="text-[10px] text-muted-foreground/80 mt-0.5 truncate leading-tight">
           {hint}
         </p>
       )}
@@ -1059,17 +1122,17 @@ function MobileBarChart({
   return (
     <div className="space-y-2">
       {max > 0 && (
-        <div className="flex flex-wrap gap-x-3 gap-y-1.5 px-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        <div className="w-full flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 px-1 text-xs font-bold uppercase tracking-wide text-center text-muted-foreground">
           <span className="text-[#28C07A]">
-            Máx Q{formatCompactMoney(max)}
+            Max Q{formatCompactMoney(max)}
           </span>
+          {min > 0 && (
+            <span className="text-[#E85D5D]">Min Q{formatCompactMoney(min)}</span>
+          )}
           {avg > 0 && (
             <span className="text-[#4D9FE8]">
               Prom Q{formatCompactMoney(avg)}
             </span>
-          )}
-          {min > 0 && (
-            <span className="text-[#E85D5D]">Mín Q{formatCompactMoney(min)}</span>
           )}
         </div>
       )}
@@ -1097,18 +1160,18 @@ function MobileBarChart({
                 type="button"
                 onClick={() => onToggleExpand(isExpanded ? null : key)}
                 className={cn(
-                  "w-full flex items-center gap-2.5 py-2.5 px-2 text-left transition-colors duration-200",
+                  "w-full flex items-center gap-2 py-1.5 px-2 text-left transition-colors duration-200",
                   isExpanded ? "bg-muted/60" : "active:bg-muted/40",
                   hasSales && "bg-[#4D9FE8]/8",
                 )}
               >
-                <div className="w-11 shrink-0 text-center leading-tight">
-                  <div className="text-sm font-black text-foreground">
+                <div className="flex items-center gap-1 shrink-0 min-w-10">
+                  <span className="text-sm font-black tabular-nums text-foreground w-5 text-right">
                     {entry.name}
-                  </div>
+                  </span>
                   {!isAnual && weather && (
-                    <div
-                      className="text-lg leading-none mt-0.5"
+                    <span
+                      className="text-sm leading-none"
                       style={{
                         opacity: weather.isExtendedForecast
                           ? 0.45
@@ -1118,15 +1181,15 @@ function MobileBarChart({
                       }}
                     >
                       {getWeatherEmoji(weather.code)}
-                    </div>
+                    </span>
                   )}
                 </div>
 
-                <div className="flex-1 min-w-0 relative h-7 rounded-full bg-muted/50 overflow-hidden">
+                <div className="flex-1 min-w-0 relative h-5 rounded-full bg-muted/50 overflow-hidden">
                   {hasSales && (
                     <div
                       className={cn(
-                        "absolute inset-y-1 left-0 rounded-full transition-all duration-500 ease-out",
+                        "absolute inset-y-0.5 left-0 rounded-full transition-all duration-500 ease-out",
                         isMax
                           ? "bg-[#28C07A]"
                           : isMin
@@ -1220,8 +1283,35 @@ function MobileBarChart({
         })}
       </div>
 
-      <p className="text-xs text-muted-foreground/70 text-center px-2">
-        Toca un día para ver detalle · barras en azul = ingresos
+      <p className="text-xs font-bold text-muted-foreground/70 text-center px-2">
+        Toca para ver el detalle
+      </p>
+    </div>
+  );
+}
+
+function ChartClimateFooter({
+  variant = "default",
+  children,
+}: {
+  variant?: "default" | "empty";
+  children?: ReactNode;
+}) {
+  if (variant === "empty") {
+    return (
+      <div className="mt-2 shrink-0 rounded-lg border border-border/50 bg-muted/30 px-4 py-2.5 text-center">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground italic">
+          {children}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2 shrink-0 rounded-lg border border-sky-500/25 bg-sky-500/[0.08] dark:bg-sky-950/30 px-4 py-2.5 text-center">
+      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-foreground">
+        Clima ·{" "}
+        <span className="text-sky-600 dark:text-sky-400">{LA_ARADA_LOCATION}</span>
       </p>
     </div>
   );
@@ -1248,14 +1338,15 @@ function WeatherAxisTick({
   const ty = Number(y ?? 0);
   const dense = Object.keys(weatherByDay).length > 28;
   const emoji = weather ? getWeatherEmoji(weather.code) : null;
-  const dayFontSize = dense ? 13 : 15;
-  const emojiFontSize = dense ? 22 : 26;
-  const emojiDy = dense ? 26 : 30;
+  const dayFontSize = dense ? 11 : 12;
+  const emojiFontSize = dense ? 16 : 18;
+  const dayDy = 10;
+  const emojiDy = dense ? 34 : 38;
 
   return (
     <g transform={`translate(${tx},${ty})`}>
       <text
-        dy={10}
+        dy={dayDy}
         textAnchor="middle"
         fill="#666"
         fontSize={dayFontSize}
@@ -1281,7 +1372,7 @@ function WeatherAxisTick({
           {emoji}
         </text>
       ) : (
-        <circle cy={28} r={1.5} fill="#555" opacity={0.35} />
+        <circle cy={emojiDy} r={1.5} fill="#555" opacity={0.35} />
       )}
     </g>
   );
