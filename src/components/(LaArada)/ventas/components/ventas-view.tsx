@@ -645,6 +645,9 @@ export default function ListView({
                             <h3 className="font-bold text-foreground text-base uppercase mt-1">
                               {venta.ven_clientes?.nombre}
                             </h3>
+                            <p className="text-xs font-semibold text-muted-foreground">
+                              NIT {venta.ven_clientes?.nit?.trim() || "C/F"}
+                            </p>
 
                             {venta.ven_detalle &&
                               venta.ven_detalle.length > 0 && (

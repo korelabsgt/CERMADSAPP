@@ -32,17 +32,33 @@ type Tab = "recibo" | "factura";
 
 function isConsumidorFinalNit(nit?: string | null): boolean {
   if (!nit?.trim()) return true;
-  const normalized = nit.trim().toUpperCase().replace(/[\s/]/g, "");
-  return normalized === "CF" || normalized === "CONSUMIDORFINAL";
+  const normalized = nit.trim().toUpperCase().replace(/[\s/.\-]/g, "");
+  return (
+    normalized === "CF" ||
+    normalized === "CONSUMIDORFINAL" ||
+    normalized === "CONSUMIDOR"
+  );
+}
+
+function receptorFromCliente(cliente?: {
+  nit?: string | null;
+  nombre?: string | null;
+  email?: string | null;
+} | null) {
+  const nit = cliente?.nit?.trim() ?? "";
+  const esCF = isConsumidorFinalNit(nit);
+  return {
+    nitReceptor: esCF ? "" : nit.toUpperCase(),
+    nombreReceptor: esCF
+      ? "CONSUMIDOR FINAL"
+      : (cliente?.nombre?.trim() || ""),
+    facturaCF: esCF,
+    correoReceptor: cliente?.email?.trim() ?? "",
+  };
 }
 
 function resetReceptorState() {
-  return {
-    nitReceptor: "",
-    nombreReceptor: "CONSUMIDOR FINAL",
-    facturaCF: true,
-    correoReceptor: "",
-  };
+  return receptorFromCliente(null);
 }
 
 /** Epson LX-350 — forma continua 9.5 in (ancho) × 11 in (largo por página). */
@@ -252,6 +268,13 @@ export default function ReceiptModal({
             dte.nombre_receptor ||
               (dteEsCF ? "CONSUMIDOR FINAL" : data?.ven_clientes?.nombre || "CONSUMIDOR FINAL"),
           );
+          setCorreoReceptor(data?.ven_clientes?.email?.trim() ?? "");
+        } else {
+          const fromCliente = receptorFromCliente(data?.ven_clientes);
+          setNitReceptor(fromCliente.nitReceptor);
+          setNombreReceptor(fromCliente.nombreReceptor);
+          setFacturaCF(fromCliente.facturaCF);
+          setCorreoReceptor(fromCliente.correoReceptor);
         }
         setLoading(false);
       });
@@ -273,18 +296,18 @@ export default function ReceiptModal({
       return;
     }
 
-    const clienteNit = venta?.ven_clientes?.nit;
-    const clienteNombre = venta?.ven_clientes?.nombre;
-    if (clienteNit && !isConsumidorFinalNit(clienteNit)) {
-      setNitReceptor(clienteNit);
-    } else {
-      setNitReceptor("");
+    const fromCliente = receptorFromCliente(venta?.ven_clientes);
+    if (!fromCliente.facturaCF) {
+      setNitReceptor(fromCliente.nitReceptor);
+      setNombreReceptor(fromCliente.nombreReceptor);
+      if (fromCliente.correoReceptor) {
+        setCorreoReceptor(fromCliente.correoReceptor);
+      }
+      return;
     }
-    setNombreReceptor(
-      clienteNombre && clienteNit && !isConsumidorFinalNit(clienteNit)
-        ? clienteNombre
-        : "",
-    );
+
+    setNitReceptor("");
+    setNombreReceptor("");
   };
 
   useEffect(() => {
@@ -1817,11 +1840,13 @@ export default function ReceiptModal({
                               <button
                                 onClick={() => {
                                   setInfileResult(null);
-                                  const freshReceptor = resetReceptorState();
-                                  setNitReceptor(freshReceptor.nitReceptor);
-                                  setNombreReceptor(freshReceptor.nombreReceptor);
-                                  setFacturaCF(freshReceptor.facturaCF);
-                                  setCorreoReceptor(freshReceptor.correoReceptor);
+                                  const fromCliente = receptorFromCliente(
+                                    venta?.ven_clientes,
+                                  );
+                                  setNitReceptor(fromCliente.nitReceptor);
+                                  setNombreReceptor(fromCliente.nombreReceptor);
+                                  setFacturaCF(fromCliente.facturaCF);
+                                  setCorreoReceptor(fromCliente.correoReceptor);
                                   setVenta({
                                     ...venta,
                                     dte_documentos: venta.dte_documentos.filter(
