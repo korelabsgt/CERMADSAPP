@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   PreventaMovimiento,
   formatReciboMovimientoLabel,
+  preventaEstaFacturada,
   razonMovimientoLabel,
 } from "../lib/zod";
 import { useEliminarMovimientoPreventa } from "../lib/hooks";
@@ -27,9 +28,10 @@ export default function EliminarConsumo({
 }: EliminarConsumoProps) {
   const { mutateAsync: eliminar, isPending } = useEliminarMovimientoPreventa();
   const esIngreso = mov?.tipo === "ingreso";
+  const facturada = preventaEstaFacturada(mov);
 
   const handleEliminar = async () => {
-    if (!mov) return;
+    if (!mov || facturada) return;
     const res = await eliminar({ movimiento_id: mov.id });
     if ("error" in res) return;
     onClose();
@@ -51,7 +53,7 @@ export default function EliminarConsumo({
           <ModalCancel onClick={onClose} disabled={isPending} />
           <button
             type="button"
-            disabled={isPending || !mov}
+            disabled={isPending || !mov || facturada}
             onClick={handleEliminar}
             className={cn(
               "inline-flex h-11 min-w-0 flex-1 items-center justify-center rounded-xl px-4 text-[10px] font-bold uppercase tracking-widest shadow-none transition-colors cursor-pointer sm:flex-none sm:px-6",
@@ -68,9 +70,11 @@ export default function EliminarConsumo({
       {mov && (
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            {esIngreso
-              ? "Se eliminará este anticipo y se descontará del saldo disponible del cliente."
-              : "Se eliminará este consumo y el monto se devolverá al saldo disponible del cliente."}
+            {facturada
+              ? "No se puede eliminar un anticipo con factura certificada. Anule la factura primero."
+              : esIngreso
+                ? "Se eliminará este anticipo y se descontará del saldo disponible del cliente."
+                : "Se eliminará este consumo y el monto se devolverá al saldo disponible del cliente."}
           </p>
           <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
             <div className="flex items-center justify-between gap-3">

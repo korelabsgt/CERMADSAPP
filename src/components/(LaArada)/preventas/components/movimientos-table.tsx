@@ -1,10 +1,17 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Ban, FileCheck2, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   PreventaMovimiento,
   formatReciboMovimientoLabel,
+  preventaEstaFacturada,
   razonMovimientoLabel,
 } from "../lib/zod";
 import {
@@ -23,13 +30,13 @@ const stickyReciboThClass =
 const stickyReciboTdClass =
   "sticky left-0 z-10 w-[7rem] min-w-[7rem] max-w-[7rem] bg-white px-2 py-3 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-900 group-hover:bg-zinc-50 dark:group-hover:bg-zinc-800";
 
-const colRecibosThClass =
+const colDocumentoThClass =
   "w-[5.5rem] min-w-[5.5rem] px-3 py-3 text-center whitespace-nowrap";
-const colRecibosTdClass = "w-[5.5rem] min-w-[5.5rem] px-3 py-3 text-center";
+const colDocumentoTdClass = "w-[5.5rem] min-w-[5.5rem] px-3 py-3 text-center";
 
-const colEditarThClass =
-  "w-[5rem] min-w-[5rem] px-3 py-3 text-center whitespace-nowrap";
-const colEditarTdClass = "w-[5rem] min-w-[5rem] px-3 py-3 text-center";
+const colAccionesThClass =
+  "w-[3.5rem] min-w-[3.5rem] px-2 py-3 text-center whitespace-nowrap";
+const colAccionesTdClass = "w-[3.5rem] min-w-[3.5rem] px-2 py-3 text-center";
 
 const comprobanteThClass =
   "w-[6.5rem] min-w-[6.5rem] px-3 py-3 text-center whitespace-nowrap";
@@ -45,12 +52,6 @@ const celdaLinkClass =
 
 const celdaLinkVerdeClass =
   "text-xs md:text-sm font-bold whitespace-nowrap text-emerald-600 hover:text-emerald-700 cursor-pointer dark:text-emerald-400 dark:hover:text-emerald-300";
-
-const iconBtnLinkClass =
-  "inline-flex size-9 items-center justify-center cursor-pointer text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300";
-
-const iconBtnDeleteClass =
-  "inline-flex size-9 items-center justify-center cursor-pointer text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300";
 
 function ComprobanteCell({
   mov,
@@ -86,7 +87,30 @@ function ComprobanteCell({
   );
 }
 
-function RecibosCell({ onVerRecibo }: { onVerRecibo: () => void }) {
+function DocumentoCell({
+  mov,
+  onVerRecibo,
+}: {
+  mov: PreventaMovimiento;
+  onVerRecibo: () => void;
+}) {
+  if (mov.tipo === "ingreso" && mov.simulado) {
+    return <span className={cn(celdaTextoClass, "text-muted-foreground")}>—</span>;
+  }
+
+  if (mov.tipo === "ingreso" && preventaEstaFacturada(mov)) {
+    return (
+      <button
+        type="button"
+        onClick={onVerRecibo}
+        className={celdaLinkClass}
+        title={`Factura ${mov.dte?.serie}-${mov.dte?.numero}`}
+      >
+        FEL
+      </button>
+    );
+  }
+
   return (
     <button type="button" onClick={onVerRecibo} className={celdaLinkClass}>
       Ver
@@ -94,62 +118,88 @@ function RecibosCell({ onVerRecibo }: { onVerRecibo: () => void }) {
   );
 }
 
-function EditarCell({
+function AccionesCell({
   mov,
   canEliminar,
   onEditarCarga,
+  onCertificarFactura,
+  onAnularFactura,
   onEliminarMovimiento,
 }: {
   mov: PreventaMovimiento;
   canEliminar: boolean;
   onEditarCarga: (mov: PreventaMovimiento) => void;
+  onCertificarFactura: (mov: PreventaMovimiento) => void;
+  onAnularFactura: (mov: PreventaMovimiento) => void;
   onEliminarMovimiento: (mov: PreventaMovimiento) => void;
 }) {
   if (mov.simulado) {
     return <span className={cn(celdaTextoClass, "text-muted-foreground")}>—</span>;
   }
 
-  if (mov.tipo === "ingreso") {
-    return (
-      <div className="inline-flex items-center justify-center gap-0.5">
-        <button
-          type="button"
-          onClick={() => onEditarCarga(mov)}
-          className={iconBtnLinkClass}
-          aria-label="Editar anticipo"
-          title="Editar"
-        >
-          <Pencil className="size-4" />
-        </button>
-        {canEliminar && (
-          <button
-            type="button"
-            onClick={() => onEliminarMovimiento(mov)}
-            className={iconBtnDeleteClass}
-            aria-label="Eliminar anticipo"
-            title="Eliminar"
-          >
-            <Trash2 className="size-4" />
-          </button>
-        )}
-      </div>
-    );
-  }
+  const esIngreso = mov.tipo === "ingreso";
+  const facturado = preventaEstaFacturada(mov);
+  const puedeEditar = esIngreso && !facturado;
+  const puedeCertificar = esIngreso && !facturado;
+  const puedeAnular = esIngreso && facturado;
+  const puedeEliminar = canEliminar && !facturado;
 
-  if (!canEliminar) {
+  if (!puedeEditar && !puedeCertificar && !puedeAnular && !puedeEliminar) {
     return <span className={cn(celdaTextoClass, "text-muted-foreground")}>—</span>;
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => onEliminarMovimiento(mov)}
-      className={iconBtnDeleteClass}
-      aria-label="Eliminar consumo"
-      title="Eliminar"
-    >
-      <Trash2 className="size-4" />
-    </button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex size-9 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-200 cursor-pointer dark:text-zinc-300 dark:hover:bg-zinc-700"
+          aria-label="Opciones del movimiento"
+        >
+          <MoreVertical className="size-4" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-[11rem]">
+        {puedeEditar && (
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onSelect={() => onEditarCarga(mov)}
+          >
+            <Pencil className="size-4" />
+            Editar
+          </DropdownMenuItem>
+        )}
+        {puedeCertificar && (
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onSelect={() => onCertificarFactura(mov)}
+          >
+            <FileCheck2 className="size-4" />
+            Certificar FEL
+          </DropdownMenuItem>
+        )}
+        {puedeAnular && (
+          <DropdownMenuItem
+            variant="destructive"
+            className="cursor-pointer"
+            onSelect={() => onAnularFactura(mov)}
+          >
+            <Ban className="size-4" />
+            Anular factura
+          </DropdownMenuItem>
+        )}
+        {puedeEliminar && (
+          <DropdownMenuItem
+            variant="destructive"
+            className="cursor-pointer"
+            onSelect={() => onEliminarMovimiento(mov)}
+          >
+            <Trash2 className="size-4" />
+            Eliminar
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -160,6 +210,8 @@ interface MovimientosTableProps {
   onReimprimirPreventa: (mov: PreventaMovimiento) => void;
   onComprobanteAnticipo: (mov: PreventaMovimiento) => void;
   onEditarCarga: (mov: PreventaMovimiento) => void;
+  onCertificarFactura: (mov: PreventaMovimiento) => void;
+  onAnularFactura: (mov: PreventaMovimiento) => void;
   onEliminarMovimiento: (mov: PreventaMovimiento) => void;
 }
 
@@ -170,6 +222,8 @@ export default function MovimientosTable({
   onReimprimirPreventa,
   onComprobanteAnticipo,
   onEditarCarga,
+  onCertificarFactura,
+  onAnularFactura,
   onEliminarMovimiento,
 }: MovimientosTableProps) {
   const abrirRecibo = (mov: PreventaMovimiento) => {
@@ -190,8 +244,8 @@ export default function MovimientosTable({
                 <th className="px-4 py-3 text-right">Monto disponible</th>
                 <th className="px-4 py-3">Fecha</th>
                 <th className={comprobanteThClass}>Comprobante</th>
-                <th className={colRecibosThClass}>Recibos</th>
-                <th className={colEditarThClass}>Editar</th>
+                <th className={colDocumentoThClass}>Documento</th>
+                <th className={colAccionesThClass} />
               </tr>
             </thead>
             <tbody className={creditosTbodyClass}>
@@ -207,7 +261,18 @@ export default function MovimientosTable({
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      {razonMovimientoLabel(mov)}
+                      <span className="inline-flex items-center gap-1.5">
+                        {razonMovimientoLabel(mov)}
+                        {preventaEstaFacturada(mov) && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-md bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-azul-trifinio dark:bg-sky-950 dark:text-sky-400"
+                            title={`Factura ${mov.dte?.serie}-${mov.dte?.numero}`}
+                          >
+                            <FileCheck2 className="size-3" />
+                            FEL
+                          </span>
+                        )}
+                      </span>
                     </td>
                     <td
                       className={cn(
@@ -245,14 +310,19 @@ export default function MovimientosTable({
                         }
                       />
                     </td>
-                    <td className={colRecibosTdClass}>
-                      <RecibosCell onVerRecibo={() => abrirRecibo(mov)} />
+                    <td className={colDocumentoTdClass}>
+                      <DocumentoCell
+                        mov={mov}
+                        onVerRecibo={() => abrirRecibo(mov)}
+                      />
                     </td>
-                    <td className={colEditarTdClass}>
-                      <EditarCell
+                    <td className={colAccionesTdClass}>
+                      <AccionesCell
                         mov={mov}
                         canEliminar={canEliminar}
                         onEditarCarga={onEditarCarga}
+                        onCertificarFactura={onCertificarFactura}
+                        onAnularFactura={onAnularFactura}
                         onEliminarMovimiento={onEliminarMovimiento}
                       />
                     </td>

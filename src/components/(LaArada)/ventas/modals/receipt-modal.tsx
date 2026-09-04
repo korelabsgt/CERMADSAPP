@@ -18,6 +18,12 @@ import { getVentaById, updateEstadoVenta } from "../lib/actions";
 import { useCertificar, useAnular } from "@/hooks/useInfile";
 import type { INFILEResponse } from "@/types/infile";
 import { getEmisorConfig, buildXMLFactura } from "@/lib/infile";
+import {
+  formatDiaGT,
+  isConsumidorFinalNit,
+  mensajePlazoAnulacionCf,
+  plazoAnulacionInmediata,
+} from "@/lib/fel-anulacion";
 import { useUser } from "@/components/(base)/providers/UserProvider";
 import Swal from "sweetalert2";
 
@@ -29,16 +35,6 @@ interface ReceiptModalProps {
 }
 
 type Tab = "recibo" | "factura";
-
-function isConsumidorFinalNit(nit?: string | null): boolean {
-  if (!nit?.trim()) return true;
-  const normalized = nit.trim().toUpperCase().replace(/[\s/.\-]/g, "");
-  return (
-    normalized === "CF" ||
-    normalized === "CONSUMIDORFINAL" ||
-    normalized === "CONSUMIDOR"
-  );
-}
 
 function receptorFromCliente(cliente?: {
   nit?: string | null;
@@ -477,6 +473,27 @@ export default function ReceiptModal({
 
     if (dte.estado === "anulado") return;
 
+    const fechaEmisionAnular = dte.fecha_emision || dte.fecha_certificacion;
+    const plazoAnular = fechaEmisionAnular
+      ? plazoAnulacionInmediata(fechaEmisionAnular)
+      : null;
+    const esCFAnular = isConsumidorFinalNit(dte.id_receptor);
+    if (esCFAnular && plazoAnular && !plazoAnular.permitido) {
+      await Swal.fire({
+        didOpen: () => {
+          const swalContainer = Swal.getContainer();
+          if (swalContainer) {
+            swalContainer.style.setProperty("z-index", "99999", "important");
+          }
+        },
+        title: "Anulación no disponible",
+        text: mensajePlazoAnulacionCf(plazoAnular),
+        icon: "warning",
+        confirmButtonColor: "#e11d48",
+      });
+      return;
+    }
+
     const result = await Swal.fire({
       didOpen: () => {
         const swalContainer = Swal.getContainer();
@@ -485,7 +502,9 @@ export default function ReceiptModal({
         }
       },
       title: "Anular Factura Electrónica",
-      text: "Por favor, ingrese el motivo por el cual está anulando este documento.",
+      text: esCFAnular
+        ? "Ingrese el motivo. En facturas a Consumidor Final el ajuste es anular y emitir una factura nueva; no use nota de crédito."
+        : "Por favor, ingrese el motivo por el cual está anulando este documento.",
       input: "text",
       inputPlaceholder: "Ej: Cliente solicitó la devolución del producto",
       showCancelButton: true,
@@ -513,7 +532,9 @@ export default function ReceiptModal({
       uuidAAnular: dte.uuid_infile,
       nitEmisor: getEmisorConfig().nitEmisor,
       idReceptor: dte.id_receptor,
-      fechaEmisionDocumento: getGmtMinus6ISO(dte.fecha_emision),
+      fechaEmisionDocumento: getGmtMinus6ISO(
+        fechaEmisionAnular || dte.fecha_emision,
+      ),
       fechaHoraAnulacion: getGmtMinus6ISO(new Date().toISOString()),
       motivoAnulacion: motivo,
     };
@@ -618,6 +639,19 @@ export default function ReceiptModal({
     : isFacturaComprobante && venta?.ven_clientes?.nit
       ? venta.ven_clientes.nit
       : "C/F";
+  const dteParaAnular = venta?.dte_documentos?.find(
+    (d: any) =>
+      d.estado === "certificado" && d.uuid_infile === infileResult?.uuid,
+  );
+  const anularEsCF = isConsumidorFinalNit(dteParaAnular?.id_receptor);
+  const anularFechaEmision =
+    dteParaAnular?.fecha_emision || dteParaAnular?.fecha_certificacion || "";
+  const anularPlazo = anularFechaEmision
+    ? plazoAnulacionInmediata(anularFechaEmision)
+    : null;
+  const anularCfVencida = Boolean(
+    anularEsCF && anularPlazo && !anularPlazo.permitido,
+  );
 
   return (
     <>
@@ -1869,6 +1903,28 @@ export default function ReceiptModal({
                                   d.uuid_infile === infileResult?.uuid,
                               ) && (
                                 <div className="space-y-2">
+                                  {anularEsCF && anularPlazo?.permitido && (
+                                    <p className="text-xs font-bold text-muted-foreground">
+                                      Consumidor Final: anule hoy o mañana
+                                      (límite {formatDiaGT(anularPlazo.fechaLimite)})
+                                      y emita una factura nueva. No use nota de
+                                      crédito sobre CF.
+                                    </p>
+                                  )}
+                                  {anularCfVencida && anularPlazo && (
+                                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/60">
+                                      <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                                        {mensajePlazoAnulacionCf(anularPlazo)}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {!anularEsCF && (
+                                    <p className="text-xs font-bold text-muted-foreground">
+                                      Receptor identificado. Si necesita un
+                                      ajuste posterior, puede emitir nota de
+                                      crédito sobre esta factura.
+                                    </p>
+                                  )}
                                   {anularError && (
                                     <p className="text-destructive text-xs text-center mt-2 font-bold">
                                       {anularError}
@@ -1876,12 +1932,14 @@ export default function ReceiptModal({
                                   )}
                                   <button
                                     onClick={handleAnular}
-                                    disabled={anulando}
-                                    className="w-full py-2 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive dark:text-red-400 hover:bg-destructive/20 transition cursor-pointer font-bold disabled:opacity-50"
+                                    disabled={anulando || anularCfVencida}
+                                    className="w-full py-2 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive dark:text-red-400 hover:bg-destructive/20 transition cursor-pointer font-bold disabled:cursor-not-allowed disabled:opacity-50"
                                   >
-                                    {anulando
-                                      ? "Anulando..."
-                                      : "Anular Factura"}
+                                    {anularCfVencida
+                                      ? "Anulación no disponible"
+                                      : anulando
+                                        ? "Anulando..."
+                                        : "Anular Factura"}
                                   </button>
                                 </div>
                               )}

@@ -2,7 +2,7 @@
 
 import { getEmisorConfig } from "@/lib/infile";
 import { formatMoney } from "../lib/ui";
-import { ReciboPrintFrame } from "./recibo-preventa-print";
+import { ReciboPrintFrame, printDocStyle } from "./recibo-preventa-print";
 
 export interface ReciboVentaSimuladoData {
   codigo: string;
@@ -33,6 +33,7 @@ export default function ReciboVentaSimulado({
       printTitle="Recibo_Venta"
       onClose={onClose}
     >
+      <div id="print-container-venta-simulado" style={printDocStyle}>
       <table
         style={{
           width: "100%",
@@ -278,6 +279,7 @@ export default function ReciboVentaSimulado({
           </tr>
         </tbody>
       </table>
+      </div>
     </ReciboPrintFrame>
   );
 }

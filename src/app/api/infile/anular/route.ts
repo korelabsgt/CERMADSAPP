@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildXMLAnulacion, anularDTE } from "@/lib/infile";
+import {
+  isConsumidorFinalNit,
+  mensajePlazoAnulacionCf,
+  plazoAnulacionInmediata,
+} from "@/lib/fel-anulacion";
 import { createAdminClient } from "@/utils/supabase/admin";
 import type { AnulacionDTEInput } from "@/types/infile";
 
@@ -21,6 +26,16 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           { error: `El campo '${field}' es obligatorio.` },
           { status: 400 }
+        );
+      }
+    }
+
+    if (isConsumidorFinalNit(input.idReceptor)) {
+      const plazo = plazoAnulacionInmediata(input.fechaEmisionDocumento);
+      if (!plazo.permitido) {
+        return NextResponse.json(
+          { error: mensajePlazoAnulacionCf(plazo) },
+          { status: 400 },
         );
       }
     }

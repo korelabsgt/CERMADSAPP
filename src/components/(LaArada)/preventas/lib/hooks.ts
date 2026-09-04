@@ -8,7 +8,10 @@ import {
   getSaldoCliente,
   getMovimientosCliente,
   getClientePreventaBySlug,
+  getProductosPreventa,
   crearPreventa,
+  certificarPreventaExistente,
+  anularFacturaPreventa,
   aplicarPreventa,
   actualizarComprobantePreventa,
   editarCargaPreventa,
@@ -17,6 +20,8 @@ import {
 } from "./actions";
 import {
   PreventaFormValues,
+  AnularFacturaPreventaValues,
+  CertificarPreventaValues,
   AplicarPreventaValues,
   ActualizarComprobantePreventaValues,
   EditarCargaPreventaValues,
@@ -48,6 +53,15 @@ export function useClientesLista() {
   });
 }
 
+export function useProductosPreventa(enabled = true) {
+  return useQuery({
+    queryKey: ["preventas", "productos"],
+    queryFn: getProductosPreventa,
+    staleTime: 1000 * 60 * 5,
+    enabled,
+  });
+}
+
 export function useSaldoCliente(clienteId: string | null) {
   return useQuery({
     queryKey: ["preventas", "saldo", clienteId],
@@ -74,9 +88,51 @@ export function useCrearPreventa() {
         return;
       }
       queryClient.invalidateQueries({ queryKey: ["preventas"] });
-      toast.success("Saldo cargado correctamente.");
+      toast.success(
+        res.recibo.dte
+          ? "Saldo cargado y factura certificada ante la SAT."
+          : "Saldo cargado correctamente.",
+      );
     },
     onError: () => toast.error("No se pudo cargar el saldo."),
+  });
+}
+
+export function useCertificarPreventa() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CertificarPreventaValues) =>
+      certificarPreventaExistente(data),
+    onSuccess: (res) => {
+      if ("error" in res) {
+        toast.error(res.error);
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: ["preventas"] });
+      toast.success("Factura certificada ante la SAT.");
+    },
+    onError: () => toast.error("No se pudo certificar la factura."),
+  });
+}
+
+export function useAnularFacturaPreventa() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: AnularFacturaPreventaValues) =>
+      anularFacturaPreventa(data),
+    onSuccess: (res) => {
+      if ("error" in res) {
+        toast.error(res.error);
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: ["preventas"] });
+      toast.success(
+        res.extemporanea
+          ? "Solicitud enviada. La SAT puede tardar en autorizar esta anulación extemporánea."
+          : "Factura anulada ante la SAT. Puede emitir una factura nueva.",
+      );
+    },
+    onError: () => toast.error("No se pudo anular la factura."),
   });
 }
 

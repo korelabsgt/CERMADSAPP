@@ -16,9 +16,12 @@ import {
   codigoCorto,
   formatReciboMovimientoLabel,
   formatReciboVentaLabel,
+  preventaEstaFacturada,
   razonMovimientoLabel,
 } from "./lib/zod";
 import CargarSaldo from "./forms/CargarSaldo";
+import CertificarFactura from "./forms/CertificarFactura";
+import AnularFactura from "./forms/AnularFactura";
 import ComprobanteAnticipo from "./forms/ComprobanteAnticipo";
 import EliminarConsumo from "./forms/EliminarConsumo";
 import ReciboPreventaPrint from "./components/recibo-preventa-print";
@@ -141,6 +144,9 @@ export default function PreventaCliente({ slug }: { slug: string }) {
     useMovimientosCliente(cliente?.cliente_id ?? null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editMov, setEditMov] = useState<PreventaMovimiento | null>(null);
+  const [certificarMov, setCertificarMov] =
+    useState<PreventaMovimiento | null>(null);
+  const [anularMov, setAnularMov] = useState<PreventaMovimiento | null>(null);
   const [eliminarMov, setEliminarMov] = useState<PreventaMovimiento | null>(null);
   const [comprobanteMov, setComprobanteMov] = useState<PreventaMovimiento | null>(
     null,
@@ -284,6 +290,7 @@ export default function PreventaCliente({ slug }: { slug: string }) {
       venta_codigo: mov.venta_id ? codigoCorto(mov.venta_id) : null,
       usuario_nombre: mov.usuario_nombre,
       fecha: mov.created_at,
+      dte: mov.dte ?? null,
     };
     window.dispatchEvent(
       new CustomEvent<ReciboPreventa>("imprimir-preventa", { detail: recibo }),
@@ -297,12 +304,41 @@ export default function PreventaCliente({ slug }: { slug: string }) {
 
   const abrirEditarCarga = (mov: PreventaMovimiento) => {
     if (mov.simulado) return;
+    if (preventaEstaFacturada(mov)) {
+      toast.warn(
+        "Este anticipo ya tiene factura electrónica certificada y no puede editarse.",
+      );
+      return;
+    }
     setEditMov(mov);
     setModalOpen(true);
   };
 
+  const abrirCertificarFactura = (mov: PreventaMovimiento) => {
+    if (mov.simulado || mov.tipo !== "ingreso") return;
+    if (preventaEstaFacturada(mov)) {
+      toast.warn(
+        "Este anticipo ya tiene factura electrónica certificada.",
+      );
+      return;
+    }
+    setCertificarMov(mov);
+  };
+
+  const abrirAnularFactura = (mov: PreventaMovimiento) => {
+    if (mov.simulado || mov.tipo !== "ingreso") return;
+    if (!preventaEstaFacturada(mov)) return;
+    setAnularMov(mov);
+  };
+
   const abrirEliminarMovimiento = (mov: PreventaMovimiento) => {
     if (mov.simulado || !canEliminarMovimientos) return;
+    if (preventaEstaFacturada(mov)) {
+      toast.warn(
+        "No se puede eliminar un anticipo con factura certificada. Anule la factura primero.",
+      );
+      return;
+    }
     setEliminarMov(mov);
   };
 
@@ -483,6 +519,8 @@ export default function PreventaCliente({ slug }: { slug: string }) {
                   onReimprimirPreventa={reimprimir}
                   onComprobanteAnticipo={abrirComprobanteAnticipo}
                   onEditarCarga={abrirEditarCarga}
+                  onCertificarFactura={abrirCertificarFactura}
+                  onAnularFactura={abrirAnularFactura}
                   onEliminarMovimiento={abrirEliminarMovimiento}
                 />
                 <TablePagination
@@ -506,6 +544,21 @@ export default function PreventaCliente({ slug }: { slug: string }) {
           id: cliente.cliente_id,
           nombre: cliente.nombre,
         }}
+      />
+      <CertificarFactura
+        isOpen={!!certificarMov}
+        onClose={() => setCertificarMov(null)}
+        mov={certificarMov}
+        cliente={{
+          id: cliente.cliente_id,
+          nombre: cliente.nombre,
+          nit: cliente.nit,
+        }}
+      />
+      <AnularFactura
+        isOpen={!!anularMov}
+        onClose={() => setAnularMov(null)}
+        mov={anularMov}
       />
       <EliminarConsumo
         isOpen={!!eliminarMov}

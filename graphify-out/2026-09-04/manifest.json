@@ -65,9 +65,9 @@
     "semantic_hash": "59dcb1b71573fd27d52377ec19ce8fab"
   },
   "src/app/api/infile/anular/route.ts": {
-    "mtime": 1788540551.2543445,
-    "ast_hash": "bf6c8630a692867632ead95b12d51256",
-    "semantic_hash": ""
+    "mtime": 1782182819.066924,
+    "ast_hash": "d5a4b144de50a013c307ac00ad95403b",
+    "semantic_hash": "d5a4b144de50a013c307ac00ad95403b"
   },
   "src/app/api/infile/certificar/route.ts": {
     "mtime": 1782182819.067312,
@@ -375,8 +375,8 @@
     "semantic_hash": "6e2074ec91ed0b6f4c0c413556c59ff2"
   },
   "src/components/(LaArada)/ventas/modals/receipt-modal.tsx": {
-    "mtime": 1788540602.5308769,
-    "ast_hash": "81476f4dc28251bec890fb1a88ba723d",
+    "mtime": 1787699558.5761247,
+    "ast_hash": "8b9b0609987c80a211205febd9e2ba2e",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/ventas/modals/sale-modal.tsx": {
@@ -1060,8 +1060,8 @@
     "semantic_hash": ""
   },
   "src/components/(LaArada)/preventas/lib/actions.ts": {
-    "mtime": 1788540559.702274,
-    "ast_hash": "4a50e1bcc49de5acc206da7714ed2832",
+    "mtime": 1788540025.3485155,
+    "ast_hash": "895ed4cb3b9c7a8c9cdfe2a26ed6c903",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/preventas/lib/export-movimientos-pdf.ts": {
@@ -1085,8 +1085,8 @@
     "semantic_hash": ""
   },
   "src/components/(LaArada)/preventas/lib/zod.ts": {
-    "mtime": 1788540529.2014337,
-    "ast_hash": "80aec0443ceb998dfcd38c392df55cbb",
+    "mtime": 1788539996.9092288,
+    "ast_hash": "2f58de96a6c7706fa46ad86aa7a95515",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/ventas/modals/sale-wizard.tsx": {
@@ -1105,13 +1105,8 @@
     "semantic_hash": ""
   },
   "src/components/(LaArada)/preventas/forms/AnularFactura.tsx": {
-    "mtime": 1788540596.329756,
-    "ast_hash": "0890c99c03f871cc2abdb7aa403134f2",
-    "semantic_hash": ""
-  },
-  "src/lib/fel-anulacion.ts": {
-    "mtime": 1788540514.1981614,
-    "ast_hash": "43b7bd2540ed362674ba2e919530b480",
+    "mtime": 1788540054.6729946,
+    "ast_hash": "554f2b8ee3722de7206d045bff0b7738",
     "semantic_hash": ""
   }
 }

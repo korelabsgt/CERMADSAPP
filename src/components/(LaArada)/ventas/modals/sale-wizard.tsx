@@ -22,7 +22,7 @@ import {
 import { VentaSchema, VentaFormValues, ClienteCatalogo } from "../lib/zod";
 import { useCatalogos, useCrearVentaConPagos } from "../lib/hooks";
 import ClientModal from "../../clientes/modals/client-modal";
-import AddProductModal from "./add-product-modal";
+import AgregarProductoVenta from "../components/agregar-producto-venta";
 import ImageUploader from "@/components/(base)/imgs/ImageUploader";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
@@ -52,7 +52,7 @@ export default function SaleWizard({
   const crearMutation = useCrearVentaConPagos();
 
   const [step, setStep] = useState(1);
-  const [modals, setModals] = useState({ client: false, product: false });
+  const [modals, setModals] = useState({ client: false });
   const [clientSearch, setClientSearch] = useState("");
   const [showClientList, setShowClientList] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -418,7 +418,12 @@ export default function SaleWizard({
                     </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-3 overflow-visible">
+                    <AgregarProductoVenta
+                      productos={catalogos?.productos ?? []}
+                      onAdd={(prod) => append(prod)}
+                    />
+
                     <div className="border-b pb-2">
                       <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider">
                         Detalle de la venta
@@ -528,28 +533,13 @@ export default function SaleWizard({
                           ))
                         )}
                       </div>
-                      <div className="bg-muted/30 border-t p-4 flex items-center justify-between gap-4">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setModals({ ...modals, product: true })
-                          }
-                          className="text-[10px] md:text-xs font-bold flex items-center gap-1.5 px-4 py-2 rounded-lg border border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors cursor-pointer shrink-0"
-                        >
-                          <Plus className="size-4" />
-                          <span className="md:hidden">AGREGAR</span>
-                          <span className="hidden md:inline">
-                            AGREGAR PRODUCTO
-                          </span>
-                        </button>
-                        <div className="flex items-center gap-4">
-                          <span className="text-xs font-bold text-muted-foreground uppercase">
-                            Total
-                          </span>
-                          <span className="text-2xl font-black text-primary tracking-tight">
-                            {money(total)}
-                          </span>
-                        </div>
+                      <div className="bg-muted/30 border-t p-4 flex items-center justify-end gap-4">
+                        <span className="text-xs font-bold text-muted-foreground uppercase">
+                          Total
+                        </span>
+                        <span className="text-2xl font-black text-primary tracking-tight">
+                          {money(total)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1144,12 +1134,6 @@ export default function SaleWizard({
           setModals({ ...modals, client: false });
           refetch();
         }}
-      />
-      <AddProductModal
-        isOpen={modals.product}
-        onClose={() => setModals({ ...modals, product: false })}
-        onAdd={(prod) => append(prod)}
-        catalogos={catalogos}
       />
     </>
   );
