@@ -9,7 +9,6 @@ import { createClient } from "@/utils/supabase/server";
 import Providers from "@/components/(base)/providers/QueryProviders";
 import { UserProvider } from "@/components/(base)/providers/UserProvider";
 import { ConnectivityShell } from "@/components/(base)/connectivity/ConnectivityShell";
-import { AuroraText } from "@/components/ui/aurora-text";
 import { ToastContainer } from "react-toastify";
 
 const geistSans = Geist({
@@ -74,31 +73,36 @@ export default async function RootLayout({
                 <main className="flex-1 w-full flex flex-col pb-8">
                   {children}
                 </main>
-                <footer className="w-full pt-6 pb-10 md:pb-6 border-t border-border/20 bg-background z-10">
-                  <div className="max-w-400 mx-auto px-6">
+                <footer className="relative z-10 mt-auto w-full bg-transparent">
+                  <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-1.5 px-4 py-2 text-center md:flex-row md:items-center md:justify-between md:px-8 md:text-left">
                     <motion.div
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 8 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.5 }}
-                      className="flex flex-col items-center justify-center space-y-3 md:space-y-4"
+                      transition={{ duration: 0.4 }}
+                      className="flex flex-wrap items-center justify-center gap-2"
                     >
-                      <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-zinc-400">
-                        © 2026 CERMADSAPP
+                      <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-zinc-500">
+                        Powered by
+                      </span>
+                      <span className="inline-flex items-center rounded-md border border-red-500/40 bg-red-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-600 dark:text-red-400">
+                        Kore | Software Engineering
+                      </span>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.4, delay: 0.08 }}
+                      className="flex flex-col items-center gap-1 md:items-end"
+                    >
+                      <p className="text-[10px] font-bold text-foreground">
+                        © 2026 Sistemas y Gobernanza Jiménez & Pinto S.A.
                       </p>
-                      <div className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 text-center">
-                        Powered by{" "}
-                        <a
-                          href="https://www.oscar27jimenez.com"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:underline cursor-pointer transition-all inline-flex items-center text-zinc-900 dark:text-zinc-100 mt-1 md:mt-0"
-                        >
-                          <AuroraText className="text-[10px] md:text-sm whitespace-nowrap">
-                            Kore | Ingeniería de Software
-                          </AuroraText>
-                        </a>
-                      </div>
+                      <span className="inline-flex items-center rounded-md border border-red-500/40 bg-red-500/10 px-2 py-0.5 text-[9px] font-black uppercase text-red-600 dark:text-red-400">
+                        CERMADSAPP v1.3.5
+                      </span>
                     </motion.div>
                   </div>
                 </footer>
