@@ -16,6 +16,7 @@ import {
   codigoCorto,
   formatReciboMovimientoLabel,
   formatReciboVentaLabel,
+  preventaConsumoAnulado,
   preventaEstaFacturada,
   razonMovimientoLabel,
 } from "./lib/zod";
@@ -51,9 +52,9 @@ const UUID_RE =
 const SIMULAR_KEY = "preventas-simular";
 const SIMULADO_MOVIMIENTOS_COUNT = 10;
 
-function sortMovimientosDesc(items: PreventaMovimiento[]): PreventaMovimiento[] {
+function sortMovimientosAsc(items: PreventaMovimiento[]): PreventaMovimiento[] {
   return [...items].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
   );
 }
 
@@ -178,7 +179,7 @@ export default function PreventaCliente({ slug }: { slug: string }) {
   const saldoActual = useMemo(() => {
     if (!cliente) return 0;
     if (movimientos.length === 0) return cliente.saldo;
-    return movimientos[0].saldo_resultante;
+    return movimientos[movimientos.length - 1].saldo_resultante;
   }, [movimientos, cliente]);
 
   const tablaMovimientos = useMemo(() => {
@@ -198,7 +199,7 @@ export default function PreventaCliente({ slug }: { slug: string }) {
           ? buildSimuladosConsumos(cliente.cliente_id, saldoActual)
           : [];
 
-    return sortMovimientosDesc([...ingresosVista, ...consumosVista]);
+    return sortMovimientosAsc([...ingresosVista, ...consumosVista]);
   }, [cliente, ingresos, consumos, simular, saldoActual]);
 
   const {
@@ -235,6 +236,7 @@ export default function PreventaCliente({ slug }: { slug: string }) {
       });
 
       const totalMonto = tablaMovimientos.reduce((sum, mov) => {
+        if (preventaConsumoAnulado(mov)) return sum;
         const m = Number(mov.monto || 0);
         return mov.tipo === "ingreso" ? sum + m : sum - m;
       }, 0);
@@ -333,6 +335,10 @@ export default function PreventaCliente({ slug }: { slug: string }) {
 
   const abrirEliminarMovimiento = (mov: PreventaMovimiento) => {
     if (mov.simulado || !canEliminarMovimientos) return;
+    if (preventaConsumoAnulado(mov)) {
+      toast.warn("Este consumo pertenece a una venta anulada.");
+      return;
+    }
     if (preventaEstaFacturada(mov)) {
       toast.warn(
         "No se puede eliminar un anticipo con factura certificada. Anule la factura primero.",

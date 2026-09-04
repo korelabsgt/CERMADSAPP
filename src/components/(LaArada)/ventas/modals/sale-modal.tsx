@@ -441,7 +441,7 @@ export default function SaleModal({
 
     const result = await Swal.fire({
       title: "¿Anular venta?",
-      text: "Se anulará la venta y se devolverá el stock. Esta acción no se puede deshacer.",
+      text: "Se anulará la venta, se devolverá el stock y el saldo de preventa usado. Esta acción no se puede deshacer.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#ef4444",
@@ -495,6 +495,16 @@ export default function SaleModal({
         });
         onClose();
         queryClient.invalidateQueries({ queryKey: ["ventas"] });
+        queryClient.invalidateQueries({ queryKey: ["preventas"] });
+      } else {
+        await Swal.fire({
+          title: "No se pudo anular",
+          text: res?.error || "Intente de nuevo.",
+          icon: "error",
+          confirmButtonColor: "#ef4444",
+          background: isDark ? "#1c1c1e" : undefined,
+          color: isDark ? "#f5f5f5" : undefined,
+        });
       }
     }
   };

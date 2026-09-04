@@ -138,6 +138,14 @@ export const AplicarPreventaSchema = z.object({
 
 export type AplicarPreventaValues = z.infer<typeof AplicarPreventaSchema>;
 
+export const DevolverPreventaPorVentaSchema = z.object({
+  venta_id: z.string().uuid("Venta inválida"),
+});
+
+export type DevolverPreventaPorVentaValues = z.infer<
+  typeof DevolverPreventaPorVentaSchema
+>;
+
 export const ActualizarComprobantePreventaSchema = z.object({
   preventa_id: z.string().uuid(),
   img_comprobante_url: z.string().nullable(),
@@ -314,6 +322,7 @@ export interface PreventaMovimiento {
   img_comprobante_url?: string | null;
   created_at: string;
   venta_numero?: number | null;
+  venta_estado?: string | null;
   simulado?: boolean;
   dte?: PreventaDte | null;
 }
@@ -356,4 +365,14 @@ export interface ReciboPreventa {
 
 export function preventaEstaFacturada(mov?: PreventaMovimiento | null): boolean {
   return mov?.tipo === "ingreso" && mov?.dte?.estado === "certificado";
+}
+
+export function ventaEstaAnulada(estado?: string | null): boolean {
+  return (estado ?? "").toLowerCase().trim() === "anulado";
+}
+
+export function preventaConsumoAnulado(
+  mov?: PreventaMovimiento | null,
+): boolean {
+  return mov?.tipo === "consumo" && ventaEstaAnulada(mov.venta_estado);
 }

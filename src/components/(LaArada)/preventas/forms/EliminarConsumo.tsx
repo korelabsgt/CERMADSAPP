@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   PreventaMovimiento,
   formatReciboMovimientoLabel,
+  preventaConsumoAnulado,
   preventaEstaFacturada,
   razonMovimientoLabel,
 } from "../lib/zod";
@@ -29,9 +30,10 @@ export default function EliminarConsumo({
   const { mutateAsync: eliminar, isPending } = useEliminarMovimientoPreventa();
   const esIngreso = mov?.tipo === "ingreso";
   const facturada = preventaEstaFacturada(mov);
+  const consumoAnulado = preventaConsumoAnulado(mov);
 
   const handleEliminar = async () => {
-    if (!mov || facturada) return;
+    if (!mov || facturada || consumoAnulado) return;
     const res = await eliminar({ movimiento_id: mov.id });
     if ("error" in res) return;
     onClose();
@@ -53,7 +55,7 @@ export default function EliminarConsumo({
           <ModalCancel onClick={onClose} disabled={isPending} />
           <button
             type="button"
-            disabled={isPending || !mov || facturada}
+            disabled={isPending || !mov || facturada || consumoAnulado}
             onClick={handleEliminar}
             className={cn(
               "inline-flex h-11 min-w-0 flex-1 items-center justify-center rounded-xl px-4 text-[10px] font-bold uppercase tracking-widest shadow-none transition-colors cursor-pointer sm:flex-none sm:px-6",
@@ -72,9 +74,11 @@ export default function EliminarConsumo({
           <p className="text-sm text-muted-foreground">
             {facturada
               ? "No se puede eliminar un anticipo con factura certificada. Anule la factura primero."
-              : esIngreso
-                ? "Se eliminará este anticipo y se descontará del saldo disponible del cliente."
-                : "Se eliminará este consumo y el monto se devolverá al saldo disponible del cliente."}
+              : consumoAnulado
+                ? "Este consumo pertenece a una venta anulada. El saldo ya no se descuenta."
+                : esIngreso
+                  ? "Se eliminará este anticipo y se descontará del saldo disponible del cliente."
+                  : "Se eliminará este consumo y el monto se devolverá al saldo disponible del cliente."}
           </p>
           <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
             <div className="flex items-center justify-between gap-3">

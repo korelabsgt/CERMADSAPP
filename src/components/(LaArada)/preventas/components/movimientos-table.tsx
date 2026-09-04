@@ -11,6 +11,7 @@ import {
 import {
   PreventaMovimiento,
   formatReciboMovimientoLabel,
+  preventaConsumoAnulado,
   preventaEstaFacturada,
   razonMovimientoLabel,
 } from "../lib/zod";
@@ -142,7 +143,7 @@ function AccionesCell({
   const puedeEditar = esIngreso && !facturado;
   const puedeCertificar = esIngreso && !facturado;
   const puedeAnular = esIngreso && facturado;
-  const puedeEliminar = canEliminar && !facturado;
+  const puedeEliminar = canEliminar && !facturado && !preventaConsumoAnulado(mov);
 
   if (!puedeEditar && !puedeCertificar && !puedeAnular && !puedeEliminar) {
     return <span className={cn(celdaTextoClass, "text-muted-foreground")}>—</span>;
@@ -251,10 +252,17 @@ export default function MovimientosTable({
             <tbody className={creditosTbodyClass}>
               {movimientos.map((mov) => {
                 const esIngreso = mov.tipo === "ingreso";
+                const consumoAnulado = preventaConsumoAnulado(mov);
                 const recibo = formatReciboMovimientoLabel(mov);
 
                 return (
-                  <tr key={mov.id} className={rowClass}>
+                  <tr
+                    key={mov.id}
+                    className={cn(
+                      rowClass,
+                      consumoAnulado && "opacity-70",
+                    )}
+                  >
                     <td className={stickyReciboTdClass}>
                       <span className="font-mono text-xs font-bold md:text-sm">
                         #{recibo}
@@ -272,14 +280,21 @@ export default function MovimientosTable({
                             FEL
                           </span>
                         )}
+                        {consumoAnulado && (
+                          <span className="inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-600 dark:bg-red-950 dark:text-red-400">
+                            Anulado
+                          </span>
+                        )}
                       </span>
                     </td>
                     <td
                       className={cn(
                         "px-4 py-3 text-right font-semibold tabular-nums whitespace-nowrap",
-                        esIngreso
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-red-600 dark:text-red-400",
+                        consumoAnulado
+                          ? "text-muted-foreground line-through"
+                          : esIngreso
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400",
                       )}
                     >
                       {esIngreso ? "+" : "-"}Q{formatMoney(mov.monto)}

@@ -24,6 +24,8 @@ import {
   PreventaFormValues,
   AplicarPreventaSchema,
   AplicarPreventaValues,
+  DevolverPreventaPorVentaSchema,
+  DevolverPreventaPorVentaValues,
   ActualizarComprobantePreventaValues,
   CertificarPreventaValues,
   EditarCargaPreventaValues,
@@ -42,6 +44,7 @@ import {
   slugCliente,
   toFelFechaGT,
   totalDetallesPreventa,
+  ventaEstaAnulada,
 } from "./zod";
 import { mensajePlazoAnulacionCf } from "@/lib/fel-anulacion";
 
@@ -62,16 +65,36 @@ function isSuperOrAdmin(role: string | null) {
   return role === "super" || role === "admin";
 }
 
+function estadoVentaJoin(raw: unknown): string | null {
+  if (!raw) return null;
+  const venta = Array.isArray(raw) ? raw[0] : raw;
+  if (!venta || typeof venta !== "object") return null;
+  const estado = (venta as { estado?: string | null }).estado;
+  return estado ?? null;
+}
+
+function movimientoAfectaSaldo(
+  tipo: string,
+  ventaEstado?: string | null,
+): boolean {
+  if (tipo === "ingreso") return true;
+  return !ventaEstaAnulada(ventaEstado);
+}
+
 async function computeSaldo(
   supabase: Supabase,
   clienteId: string,
 ): Promise<number> {
   const { data: movimientos } = await supabase
     .from("ven_preventa_movimientos")
-    .select("tipo, monto")
+    .select("tipo, monto, ven_ventas (estado)")
     .eq("cliente_id", clienteId);
 
   return (movimientos ?? []).reduce((acc: number, mov) => {
+    const extra = mov as unknown as { ven_ventas?: unknown };
+    if (!movimientoAfectaSaldo(mov.tipo, estadoVentaJoin(extra.ven_ventas))) {
+      return acc;
+    }
     const monto = Number(mov.monto || 0);
     return mov.tipo === "ingreso" ? acc + monto : acc - monto;
   }, 0);
@@ -83,7 +106,7 @@ async function recalcularSaldosResultantes(
 ) {
   const { data: movs, error } = await supabase
     .from("ven_preventa_movimientos")
-    .select("id, tipo, monto")
+    .select("id, tipo, monto, ven_ventas (estado)")
     .eq("cliente_id", clienteId)
     .order("created_at", { ascending: true });
 
@@ -91,8 +114,11 @@ async function recalcularSaldosResultantes(
 
   let saldo = 0;
   for (const mov of movs ?? []) {
+    const extra = mov as unknown as { ven_ventas?: unknown };
     const m = Number(mov.monto || 0);
-    saldo = mov.tipo === "ingreso" ? saldo + m : saldo - m;
+    if (movimientoAfectaSaldo(mov.tipo, estadoVentaJoin(extra.ven_ventas))) {
+      saldo = mov.tipo === "ingreso" ? saldo + m : saldo - m;
+    }
     const { error: updErr } = await supabase
       .from("ven_preventa_movimientos")
       .update({ saldo_resultante: saldo })
@@ -320,7 +346,9 @@ export async function getResumenPreventas(): Promise<ClientePreventa[]> {
 
   const { data: movimientos, error } = await supabase
     .from("ven_preventa_movimientos")
-    .select("cliente_id, tipo, monto, ven_clientes (nombre, nit, telefono)");
+    .select(
+      "cliente_id, tipo, monto, ven_ventas (estado), ven_clientes (nombre, nit, telefono)",
+    );
 
   if (error) throw new Error(error.message);
 
@@ -350,8 +378,11 @@ export async function getResumenPreventas(): Promise<ClientePreventa[]> {
     }
 
     const entry = map.get(clienteId)!;
+    const extra = mov as unknown as { ven_ventas?: unknown };
     const monto = Number(mov.monto || 0);
-    entry.saldo += mov.tipo === "ingreso" ? monto : -monto;
+    if (movimientoAfectaSaldo(mov.tipo, estadoVentaJoin(extra.ven_ventas))) {
+      entry.saldo += mov.tipo === "ingreso" ? monto : -monto;
+    }
     entry.cantidadMovimientos += 1;
   }
 
@@ -405,11 +436,11 @@ export async function getMovimientosCliente(
       `
       id, cliente_id, tipo, monto, saldo_resultante, metodo_pago,
       preventa_id, venta_id, usuario_id, created_at,
-      ven_ventas (numero_recibo)
+      ven_ventas (numero_recibo, estado)
     `,
     )
     .eq("cliente_id", clienteId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: true });
 
   if (error) throw new Error(error.message);
 
@@ -458,11 +489,12 @@ export async function getMovimientosCliente(
     );
   }
 
+  let saldo = 0;
   return rows.map((mov) => {
     const extra = mov as unknown as {
       ven_ventas?:
-        | { numero_recibo?: number | null }
-        | { numero_recibo?: number | null }[]
+        | { numero_recibo?: number | null; estado?: string | null }
+        | { numero_recibo?: number | null; estado?: string | null }[]
         | null;
     };
     const ventaRaw = extra.ven_ventas;
@@ -472,13 +504,18 @@ export async function getMovimientosCliente(
     const preventa = mov.preventa_id
       ? preventaMap.get(mov.preventa_id)
       : undefined;
+    const ventaEstado = venta?.estado ?? null;
+    const monto = Number(mov.monto || 0);
+    if (movimientoAfectaSaldo(mov.tipo, ventaEstado)) {
+      saldo = mov.tipo === "ingreso" ? saldo + monto : saldo - monto;
+    }
 
     return {
       id: mov.id,
       cliente_id: mov.cliente_id,
       tipo: mov.tipo,
-      monto: Number(mov.monto || 0),
-      saldo_resultante: Number(mov.saldo_resultante || 0),
+      monto,
+      saldo_resultante: saldo,
       metodo_pago: mov.metodo_pago,
       preventa_id: mov.preventa_id,
       venta_id: mov.venta_id,
@@ -491,6 +528,7 @@ export async function getMovimientosCliente(
       img_comprobante_url: preventa?.img_comprobante_url ?? null,
       created_at: mov.created_at,
       venta_numero: venta?.numero_recibo ?? null,
+      venta_estado: ventaEstado,
       dte: preventa?.dte ?? null,
     } satisfies PreventaMovimiento;
   });
@@ -802,6 +840,46 @@ export async function aplicarPreventa(
       fecha: new Date().toISOString(),
     },
   };
+}
+
+export async function devolverPreventaPorVenta(
+  data: DevolverPreventaPorVentaValues,
+): Promise<{ error: string } | { success: true; montoDevuelto: number }> {
+  const result = DevolverPreventaPorVentaSchema.safeParse(data);
+  if (!result.success) return { error: "Venta inválida" };
+
+  const supabase = await createClient();
+  const cajero = await requireAuthenticatedCajero(supabase);
+  if (!cajero.ok) return { error: cajero.error };
+
+  const { venta_id } = result.data;
+
+  const { data: consumos, error } = await supabase
+    .from("ven_preventa_movimientos")
+    .select("id, cliente_id, monto")
+    .eq("venta_id", venta_id)
+    .eq("tipo", "consumo");
+
+  if (error) return { error: "No se pudo consultar el saldo de preventa" };
+  if (!consumos?.length) return { success: true, montoDevuelto: 0 };
+
+  const montoDevuelto = consumos.reduce(
+    (acc, mov) => acc + Number(mov.monto || 0),
+    0,
+  );
+  const clienteIds = Array.from(new Set(consumos.map((mov) => mov.cliente_id)));
+
+  try {
+    for (const clienteId of clienteIds) {
+      await recalcularSaldosResultantes(supabase, clienteId);
+    }
+  } catch {
+    return { error: "No se pudo recalcular el saldo de preventa" };
+  }
+
+  revalidatePath("/cermadsa/laarada/preventas", "layout");
+  revalidatePath("/cermadsa/laarada/ventas");
+  return { success: true, montoDevuelto };
 }
 
 export async function getComprobanteSignedUrl(path: string): Promise<{

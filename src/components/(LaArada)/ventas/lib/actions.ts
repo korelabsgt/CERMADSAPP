@@ -14,6 +14,7 @@ import { requireAuthenticatedCajero } from "@/utils/require-authenticated-cajero
 import {
   getSaldoCliente,
   aplicarPreventa,
+  devolverPreventaPorVenta,
 } from "@/components/(LaArada)/preventas/lib/actions";
 
 const BUCKET_COMPROBANTES = "ventas-comprobantes";
@@ -686,6 +687,16 @@ export async function updateEstadoVenta(
   const supabase = await createClient();
 
   if (estado.toLowerCase().trim() === "anulado") {
+    const { data: ventaActual } = await supabase
+      .from("ven_ventas")
+      .select("estado")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (ventaActual?.estado?.toLowerCase().trim() === "anulado") {
+      return { error: "Esta venta ya está anulada." };
+    }
+
     const { data: detalles } = await supabase
       .from("ven_detalle")
       .select("producto_id, cantidad")
@@ -718,7 +729,14 @@ export async function updateEstadoVenta(
 
   if (error) return { error: error.message };
 
+  if (estado.toLowerCase().trim() === "anulado") {
+    const preventa = await devolverPreventaPorVenta({ venta_id: id });
+    if ("error" in preventa) return { error: preventa.error };
+  }
+
   revalidatePath("/cermadsa/laarada/pedidos");
+  revalidatePath("/cermadsa/laarada/preventas", "layout");
+  revalidatePath("/cermadsa/laarada/ventas");
   return { success: true };
 }
 

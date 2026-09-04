@@ -567,7 +567,7 @@ export default function ReceiptModal({
           }
         },
         title: "¿Anular también la venta?",
-        text: "La factura ya está anulada fiscalmente. ¿Deseas anular también el registro de la venta en el sistema para devolver el inventario?",
+        text: "La factura ya está anulada fiscalmente. ¿Deseas anular también el registro de la venta para devolver el inventario y el saldo de preventa?",
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Sí, anular venta total",
