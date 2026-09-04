@@ -263,7 +263,6 @@ export async function downloadHtmlContentAsPdf(content: string, title: string) {
 
   const html2canvas = (await import("html2canvas")).default;
   const canvas = await html2canvas(doc.body, {
-    window: win,
     backgroundColor: "#ffffff",
     scale: 2,
     width: RECEIPT_DOC_W_PX,
