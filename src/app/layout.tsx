@@ -60,6 +60,10 @@ export default async function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background flex flex-col`}
       >
+        <Script
+          src="https://cdn.lordicon.com/lordicon.js"
+          strategy="beforeInteractive"
+        />
         <Providers>
           <ThemeProvider
             attribute="class"
@@ -70,7 +74,7 @@ export default async function RootLayout({
             <UserProvider user={user}>
               <ConnectivityShell>
                 <Header />
-                <main className="flex-1 w-full flex flex-col pb-8">
+                <main className="flex-1 w-full flex flex-col min-h-0">
                   {children}
                 </main>
                 <footer className="relative z-10 mt-auto w-full bg-transparent">
@@ -118,10 +122,6 @@ export default async function RootLayout({
           closeOnClick
           pauseOnHover
           theme="colored"
-        />
-        <Script
-          src="https://cdn.lordicon.com/lordicon.js"
-          strategy="afterInteractive"
         />
       </body>
     </html>

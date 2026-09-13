@@ -17,6 +17,7 @@ import {
   CreditCard,
   Truck,
   ReceiptText,
+  TrendingDown,
   ChevronDown,
   Trash2,
   Fingerprint,
@@ -65,6 +66,12 @@ const LA_ARADA_LINKS = [
     label: "Productos",
     icon: Package,
     roles: ["super", "admin", "contabilidad", "ventas"],
+  },
+  {
+    href: "/cermadsa/laarada/gastos",
+    label: "Gastos",
+    icon: TrendingDown,
+    roles: ["super", "admin", "ventas"],
   },
   {
     href: "/cermadsa/laarada/proveedores",

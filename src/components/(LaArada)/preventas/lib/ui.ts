@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 export const tableShell =
-  "overflow-hidden rounded-t-2xl border border-zinc-200 border-t-4 border-t-sky-600 bg-white dark:border-zinc-700 dark:border-t-sky-400 dark:bg-zinc-900";
+  "overflow-hidden rounded-2xl border border-zinc-200 border-t-4 border-t-sky-600 bg-white shadow-sm dark:border-zinc-700 dark:border-t-sky-400 dark:bg-zinc-900";
 
 export const creditosTableWrap =
   "rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100";

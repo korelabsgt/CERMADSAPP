@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   getResumenPreventas,
@@ -34,6 +34,8 @@ export function useResumenPreventas() {
   return useQuery({
     queryKey: ["preventas", "resumen"],
     queryFn: getResumenPreventas,
+    staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
   });
 }
 

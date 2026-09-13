@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import {
   getVentasCredito,
   procesarPagoCredito,
@@ -26,6 +26,8 @@ export function useCreditos() {
   const { data: ventasCredito = [], isLoading } = useQuery({
     queryKey: ["creditos"],
     queryFn: getVentasCredito,
+    staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
   });
 
   const creditosTotales = useMemo(() => {

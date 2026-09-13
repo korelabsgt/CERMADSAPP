@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Plus,
   ShoppingCart,
@@ -8,6 +9,7 @@ import {
   List,
   Truck,
   ShieldAlert,
+  ArrowLeft,
 } from "lucide-react";
 import { useVentas, useVendedores } from "./lib/hooks";
 import SaleModal from "./modals/sale-modal";
@@ -16,6 +18,7 @@ import ReceiptModal from "./modals/receipt-modal";
 import StatusModal from "./modals/status-modal";
 import ListView from "./components/ventas-view";
 import MonitorView from "./components/monitor-view";
+import { VentasSkeleton } from "./ventas-skeleton";
 import ReciboPreventaPrint from "@/components/(LaArada)/preventas/components/recibo-preventa-print";
 import {
   readLaAradaSimulatedRole,
@@ -87,10 +90,25 @@ export default function ListadoVentas() {
     });
   };
 
+  if (isLoading) {
+    return <VentasSkeleton />;
+  }
+
   return (
     <div className="p-4 md:p-6 lg:px-10 w-full space-y-6">
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-        <div>
+        <div className="flex flex-col gap-1">
+          {effectiveRole !== "user" && (
+            <Link
+              href="/cermadsa/laarada"
+              className="group inline-flex shrink-0 items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground cursor-pointer w-fit mb-0.5"
+            >
+              <ArrowLeft className="size-4.5 transition-transform group-hover:-translate-x-0.5" />
+              <span className="text-xs font-bold uppercase tracking-widest">
+                Volver
+              </span>
+            </Link>
+          )}
           <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
             {viewMode === "ventas" ? (
               <ShoppingCart className="size-5 md:size-6 text-orange-500" />

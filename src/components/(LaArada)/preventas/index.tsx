@@ -12,13 +12,15 @@ import {
   Wallet,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import ReciboPreventaPrint from "./components/recibo-preventa-print";
 import CargarSaldo from "./forms/CargarSaldo";
 import { useEliminarPreventaCliente, useResumenPreventas } from "./lib/hooks";
+import { PreventasSkeleton } from "./preventas-skeleton";
 import { useUser } from "@/components/(base)/providers/UserProvider";
+import TablePagination, { PageSizeOption } from "@/components/(LaArada)/lib/pagination";
 import {
   cargarSaldoBtn,
   creditosNavBtn,
@@ -42,6 +44,8 @@ export default function Preventas() {
   const eliminarPreventaCliente = useEliminarPreventaCliente();
   const [searchTerm, setSearchTerm] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<PageSizeOption>(15);
 
   const metadata = user?.user_metadata || {};
   const realRole = (metadata.rol || user?.role || "user") as string;
@@ -55,6 +59,23 @@ export default function Preventas() {
         c.nombre.toLowerCase().includes(term) || c.nit.includes(searchTerm),
     );
   }, [resumen, searchTerm]);
+
+  const totalPages =
+    pageSize === "all"
+      ? 1
+      : Math.max(1, Math.ceil(filtrados.length / (Number(pageSize) || 15)));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, pageSize]);
+
+  const paginatedClientes = useMemo(() => {
+    if (pageSize === "all") return filtrados;
+    const size = Number(pageSize) || 15;
+    const start = (safeCurrentPage - 1) * size;
+    return filtrados.slice(start, start + size);
+  }, [filtrados, safeCurrentPage, pageSize]);
 
   const irCliente = (cliente: ClientePreventa) => {
     router.push(
@@ -104,14 +125,7 @@ export default function Preventas() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-muted-foreground">
-        <Loader2 className="size-8 animate-spin text-zinc-500" />
-        <p className="text-sm font-bold uppercase tracking-widest">
-          Cargando preventas...
-        </p>
-      </div>
-    );
+    return <PreventasSkeleton />;
   }
 
   return (
@@ -173,122 +187,138 @@ export default function Preventas() {
               </p>
             </div>
           ) : (
-            <div className="p-4">
-              <div className={creditosTableWrap}>
-                <div className={creditosTableScroll}>
-                  <table className={creditosTableClass}>
-                    <thead className={creditosTheadClass}>
-                      <tr>
-                        <th className="sticky left-0 z-20 w-12 bg-zinc-50 px-2 py-3 text-center shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-800/60">
-                          No.
-                        </th>
-                        <th className="sticky left-12 z-20 w-[9rem] max-w-[9rem] bg-zinc-50 px-2 py-3 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-800/60 lg:w-[20rem] lg:max-w-[20rem] lg:px-4 xl:w-[26rem] xl:max-w-[26rem]">
-                          Nombre
-                        </th>
-                        <th className="px-4 py-3">NIT</th>
-                        <th className="px-4 py-3">Teléfono</th>
-                        <th className="px-4 py-3 text-right">Saldo</th>
-                        <th className="px-4 py-3 text-center">Movs.</th>
-                        <th
-                          className={cn(
-                            "px-2 py-3 text-right",
-                            canEliminarPreventa ? "w-24" : "w-14",
-                          )}
-                        />
-                      </tr>
-                    </thead>
-                    <tbody className={creditosTbodyClass}>
-                      {filtrados.map((cliente, index) => (
-                        <tr
-                          key={cliente.cliente_id}
-                          onClick={() => irCliente(cliente)}
-                          className={creditosRowClass}
-                        >
-                          <td className="sticky left-0 z-10 w-12 bg-white px-2 py-2.5 text-center tabular-nums shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-900 lg:py-3">
-                            {index + 1}
-                          </td>
-                          <td className="sticky left-12 z-10 w-[9rem] max-w-[9rem] bg-white px-2 py-2.5 text-[11px] font-bold uppercase leading-snug text-foreground shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-900 lg:w-[20rem] lg:max-w-[20rem] lg:px-4 lg:py-3 lg:text-sm xl:w-[26rem] xl:max-w-[26rem]">
-                            <span className="line-clamp-2">{cliente.nombre}</span>
-                          </td>
-                          <td className="px-4 py-3 font-mono font-bold text-orange-500 whitespace-nowrap dark:text-orange-400">
-                            {cliente.nit}
-                          </td>
-                          <td className="px-4 py-3">
-                            {cliente.telefono && cliente.telefono !== "N/A" ? (
-                              <span
-                                className={cn(
-                                  phonePill,
-                                  "max-w-full truncate",
-                                )}
-                              >
-                                <Phone className="size-3.5 shrink-0" />
-                                <span className="truncate">
-                                  {cliente.telefono}
-                                </span>
-                              </span>
-                            ) : (
-                              <span className="text-muted-foreground">—</span>
+            <div className={creditosTableScroll}>
+              <table className={creditosTableClass}>
+                <thead className={creditosTheadClass}>
+                  <tr>
+                    <th className="sticky left-0 z-20 w-12 bg-zinc-50 px-2 py-3 text-center shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-800/60">
+                      No.
+                    </th>
+                    <th className="sticky left-12 z-20 w-[9rem] max-w-[9rem] bg-zinc-50 px-2 py-3 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-800/60 lg:w-[20rem] lg:max-w-[20rem] lg:px-4 xl:w-[26rem] xl:max-w-[26rem]">
+                      Nombre
+                    </th>
+                    <th className="px-4 py-3">NIT</th>
+                    <th className="px-4 py-3">Teléfono</th>
+                    <th className="px-4 py-3 text-right">Saldo</th>
+                    <th className="px-4 py-3 text-center">Movs.</th>
+                    <th
+                      className={cn(
+                        "px-2 py-3 text-right",
+                        canEliminarPreventa ? "w-24" : "w-14",
+                      )}
+                    />
+                  </tr>
+                </thead>
+                <tbody className={creditosTbodyClass}>
+                  {paginatedClientes.map((cliente, index) => {
+                    const sizeNum =
+                      pageSize === "all"
+                        ? filtrados.length
+                        : Number(pageSize) || 15;
+                    const rowNumber =
+                      (safeCurrentPage - 1) * sizeNum + index + 1;
+
+                    return (
+                      <tr
+                        key={cliente.cliente_id}
+                        onClick={() => irCliente(cliente)}
+                        className={creditosRowClass}
+                      >
+                        <td className="sticky left-0 z-10 w-12 bg-white px-2 py-2.5 text-center tabular-nums shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-900 lg:py-3">
+                          {rowNumber}
+                        </td>
+                        <td className="sticky left-12 z-10 w-[9rem] max-w-[9rem] bg-white px-2 py-2.5 text-[11px] font-bold uppercase leading-snug text-foreground shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-900 lg:w-[20rem] lg:max-w-[20rem] lg:px-4 lg:py-3 lg:text-sm xl:w-[26rem] xl:max-w-[26rem]">
+                          <span className="line-clamp-2">{cliente.nombre}</span>
+                        </td>
+                        <td className="px-4 py-3 font-mono font-bold text-orange-500 whitespace-nowrap dark:text-orange-400">
+                          {cliente.nit}
+                        </td>
+                        <td className="px-4 py-3">
+                        {cliente.telefono && cliente.telefono !== "N/A" ? (
+                          <span
+                            className={cn(
+                              phonePill,
+                              "max-w-full truncate",
                             )}
-                          </td>
-                          <td className="px-4 py-3 text-right font-semibold tabular-nums whitespace-nowrap">
-                            Q{formatMoney(cliente.saldo)}
-                          </td>
-                          <td className="px-4 py-3 text-center tabular-nums whitespace-nowrap">
-                            <span className="inline-flex rounded-md border border-sky-200 bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-600 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-400">
-                              {cliente.cantidadMovimientos}
+                          >
+                            <Phone className="size-3.5 shrink-0" />
+                            <span className="truncate">
+                              {cliente.telefono}
                             </span>
-                          </td>
-                          <td className="px-2 py-3 text-right whitespace-nowrap">
-                            <div className="inline-flex items-center gap-1">
-                              {canEliminarPreventa && (
-                                <button
-                                  type="button"
-                                  disabled={
-                                    eliminarPreventaCliente.isPending ||
-                                    cliente.cantidadMovimientos > 0
-                                  }
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    void confirmarEliminarPreventa(cliente);
-                                  }}
-                                  className={cn(
-                                    "inline-flex size-9 items-center justify-center rounded-lg cursor-pointer disabled:cursor-not-allowed",
-                                    cliente.cantidadMovimientos > 0
-                                      ? "text-muted-foreground opacity-40"
-                                      : "text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-950/60",
-                                    eliminarPreventaCliente.isPending &&
-                                      "opacity-50",
-                                  )}
-                                  aria-label="Eliminar preventa del cliente"
-                                  title={
-                                    cliente.cantidadMovimientos > 0
-                                      ? "Tiene movimientos — elimine desde el detalle"
-                                      : "Eliminar registro sin movimientos"
-                                  }
-                                >
-                                  <Trash2 className="size-4" />
-                                </button>
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold tabular-nums whitespace-nowrap">
+                        Q{formatMoney(cliente.saldo)}
+                      </td>
+                      <td className="px-4 py-3 text-center tabular-nums whitespace-nowrap">
+                        <span className="inline-flex rounded-md border border-sky-200 bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-600 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-400">
+                          {cliente.cantidadMovimientos}
+                        </span>
+                      </td>
+                      <td className="px-2 py-3 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1">
+                          {canEliminarPreventa && (
+                            <button
+                              type="button"
+                              disabled={
+                                eliminarPreventaCliente.isPending ||
+                                cliente.cantidadMovimientos > 0
+                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void confirmarEliminarPreventa(cliente);
+                              }}
+                              className={cn(
+                                "inline-flex size-9 items-center justify-center rounded-lg cursor-pointer disabled:cursor-not-allowed",
+                                cliente.cantidadMovimientos > 0
+                                  ? "text-muted-foreground opacity-40"
+                                  : "text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-950/60",
+                                eliminarPreventaCliente.isPending &&
+                                  "opacity-50",
                               )}
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  irCliente(cliente);
-                                }}
-                                className={creditosNavBtn}
-                                aria-label="Entrar"
-                              >
-                                <ChevronRight className="size-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                              aria-label="Eliminar preventa del cliente"
+                              title={
+                                cliente.cantidadMovimientos > 0
+                                  ? "Tiene movimientos — elimine desde el detalle"
+                                  : "Eliminar registro sin movimientos"
+                              }
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              irCliente(cliente);
+                            }}
+                            className={creditosNavBtn}
+                            aria-label="Entrar"
+                          >
+                            <ChevronRight className="size-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
+          )}
+
+          {filtrados.length > 0 && (
+            <TablePagination
+              currentPage={safeCurrentPage}
+              totalPages={totalPages}
+              totalItems={filtrados.length}
+              pageSize={pageSize}
+              onPageSizeChange={setPageSize}
+              onPageChange={setCurrentPage}
+            />
           )}
         </div>
       </div>

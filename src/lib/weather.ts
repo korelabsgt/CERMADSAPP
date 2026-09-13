@@ -95,6 +95,24 @@ export function getWeatherEmoji(code: number) {
   return WEATHER_EMOJI[code] ?? "·";
 }
 
+const weatherCache = new Map<
+  string,
+  {
+    days: Record<number, DayWeather>;
+    summary: WeatherSummary | null;
+    hasForecast: boolean;
+  }
+>();
+
+export function getCachedMonthlyWeather(
+  year: number,
+  month: number,
+  daysInMonth: number,
+) {
+  const key = `${year}-${month}-${daysInMonth}`;
+  return weatherCache.get(key) || null;
+}
+
 export async function fetchMonthlyWeather(
   year: number,
   month: number,
@@ -104,6 +122,12 @@ export async function fetchMonthlyWeather(
   summary: WeatherSummary | null;
   hasForecast: boolean;
 }> {
+  const key = `${year}-${month}-${daysInMonth}`;
+  const cached = weatherCache.get(key);
+  if (cached) {
+    return cached;
+  }
+
   try {
     const params = new URLSearchParams({
       year: String(year),
@@ -111,16 +135,18 @@ export async function fetchMonthlyWeather(
       days: String(daysInMonth),
     });
     const res = await fetch(`/api/weather?${params.toString()}`, {
-      cache: "no-store",
+      cache: "force-cache",
     });
     if (!res.ok) return { days: {}, summary: null, hasForecast: false };
     const data = await res.json();
     const days = data.days ?? {};
-    return {
+    const result = {
       days,
       summary: data.summary ?? null,
       hasForecast: Boolean(data.hasForecast ?? Object.keys(days).length > 0),
     };
+    weatherCache.set(key, result);
+    return result;
   } catch {
     return { days: {}, summary: null, hasForecast: false };
   }

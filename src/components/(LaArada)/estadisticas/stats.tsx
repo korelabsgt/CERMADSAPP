@@ -1,16 +1,24 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback, type ReactNode, type RefObject } from "react";
+import Link from "next/link";
 import {
   TrendingUp,
   CalendarDays,
   Layers,
   Droplets,
+  ArrowLeft,
+  BarChart3,
+  LineChart as LineChartIcon,
+  Scale,
+  TrendingDown,
 } from "lucide-react";
 import {
   BarChart,
   Bar,
   Cell,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -23,20 +31,48 @@ import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
   fetchMonthlyWeather,
+  getCachedMonthlyWeather,
   getWeatherIcon,
   getWeatherEmoji,
   LA_ARADA_LOCATION,
   type DayWeather,
   type WeatherSummary,
 } from "@/lib/weather";
+import { Skeleton } from "@/components/ui/skeleton";
 import { EstadisticasDataSkeleton } from "./estadisticas-skeleton";
 import { PeriodPicker, toPeriodKey } from "./PeriodPicker";
+import BalanceComparativo from "./BalanceComparativo";
+import type { GastoItem } from "@/components/(LaArada)/gastos/lib/zod";
 
 const CHART_COLORS = {
   default: "#4D9FE8",
   max: "#28C07A",
   min: "#E85D5D",
 } as const;
+
+const CHART_TABS = [
+  {
+    id: "balance" as const,
+    label: "Balance",
+    icon: Scale,
+    activeBg: "bg-blue-600 dark:bg-blue-500",
+    activeGlow: "shadow-blue-500/25",
+  },
+  {
+    id: "ingresos" as const,
+    label: "Ingresos",
+    icon: BarChart3,
+    activeBg: "bg-emerald-600 dark:bg-emerald-500",
+    activeGlow: "shadow-emerald-500/25",
+  },
+  {
+    id: "gastos" as const,
+    label: "Egresos",
+    icon: TrendingDown,
+    activeBg: "bg-orange-500 dark:bg-orange-500",
+    activeGlow: "shadow-orange-500/25",
+  },
+] as const;
 const BAR_SIZE_MONTHLY = 32;
 const BAR_SIZE_ANNUAL = 48;
 const BAR_Z_INDEX = 500;
@@ -121,6 +157,71 @@ function createBarAmountLabel(maxValue: number, minValue: number) {
   };
 }
 
+function createGastosBarAmountLabel(maxValue: number, minValue: number) {
+  return function GastosBarAmountLabel(props: LabelProps) {
+    const x = Number(props.x);
+    const y = Number(props.y);
+    const width = Number(props.width);
+    const value = Number(props.value);
+
+    if (
+      Number.isNaN(x) ||
+      Number.isNaN(y) ||
+      Number.isNaN(width) ||
+      !value ||
+      value <= 0
+    ) {
+      return <g />;
+    }
+
+    const isMax = value === maxValue;
+    const isMin = value === minValue && minValue !== maxValue;
+    const color = isMax ? "#EA580C" : isMin ? "#FB923C" : "#F97316";
+    const amount = `-${formatChartPeakAmount(value)}`;
+    const centerX = x + width / 2;
+
+    if (isMax || isMin) {
+      return (
+        <g>
+          <text
+            x={centerX}
+            y={y - 16}
+            textAnchor="middle"
+            fill={color}
+            fontSize={9}
+            fontWeight={900}
+          >
+            {isMax ? "MÁX" : "MÍN"}
+          </text>
+          <text
+            x={centerX}
+            y={y - 4}
+            textAnchor="middle"
+            fill={color}
+            fontSize={10}
+            fontWeight={900}
+          >
+            {amount}
+          </text>
+        </g>
+      );
+    }
+
+    return (
+      <text
+        x={centerX}
+        y={y - 5}
+        textAnchor="middle"
+        fill={color}
+        fontSize={9}
+        fontWeight={900}
+      >
+        {amount}
+      </text>
+    );
+  };
+}
+
 const MONTHS = [
   "Enero",
   "Febrero",
@@ -160,22 +261,39 @@ function CurrencyValue({
   );
 }
 
-export default function Stats({ orders }: { orders: any[] }) {
+type ChartStyle = "balance" | "ingresos" | "gastos";
+
+export default function Stats({
+  orders,
+  gastos = [],
+}: {
+  orders: any[];
+  gastos?: GastoItem[];
+}) {
   const currentMonthIdx = new Date().getMonth();
   const currentYearVal = new Date().getFullYear();
 
   const [viewMode, setViewMode] = useState<"mensual" | "anual">("mensual");
+  const [chartStyle, setChartStyle] = useState<ChartStyle>("balance");
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonthIdx);
   const [selectedYear, setSelectedYear] = useState<number>(currentYearVal);
+  const daysInMonth = useMemo(() => {
+    return new Date(selectedYear, selectedMonth + 1, 0).getDate();
+  }, [selectedMonth, selectedYear]);
+
+  const cachedWeather = useMemo(() => {
+    return getCachedMonthlyWeather(selectedYear, selectedMonth, daysInMonth);
+  }, [selectedYear, selectedMonth, daysInMonth]);
+
   const [weatherByDay, setWeatherByDay] = useState<
     Record<number, DayWeather>
-  >({});
+  >(() => cachedWeather?.days ?? {});
   const [weatherSummary, setWeatherSummary] = useState<WeatherSummary | null>(
-    null,
+    () => cachedWeather?.summary ?? null,
   );
-  const [weatherLoading, setWeatherLoading] = useState(true);
+  const [weatherLoading, setWeatherLoading] = useState(() => !cachedWeather);
   const [weatherHasForecast, setWeatherHasForecast] = useState<boolean | null>(
-    null,
+    () => cachedWeather?.hasForecast ?? null,
   );
   const [expandedBarKey, setExpandedBarKey] = useState<string | null>(null);
   const mobileScrollRef = useRef<HTMLDivElement>(null);
@@ -184,15 +302,21 @@ export default function Stats({ orders }: { orders: any[] }) {
   );
   const [weatherTooltipPos, setWeatherTooltipPos] = useState({ x: 0, y: 0 });
 
-  const daysInMonth = useMemo(() => {
-    return new Date(selectedYear, selectedMonth + 1, 0).getDate();
-  }, [selectedMonth, selectedYear]);
-
   useEffect(() => {
     if (viewMode !== "mensual") {
       setWeatherByDay({});
       setWeatherSummary(null);
       setWeatherHasForecast(null);
+      setWeatherLoading(false);
+      return;
+    }
+
+    const cached = getCachedMonthlyWeather(selectedYear, selectedMonth, daysInMonth);
+    if (cached) {
+      setWeatherByDay(cached.days);
+      setWeatherSummary(cached.summary);
+      setWeatherHasForecast(cached.hasForecast);
+      setWeatherLoading(false);
       return;
     }
 
@@ -240,8 +364,19 @@ export default function Stats({ orders }: { orders: any[] }) {
       const date = new Date(dateString);
       periods.add(toPeriodKey(date.getFullYear(), date.getMonth()));
     });
+    gastos.forEach((g: GastoItem) => {
+      if (!g.fecha) return;
+      let dateString = g.fecha;
+      if (typeof dateString === "string" && dateString.length === 10) {
+        dateString = `${dateString}T12:00:00`;
+      }
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        periods.add(toPeriodKey(date.getFullYear(), date.getMonth()));
+      }
+    });
     return periods;
-  }, [validOrders]);
+  }, [validOrders, gastos]);
 
   const yearsWithData = useMemo(() => {
     const years = new Set<number>();
@@ -435,13 +570,81 @@ export default function Stats({ orders }: { orders: any[] }) {
     ? yearlyInfo?.totalYear || 0
     : chartInfo.total;
 
+  const gastosDayMap = useMemo(() => {
+    const map: Record<number, number> = {};
+    if (!gastos || isAnual) return map;
+    gastos.forEach((g) => {
+      if (!g.fecha) return;
+      const parts = String(g.fecha).split("T")[0].split("-");
+      if (parts.length === 3) {
+        const y = Number(parts[0]);
+        const m = Number(parts[1]) - 1;
+        const d = Number(parts[2]);
+        if (y === selectedYear && m === selectedMonth) {
+          map[d] = (map[d] || 0) + Number(g.cantidad || 0);
+        }
+      }
+    });
+    return map;
+  }, [gastos, selectedYear, selectedMonth, isAnual]);
+
+  const gastosMesMap = useMemo(() => {
+    const map: Record<number, number> = {};
+    if (!gastos) return map;
+    gastos.forEach((g) => {
+      if (!g.fecha) return;
+      const parts = String(g.fecha).split("T")[0].split("-");
+      if (parts.length === 3) {
+        const y = Number(parts[0]);
+        const m = Number(parts[1]) - 1;
+        if (y === selectedYear) {
+          map[m] = (map[m] || 0) + Number(g.cantidad || 0);
+        }
+      }
+    });
+    return map;
+  }, [gastos, selectedYear]);
+
+  const totalGastosPeriodo = useMemo(() => {
+    if (isAnual) {
+      return Object.values(gastosMesMap).reduce((acc, v) => acc + v, 0);
+    }
+    return Object.values(gastosDayMap).reduce((acc, v) => acc + v, 0);
+  }, [isAnual, gastosMesMap, gastosDayMap]);
+
+  const balancePeriodo = totalRevenue - totalGastosPeriodo;
+
+  const maxGasto = useMemo(() => {
+    if (isAnual) {
+      const vals = Object.values(gastosMesMap);
+      return vals.length > 0 ? Math.max(...vals, 0) : 0;
+    }
+    const vals = Object.values(gastosDayMap);
+    return vals.length > 0 ? Math.max(...vals, 0) : 0;
+  }, [isAnual, gastosMesMap, gastosDayMap]);
+
   const chartDataWithWeather = useMemo(() => {
-    if (isAnual) return currentGraphData;
-    return currentGraphData.map((d: { name: string; total: number }) => ({
-      ...d,
-      weather: weatherByDay[Number(d.name)] ?? null,
-    }));
-  }, [currentGraphData, isAnual, weatherByDay]);
+    if (isAnual) {
+      return (currentGraphData || []).map((d: any, idx: number) => {
+        const g = gastosMesMap[idx] || 0;
+        return {
+          ...d,
+          gastos: g,
+          balance: Number(d.total || 0) - g,
+        };
+      });
+    }
+    return (currentGraphData || []).map((d: any) => {
+      const dayNum = Number(d.name);
+      const g = gastosDayMap[dayNum] || 0;
+      return {
+        ...d,
+        gastos: g,
+        balance: Number(d.total || 0) - g,
+        weather: weatherByDay[dayNum] ?? null,
+      };
+    });
+  }, [currentGraphData, isAnual, weatherByDay, gastosDayMap, gastosMesMap]);
 
   useEffect(() => {
     mobileScrollRef.current?.scrollTo({ top: 0, behavior: "instant" });
@@ -455,14 +658,49 @@ export default function Stats({ orders }: { orders: any[] }) {
     [currentMax, currentMin],
   );
 
+  const gastosStats = useMemo(() => {
+    const rawVals = isAnual
+      ? Object.values(gastosMesMap)
+      : Object.values(gastosDayMap);
+    const positiveVals = rawVals.filter((v) => v > 0);
+    const max = positiveVals.length > 0 ? Math.max(...positiveVals) : 0;
+    const min = positiveVals.length > 0 ? Math.min(...positiveVals) : 0;
+    const total = totalGastosPeriodo;
+    const avg =
+      positiveVals.length > 0
+        ? total / positiveVals.length
+        : 0;
+    return { max, min, total, avg };
+  }, [isAnual, gastosMesMap, gastosDayMap, totalGastosPeriodo]);
+
+  const totalGastosAnual = useMemo(() => {
+    return Object.values(gastosMesMap).reduce((acc, v) => acc + v, 0);
+  }, [gastosMesMap]);
+
+  const gastosYearlyAvg = totalGastosAnual / 12;
+  const gastosMonthlyCalendarAvg =
+    daysInMonth > 0 ? totalGastosPeriodo / daysInMonth : 0;
+
+  const gastosBarAmountLabel = useMemo(
+    () => createGastosBarAmountLabel(gastosStats.max, gastosStats.min),
+    [gastosStats.max, gastosStats.min],
+  );
+
   const chartYMax = useMemo(() => {
-    const peak = Math.max(currentMax, currentAvg, 1);
-    const padded = peak * 1.1;
+    let peak = 1;
+    if (chartStyle === "gastos") {
+      peak = Math.max(gastosStats.max, gastosStats.avg, 1);
+    } else if (chartStyle === "balance") {
+      peak = Math.max(currentMax, maxGasto, currentAvg, 1);
+    } else {
+      peak = Math.max(currentMax, currentAvg, 1);
+    }
+    const padded = peak * 1.15;
     if (padded <= 10_000) return Math.ceil(padded / 2_000) * 2_000;
     if (padded <= 50_000) return Math.ceil(padded / 5_000) * 5_000;
     if (padded <= 200_000) return Math.ceil(padded / 10_000) * 10_000;
     return Math.ceil(padded / 50_000) * 50_000;
-  }, [currentMax, currentAvg]);
+  }, [currentMax, maxGasto, currentAvg, chartStyle, gastosStats]);
 
   const weatherAxisHeight = isAnual ? 28 : 52;
   const desktopChartHeight = isAnual ? 400 : 430;
@@ -479,14 +717,26 @@ export default function Stats({ orders }: { orders: any[] }) {
     setHoveredWeatherDay(null);
   }, []);
 
-  const showDataSkeleton = !isAnual && weatherLoading;
+  const showDataSkeleton = false;
 
   return (
     <div className="w-full flex flex-col gap-3 relative text-foreground animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center shrink-0 gap-2">
-        <div className="flex items-center justify-center sm:justify-start gap-2 text-orange-500 font-bold uppercase text-xs tracking-widest">
-          <TrendingUp className="size-3.5 shrink-0" />
-          <span>Ingresos y Ventas</span>
+        <div className="flex items-center justify-center sm:justify-start gap-3">
+          <Link
+            href="/cermadsa/laarada"
+            className="group inline-flex shrink-0 items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
+          >
+            <ArrowLeft className="size-4.5 transition-transform group-hover:-translate-x-0.5" />
+            <span className="text-xs font-bold uppercase tracking-widest">
+              Volver
+            </span>
+          </Link>
+          <div className="h-4 w-px bg-border/60" />
+          <div className="flex items-center gap-2 text-orange-600 dark:text-orange-500 font-bold uppercase text-xs md:text-sm tracking-widest">
+            <TrendingUp className="size-4 shrink-0 text-orange-500" />
+            <span>Análisis de Operaciones</span>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto">
@@ -534,231 +784,16 @@ export default function Stats({ orders }: { orders: any[] }) {
         <EstadisticasDataSkeleton />
       ) : (
         <>
-        <div className="rounded-lg border border-border/50 overflow-hidden shrink-0">
-        {/* Móvil: layout vertical de ancho completo */}
-        <div className="md:hidden flex flex-col">
-          <div className="px-4 py-5 border-b border-border/40 bg-muted/20">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-              {isAnual
-                ? `Ingresos ${selectedYear}`
-                : `Ingresos ${MONTHS[selectedMonth]}`}
-            </p>
-            <div className="text-4xl font-bold tabular-nums mt-2 leading-none">
-              <CurrencyValue amount={totalRevenue} />
-            </div>
-          </div>
-
-          {!isAnual && (
-            <div className="grid grid-cols-3 divide-x divide-border/40 border-b border-border/40 bg-background">
-              <MobilePromStat
-                label="Prom. activo"
-                hint="c/ventas"
-                value={
-                  <CurrencyValue
-                    amount={currentAvg}
-                    className="text-orange-500"
-                  />
-                }
-              />
-              <MobilePromStat
-                label="Prom. mes"
-                hint={`${daysInMonth}d`}
-                value={
-                  <CurrencyValue amount={monthlyCalendarAvg} />
-                }
-              />
-              <MobilePromStat
-                label="Prom. anual"
-                hint="/mes"
-                value={
-                  <CurrencyValue amount={yearlyInfo?.avgYear || 0} />
-                }
-              />
-            </div>
-          )}
-
-          {isAnual && (
-            <div className="px-4 py-4 border-b border-border/40">
-              <MiniStat
-                label="Promedio mensual"
-                value={
-                  <CurrencyValue
-                    amount={currentAvg}
-                    className="text-orange-500 text-lg"
-                  />
-                }
-              />
-            </div>
-          )}
-
-          <div className="divide-y divide-border/40">
-            <MobileMetricRow
-              label={isAnual ? "Mes máximo" : "Día máximo"}
-              hint={
-                isAnual
-                  ? yearlyInfo?.highestMonth?.name || "N/A"
-                  : chartInfo.maxDayLabel
-              }
-              value={
-                <CurrencyValue amount={currentMax} className="text-[#28C07A]" />
-              }
-            />
-            <MobileMetricRow
-              label={isAnual ? "Mes mínimo" : "Día mínimo"}
-              hint={
-                isAnual
-                  ? yearlyInfo?.lowestMonth?.name || "N/A"
-                  : chartInfo.minDayLabel
-              }
-              value={
-                <CurrencyValue amount={currentMin} className="text-[#E85D5D]" />
-              }
-            />
-            <MobileMetricRow
-              label="Mejor mes"
-              hint={yearlyInfo?.highestMonth?.name || "N/A"}
-              value={
-                <CurrencyValue
-                  amount={yearlyInfo?.highestMonth?.total || 0}
-                  className="text-[#28C07A]"
-                />
-              }
-            />
-            <MobileMetricRow
-              label="Peor mes"
-              hint={yearlyInfo?.lowestMonth?.name || "N/A"}
-              value={
-                <CurrencyValue
-                  amount={yearlyInfo?.lowestMonth?.total || 0}
-                  className="text-[#E85D5D]"
-                />
-              }
-            />
-          </div>
-
-          {!isAnual && (
-            <WeatherSummaryBanner
-              summary={weatherSummary}
-              hasForecast={weatherHasForecast}
-              daysInMonth={daysInMonth}
-            />
-          )}
-        </div>
-
-        {/* Escritorio: grid de 6 columnas */}
-        <div className="hidden md:grid lg:grid-cols-6 divide-x divide-border/40 items-start">
-          <div className="col-span-2 px-4 py-2.5 flex flex-col gap-2">
-            <div>
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
-                {isAnual
-                  ? `Ingresos ${selectedYear}`
-                  : `Ingresos ${MONTHS[selectedMonth]}`}
-              </p>
-              <div className="text-2xl md:text-3xl font-bold tabular-nums mt-1">
-                <CurrencyValue amount={totalRevenue} />
-              </div>
-            </div>
-            {!isAnual && (
-              <div className="grid grid-cols-3 gap-2">
-                <MiniStat
-                  label="Prom. activo"
-                  value={
-                    <CurrencyValue
-                      amount={currentAvg}
-                      className="text-orange-500 text-sm"
-                    />
-                  }
-                  hint="c/ventas"
-                />
-                <MiniStat
-                  label="Prom. mes"
-                  value={
-                    <CurrencyValue
-                      amount={monthlyCalendarAvg}
-                      className="text-sm"
-                    />
-                  }
-                  hint={`${daysInMonth}d`}
-                />
-                <MiniStat
-                  label="Prom. anual"
-                  value={
-                    <CurrencyValue
-                      amount={yearlyInfo?.avgYear || 0}
-                      className="text-sm"
-                    />
-                  }
-                  hint="/mes"
-                />
-              </div>
-            )}
-            {isAnual && (
-              <MiniStat
-                label="Promedio mensual"
-                value={
-                  <CurrencyValue
-                    amount={currentAvg}
-                    className="text-orange-500"
-                  />
-                }
-              />
-            )}
-          </div>
-
-          <MetricCell
-            label={isAnual ? "Mes máximo" : "Día máximo"}
-            hint={
-              isAnual
-                ? yearlyInfo?.highestMonth?.name || "N/A"
-                : chartInfo.maxDayLabel
-            }
-            value={
-              <CurrencyValue amount={currentMax} className="text-[#28C07A]" />
-            }
-          />
-          <MetricCell
-            label={isAnual ? "Mes mínimo" : "Día mínimo"}
-            hint={
-              isAnual
-                ? yearlyInfo?.lowestMonth?.name || "N/A"
-                : chartInfo.minDayLabel
-            }
-            value={
-              <CurrencyValue amount={currentMin} className="text-[#E85D5D]" />
-            }
-          />
-          <MetricCell
-            label="Mejor mes"
-            hint={yearlyInfo?.highestMonth?.name || "N/A"}
-            value={
-              <CurrencyValue
-                amount={yearlyInfo?.highestMonth?.total || 0}
-                className="text-[#28C07A]"
-              />
-            }
-          />
-          <MetricCell
-            label="Peor mes"
-            hint={yearlyInfo?.lowestMonth?.name || "N/A"}
-            value={
-              <CurrencyValue
-                amount={yearlyInfo?.lowestMonth?.total || 0}
-                className="text-[#E85D5D]"
-              />
-            }
-          />
-        </div>
-
         {!isAnual && (
-          <div className="hidden md:block">
+          <div className="rounded-lg border border-border/50 overflow-hidden shrink-0">
             <WeatherSummaryBanner
               summary={weatherSummary}
               hasForecast={weatherHasForecast}
               daysInMonth={daysInMonth}
+              loading={weatherLoading}
             />
           </div>
         )}
-      </div>
 
       <div className="w-full bg-background rounded-xl p-3 md:p-4 border border-border/50 relative shadow-sm">
         {hoveredWeatherDay !== null && weatherByDay[hoveredWeatherDay] && (
@@ -772,11 +807,351 @@ export default function Stats({ orders }: { orders: any[] }) {
             />
           </div>
         )}
-        {currentGraphData.length === 0 ? (
-          <div className="h-[min(65vh,480px)] md:min-h-[420px] flex items-center justify-center text-muted-foreground font-bold uppercase border-2 border-dashed border-border rounded-xl text-center px-4 text-sm">
-            Sin entregas registradas en este periodo
+        {/* Header con Switch de Gráfica: Balance (azul), Ingresos (verde), Egresos (naranja) */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 mb-3 pb-2.5 border-b border-border/40">
+          <div className="flex items-center gap-3">
+            {chartStyle === "balance" ? (
+              <div className="flex flex-wrap items-center gap-2.5 font-bold text-xs">
+                <div className="hidden sm:flex items-center gap-1.5 text-blue-600 dark:text-blue-400 uppercase tracking-wider text-[11px] font-black">
+                  <Scale className="size-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>Balance</span>
+                  <span className="text-muted-foreground/40 font-normal">|</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[#10B981]">
+                  <span className="size-2.5 rounded-full bg-[#10B981] ring-2 ring-[#10B981]/20" />
+                  <span>Ingresos (Ventas)</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[#F97316]">
+                  <span className="size-2.5 rounded-full bg-[#F97316] ring-2 ring-[#F97316]/20" />
+                  <span>Egresos (Gastos)</span>
+                </div>
+              </div>
+            ) : chartStyle === "ingresos" ? (
+              <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 text-[11px]">
+                <BarChart3 className="size-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Gráfica de Ingresos</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 text-[11px]">
+                <TrendingDown className="size-4 text-orange-500" />
+                <span>Gráfica de Egresos</span>
+              </div>
+            )}
           </div>
-        ) : (
+
+          <div className="relative flex items-center bg-muted/60 p-1 rounded-xl border border-border/50 shadow-xs">
+            {CHART_TABS.map((tab) => {
+              const isActive = chartStyle === tab.id;
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setChartStyle(tab.id)}
+                  className="relative px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer select-none"
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeChartTabPill"
+                      className={cn(
+                        "absolute inset-0 rounded-lg shadow-sm transition-colors duration-300",
+                        tab.activeBg,
+                        tab.activeGlow,
+                      )}
+                      transition={{
+                        type: "spring",
+                        stiffness: 450,
+                        damping: 32,
+                      }}
+                    />
+                  )}
+                  <span
+                    className={cn(
+                      "relative z-10 flex items-center gap-1.5 transition-colors duration-200",
+                      isActive
+                        ? "text-white font-black"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Icon className="size-3.5" />
+                    <span>{tab.label}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={chartStyle}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+            className="w-full"
+          >
+            {currentGraphData.length === 0 && (chartStyle !== "gastos" || totalGastosPeriodo === 0) ? (
+              <div className="h-[min(65vh,480px)] md:min-h-[420px] flex items-center justify-center text-muted-foreground font-bold uppercase border-2 border-dashed border-border rounded-xl text-center px-4 text-sm">
+                Sin entregas registradas en este periodo
+              </div>
+            ) : chartStyle === "balance" ? (
+              <>
+                {/* Resumen Superior para Vista Balance */}
+                <div className="w-full flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:gap-x-8 mb-2 text-[11px] font-black uppercase tracking-wider text-center">
+                  <span className="text-[#10B981] inline-flex items-baseline gap-1">
+                    Ingresos:
+                    <CurrencyValue amount={totalRevenue} />
+                  </span>
+                  <span className="text-[#F97316] inline-flex items-baseline gap-1">
+                    Egresos:
+                    <CurrencyValue amount={totalGastosPeriodo} />
+                  </span>
+                  <span
+                    className={cn(
+                      "inline-flex items-baseline gap-1 px-2 py-0.5 rounded-md font-bold",
+                      balancePeriodo >= 0
+                        ? "text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-500/20"
+                        : "text-orange-600 dark:text-orange-400 bg-orange-500/10 border border-orange-500/20",
+                    )}
+                  >
+                    Balance:
+                    {balancePeriodo >= 0 ? "+" : ""}
+                    <CurrencyValue amount={balancePeriodo} />
+                  </span>
+                </div>
+
+            {/* Móvil: Scroll horizontal para apreciar con claridad todos los puntos y clima */}
+            <div className="md:hidden w-full overflow-x-auto pb-2 -mx-1 px-1">
+              {!isAnual && (
+                <p className="text-[10px] text-muted-foreground font-medium mb-1 flex items-center gap-1">
+                  👉 Desliza para explorar todos los días y clima
+                </p>
+              )}
+              <div
+                style={{
+                  width: isAnual ? "100%" : `${Math.max(daysInMonth * 26, 680)}px`,
+                  height: 380,
+                }}
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={chartDataWithWeather}
+                    margin={{
+                      top: 24,
+                      right: 18,
+                      left: 0,
+                      bottom: 8,
+                    }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="4 4"
+                      vertical
+                      horizontal
+                      stroke="#88888828"
+                    />
+                    <XAxis
+                      dataKey="name"
+                      height={weatherAxisHeight}
+                      tickMargin={0}
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tick={
+                        !isAnual
+                          ? (props) => (
+                              <WeatherAxisTick
+                                {...props}
+                                weatherByDay={weatherByDay}
+                                onHover={handleWeatherHover}
+                                onLeave={handleWeatherLeave}
+                              />
+                            )
+                          : { fill: "#888", fontWeight: "900", dy: 10 }
+                      }
+                      interval={0}
+                    />
+                    <YAxis
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
+                      domain={[0, chartYMax]}
+                      tick={{ fill: "#888", fontWeight: "900" }}
+                      tickFormatter={(val) => formatCompactMoney(val)}
+                    />
+                    <Tooltip
+                      cursor={{
+                        stroke: "#88888860",
+                        strokeDasharray: "3 3",
+                        strokeWidth: 1,
+                      }}
+                      offset={28}
+                      wrapperStyle={{ zIndex: 50, outline: "none" }}
+                      content={
+                        <ChartTooltipContent
+                          isAnual={isAnual}
+                          selectedMonth={selectedMonth}
+                          selectedYear={selectedYear}
+                          chartType="balance"
+                        />
+                      }
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="gastos"
+                      name="Egresos"
+                      stroke="#F97316"
+                      strokeWidth={2.5}
+                      dot={{
+                        r: 3.5,
+                        strokeWidth: 2,
+                        fill: "#F97316",
+                        stroke: "#ffffff",
+                      }}
+                      activeDot={{
+                        r: 6,
+                        strokeWidth: 2,
+                        fill: "#F97316",
+                        stroke: "#ffffff",
+                      }}
+                      isAnimationActive={false}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="total"
+                      name="Ingresos"
+                      stroke="#10B981"
+                      strokeWidth={2.5}
+                      dot={{
+                        r: 3.5,
+                        strokeWidth: 2,
+                        fill: "#10B981",
+                        stroke: "#ffffff",
+                      }}
+                      activeDot={{
+                        r: 6,
+                        strokeWidth: 2,
+                        fill: "#10B981",
+                        stroke: "#ffffff",
+                      }}
+                      isAnimationActive={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Escritorio: Ancho completo */}
+            <div className="hidden md:block w-full" style={{ height: desktopChartHeight }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={chartDataWithWeather}
+                  margin={{
+                    top: 24,
+                    right: 24,
+                    left: 8,
+                    bottom: 8,
+                  }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="4 4"
+                    vertical
+                    horizontal
+                    stroke="#88888828"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    height={weatherAxisHeight}
+                    tickMargin={0}
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tick={
+                      !isAnual
+                        ? (props) => (
+                            <WeatherAxisTick
+                              {...props}
+                              weatherByDay={weatherByDay}
+                              onHover={handleWeatherHover}
+                              onLeave={handleWeatherLeave}
+                            />
+                          )
+                        : { fill: "#888", fontWeight: "900", dy: 10 }
+                    }
+                    interval={0}
+                  />
+                  <YAxis
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    domain={[0, chartYMax]}
+                    tick={{ fill: "#888", fontWeight: "900" }}
+                    tickFormatter={(val) =>
+                      `Q${Number(val).toLocaleString("en-US")}`
+                    }
+                  />
+                  <Tooltip
+                    cursor={{
+                      stroke: "#88888860",
+                      strokeDasharray: "3 3",
+                      strokeWidth: 1,
+                    }}
+                    offset={28}
+                    wrapperStyle={{ zIndex: 50, outline: "none" }}
+                    content={
+                      <ChartTooltipContent
+                        isAnual={isAnual}
+                        selectedMonth={selectedMonth}
+                        selectedYear={selectedYear}
+                        chartType="balance"
+                      />
+                    }
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="gastos"
+                    name="Egresos"
+                    stroke="#F97316"
+                    strokeWidth={2.75}
+                    dot={{
+                      r: 3.5,
+                      strokeWidth: 2,
+                      fill: "#F97316",
+                      stroke: "#ffffff",
+                    }}
+                    activeDot={{
+                      r: 6.5,
+                      strokeWidth: 2.5,
+                      fill: "#F97316",
+                      stroke: "#ffffff",
+                    }}
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="total"
+                    name="Ingresos"
+                    stroke="#10B981"
+                    strokeWidth={2.75}
+                    dot={{
+                      r: 3.5,
+                      strokeWidth: 2,
+                      fill: "#10B981",
+                      stroke: "#ffffff",
+                    }}
+                    activeDot={{
+                      r: 6.5,
+                      strokeWidth: 2.5,
+                      fill: "#10B981",
+                      stroke: "#ffffff",
+                    }}
+                    isAnimationActive={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        ) : chartStyle === "ingresos" ? (
           <>
             <div className="md:hidden w-full">
               <MobileBarChart
@@ -790,6 +1165,7 @@ export default function Stats({ orders }: { orders: any[] }) {
                 expandedKey={expandedBarKey}
                 onToggleExpand={setExpandedBarKey}
                 scrollRef={mobileScrollRef}
+                variant="ingresos"
               />
             </div>
 
@@ -874,6 +1250,7 @@ export default function Stats({ orders }: { orders: any[] }) {
                         isAnual={isAnual}
                         selectedMonth={selectedMonth}
                         selectedYear={selectedYear}
+                        chartType="ingresos"
                       />
                     }
                   />
@@ -915,7 +1292,153 @@ export default function Stats({ orders }: { orders: any[] }) {
               </div>
             </div>
           </>
+        ) : (
+          <>
+            {/* View 3: Gastos (BarChart con números negativos en el eje Y) */}
+            <div className="md:hidden w-full">
+              <MobileBarChart
+                data={chartDataWithWeather}
+                max={gastosStats.max}
+                min={gastosStats.min}
+                avg={gastosStats.avg}
+                isAnual={isAnual}
+                selectedMonth={selectedMonth}
+                weatherByDay={weatherByDay}
+                expandedKey={expandedBarKey}
+                onToggleExpand={setExpandedBarKey}
+                scrollRef={mobileScrollRef}
+                variant="gastos"
+              />
+            </div>
+
+            <div className="hidden md:block w-full">
+              {(gastosStats.max > 0 || gastosStats.min > 0 || gastosStats.avg > 0) && (
+                <div className="w-full flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:gap-x-8 mb-2 text-[11px] font-black uppercase tracking-wider text-center">
+                  {gastosStats.max > 0 && (
+                    <span className="text-[#EA580C] inline-flex items-baseline gap-1">
+                      Max:
+                      <span>-Q{formatMoneyAmount(gastosStats.max)}</span>
+                    </span>
+                  )}
+                  {gastosStats.min > 0 && (
+                    <span className="text-[#FB923C] inline-flex items-baseline gap-1">
+                      Min:
+                      <span>-Q{formatMoneyAmount(gastosStats.min)}</span>
+                    </span>
+                  )}
+                  {gastosStats.avg > 0 && (
+                    <span className="text-[#F97316] inline-flex items-baseline gap-1">
+                      Prom:
+                      <span>-Q{formatMoneyAmount(gastosStats.avg)}</span>
+                    </span>
+                  )}
+                </div>
+              )}
+              <div className="w-full" style={{ height: desktopChartHeight }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={chartDataWithWeather}
+                    margin={{
+                      top: 24,
+                      right: 24,
+                      left: 8,
+                      bottom: 8,
+                    }}
+                    barCategoryGap={!isAnual ? "6%" : "12%"}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="4 4"
+                      vertical
+                      horizontal
+                      stroke="#88888828"
+                    />
+                    <XAxis
+                      dataKey="name"
+                      height={weatherAxisHeight}
+                      tickMargin={0}
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tick={
+                        !isAnual
+                          ? (props) => (
+                              <WeatherAxisTick
+                                {...props}
+                                weatherByDay={weatherByDay}
+                                onHover={handleWeatherHover}
+                                onLeave={handleWeatherLeave}
+                              />
+                            )
+                          : { fill: "#888", fontWeight: "900", dy: 10 }
+                      }
+                      interval={0}
+                    />
+                    <YAxis
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      domain={[0, chartYMax]}
+                      tick={{ fill: "#888", fontWeight: "900" }}
+                      tickFormatter={(val) =>
+                        Number(val) === 0
+                          ? "Q0"
+                          : `-Q${Number(val).toLocaleString("en-US")}`
+                      }
+                    />
+                    <Tooltip
+                      cursor={{ fill: `#F9731618` }}
+                      offset={28}
+                      wrapperStyle={{ zIndex: 50, outline: "none" }}
+                      content={
+                        <ChartTooltipContent
+                          isAnual={isAnual}
+                          selectedMonth={selectedMonth}
+                          selectedYear={selectedYear}
+                          chartType="gastos"
+                        />
+                      }
+                    />
+                    <Bar
+                      dataKey="gastos"
+                      radius={[4, 4, 0, 0]}
+                      maxBarSize={barSize}
+                      minPointSize={2}
+                      isAnimationActive={false}
+                      activeBar={false}
+                      zIndex={BAR_Z_INDEX}
+                    >
+                      {chartDataWithWeather.map((entry, index) => {
+                        const hasGasto = (entry.gastos || 0) > 0;
+                        const isMax = hasGasto && entry.gastos === gastosStats.max;
+                        const isMin = hasGasto && entry.gastos === gastosStats.min;
+                        return (
+                          <Cell
+                            key={`bar-gasto-${index}`}
+                            fill={
+                              !hasGasto
+                                ? "transparent"
+                                : isMax
+                                  ? "#EA580C"
+                                  : isMin
+                                    ? "#FB923C"
+                                    : "#F97316"
+                            }
+                          />
+                        );
+                      })}
+                      <LabelList
+                        dataKey="gastos"
+                        content={gastosBarAmountLabel}
+                      />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </>
         )}
+          </motion.div>
+        </AnimatePresence>
         {!isAnual && !weatherLoading && weatherHasForecast === false && (
           <ChartClimateFooter variant="empty">
             Aún no hay pronóstico de clima disponible para {MONTHS[selectedMonth]}{" "}
@@ -926,78 +1449,18 @@ export default function Stats({ orders }: { orders: any[] }) {
           <ChartClimateFooter />
         )}
       </div>
+
+      <BalanceComparativo
+        viewMode={viewMode}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+        orders={validOrders}
+        gastos={gastos}
+        daysInMonth={daysInMonth}
+        monthsList={MONTHS}
+      />
         </>
       )}
-    </div>
-  );
-}
-
-function MiniStat({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: ReactNode;
-  hint?: string;
-}) {
-  return (
-    <div className="min-w-0">
-      <p className="text-[9px] uppercase tracking-wider text-muted-foreground truncate">
-        {label}
-      </p>
-      <div className="font-bold tabular-nums mt-0.5 truncate">{value}</div>
-      {hint && (
-        <p className="text-[9px] text-muted-foreground/70 truncate">{hint}</p>
-      )}
-    </div>
-  );
-}
-
-function MobilePromStat({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: ReactNode;
-  hint?: string;
-}) {
-  return (
-    <div className="min-w-0 px-2 py-3 text-center">
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground leading-tight">
-        {label}
-      </p>
-      <div className="text-xs font-bold tabular-nums mt-1 leading-tight">{value}</div>
-      {hint && (
-        <p className="text-[10px] text-muted-foreground/70 mt-0.5">{hint}</p>
-      )}
-    </div>
-  );
-}
-
-function MobileMetricRow({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: ReactNode;
-  hint?: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3 px-4 py-3">
-      <div className="min-w-0 flex-1">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold leading-tight">
-          {label}
-        </p>
-        {hint && (
-          <p className="text-xs text-muted-foreground/80 mt-0.5 leading-snug">
-            {hint}
-          </p>
-        )}
-      </div>
-      <div className="text-xs font-bold tabular-nums shrink-0 text-right">{value}</div>
     </div>
   );
 }
@@ -1006,14 +1469,28 @@ function WeatherSummaryBanner({
   summary,
   hasForecast,
   daysInMonth,
+  loading,
 }: {
   summary: WeatherSummary | null;
   hasForecast: boolean | null;
   daysInMonth: number;
+  loading?: boolean;
 }) {
+  if (loading) {
+    return (
+      <div className="px-4 md:px-5 py-3 md:py-4 bg-muted/20 flex items-center gap-3.5">
+        <Skeleton className="size-12 md:size-14 rounded-2xl shrink-0" />
+        <div className="space-y-2 flex-1">
+          <Skeleton className="h-3 w-36" />
+          <Skeleton className="h-5 w-28" />
+        </div>
+      </div>
+    );
+  }
+
   if (!summary || !hasForecast) {
     return (
-      <div className="border-t border-border/40 px-4 md:px-5 py-3 md:py-4 bg-muted/20">
+      <div className="px-4 md:px-5 py-3 md:py-4 bg-muted/20">
         <p className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground font-medium leading-tight">
           <span className="text-muted-foreground">—</span>
           Clima · {LA_ARADA_LOCATION}
@@ -1031,7 +1508,7 @@ function WeatherSummaryBanner({
   const Icon = getWeatherIcon(summary.dominantCode);
 
   return (
-    <div className="border-t border-border/40 px-4 md:px-5 py-4 md:py-4 bg-gradient-to-r from-sky-500/[0.07] via-sky-500/[0.03] to-transparent flex items-center gap-3.5 md:items-start md:gap-5">
+    <div className="px-4 md:px-5 py-4 md:py-4 bg-gradient-to-r from-sky-500/[0.07] via-sky-500/[0.03] to-transparent flex items-center gap-3.5 md:items-start md:gap-5">
       <div className="size-12 md:size-14 shrink-0 rounded-2xl bg-sky-500/15 border border-sky-500/20 flex items-center justify-center">
         <Icon className="size-6 md:size-7 text-sky-500" strokeWidth={2} />
       </div>
@@ -1068,32 +1545,6 @@ function WeatherSummaryBanner({
   );
 }
 
-function MetricCell({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: ReactNode;
-  hint?: string;
-}) {
-  return (
-    <div className="px-3 py-2 min-w-0 flex flex-col">
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium truncate leading-tight">
-        {label}
-      </p>
-      <div className="text-base font-bold tabular-nums mt-0.5 truncate leading-tight">
-        {value}
-      </div>
-      {hint && (
-        <p className="text-[10px] text-muted-foreground/80 mt-0.5 truncate leading-tight">
-          {hint}
-        </p>
-      )}
-    </div>
-  );
-}
-
 function MobileBarChart({
   data,
   max,
@@ -1105,10 +1556,12 @@ function MobileBarChart({
   expandedKey,
   onToggleExpand,
   scrollRef,
+  variant = "ingresos",
 }: {
   data: Array<{
     name: string;
     total: number;
+    gastos?: number;
     fullName?: string;
     weather?: DayWeather | null;
   }>;
@@ -1121,22 +1574,26 @@ function MobileBarChart({
   expandedKey: string | null;
   onToggleExpand: (key: string | null) => void;
   scrollRef: RefObject<HTMLDivElement | null>;
+  variant?: "ingresos" | "gastos";
 }) {
+  const isGastos = variant === "gastos";
   const scaleMax = max > 0 ? max : 1;
 
   return (
     <div className="space-y-2">
       {max > 0 && (
         <div className="w-full flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 px-1 text-xs font-bold uppercase tracking-wide text-center text-muted-foreground">
-          <span className="text-[#28C07A]">
-            Max Q{formatCompactMoney(max)}
+          <span className={isGastos ? "text-[#EA580C]" : "text-[#28C07A]"}>
+            Max {isGastos ? "-" : ""}Q{formatCompactMoney(max)}
           </span>
           {min > 0 && (
-            <span className="text-[#E85D5D]">Min Q{formatCompactMoney(min)}</span>
+            <span className={isGastos ? "text-[#FB923C]" : "text-[#E85D5D]"}>
+              Min {isGastos ? "-" : ""}Q{formatCompactMoney(min)}
+            </span>
           )}
           {avg > 0 && (
-            <span className="text-[#4D9FE8]">
-              Prom Q{formatCompactMoney(avg)}
+            <span className={isGastos ? "text-[#F97316]" : "text-[#4D9FE8]"}>
+              Prom {isGastos ? "-" : ""}Q{formatCompactMoney(avg)}
             </span>
           )}
         </div>
@@ -1151,12 +1608,13 @@ function MobileBarChart({
           const day = Number(entry.name);
           const weather =
             entry.weather ?? (!isAnual ? weatherByDay[day] : null);
-          const hasSales = entry.total > 0;
-          const barPct = hasSales
-            ? Math.max((entry.total / scaleMax) * 100, 4)
+          const val = isGastos ? Number(entry.gastos || 0) : entry.total;
+          const hasVal = val > 0;
+          const barPct = hasVal
+            ? Math.max((val / scaleMax) * 100, 4)
             : 0;
-          const isMax = hasSales && entry.total === max;
-          const isMin = hasSales && entry.total === min;
+          const isMax = hasVal && val === max;
+          const isMin = hasVal && val === min;
           const isExpanded = expandedKey === key;
 
           return (
@@ -1167,7 +1625,7 @@ function MobileBarChart({
                 className={cn(
                   "w-full flex items-center gap-2 py-1.5 px-2 text-left transition-colors duration-200",
                   isExpanded ? "bg-muted/60" : "active:bg-muted/40",
-                  hasSales && "bg-[#4D9FE8]/8",
+                  hasVal && (isGastos ? "bg-orange-500/8" : "bg-[#4D9FE8]/8"),
                 )}
               >
                 <div className="flex items-center gap-1 shrink-0 min-w-10">
@@ -1191,35 +1649,49 @@ function MobileBarChart({
                 </div>
 
                 <div className="flex-1 min-w-0 relative h-5 rounded-full bg-muted/50 overflow-hidden">
-                  {hasSales && (
+                  {hasVal && (
                     <div
                       className={cn(
                         "absolute inset-y-0.5 left-0 rounded-full transition-all duration-500 ease-out",
-                        isMax
-                          ? "bg-[#28C07A]"
-                          : isMin
-                            ? "bg-[#E85D5D]"
-                            : "bg-[#4D9FE8]",
+                        isGastos
+                          ? isMax
+                            ? "bg-[#EA580C]"
+                            : isMin
+                              ? "bg-[#FB923C]"
+                              : "bg-[#F97316]"
+                          : isMax
+                            ? "bg-[#28C07A]"
+                            : isMin
+                              ? "bg-[#E85D5D]"
+                              : "bg-[#4D9FE8]",
                       )}
                       style={{ width: `${barPct}%` }}
                     />
                   )}
                 </div>
 
-                <div className="w-16 shrink-0 text-right">
-                  {hasSales ? (
+                <div className="w-20 shrink-0 text-right">
+                  {hasVal ? (
                     <span
                       className={cn(
                         "text-sm font-black tabular-nums",
-                        isMax
-                          ? "text-[#28C07A]"
-                          : isMin
-                            ? "text-[#E85D5D]"
-                            : "text-foreground",
+                        isGastos
+                          ? isMax
+                            ? "text-[#EA580C]"
+                            : isMin
+                              ? "text-[#FB923C]"
+                              : "text-[#F97316]"
+                          : isMax
+                            ? "text-[#28C07A]"
+                            : isMin
+                              ? "text-[#E85D5D]"
+                              : "text-foreground",
                       )}
                     >
-                      <span className="text-[10px] opacity-70">Q</span>
-                      {formatCompactMoney(entry.total)}
+                      <span className="text-[10px] opacity-70">
+                        {isGastos ? "-Q" : "Q"}
+                      </span>
+                      {formatCompactMoney(val)}
                     </span>
                   ) : (
                     <span className="text-sm text-muted-foreground/35 font-bold">
@@ -1244,12 +1716,18 @@ function MobileBarChart({
                         {isAnual ? (
                           <>
                             {entry.fullName || entry.name} ·{" "}
-                            <CurrencyValue amount={entry.total} />
+                            <span className={isGastos ? "text-[#F97316]" : ""}>
+                              {isGastos ? "-" : ""}
+                              <CurrencyValue amount={val} />
+                            </span>
                           </>
                         ) : (
                           <>
                             Día {entry.name} de {MONTHS[selectedMonth]} ·{" "}
-                            <CurrencyValue amount={entry.total} />
+                            <span className={isGastos ? "text-[#F97316]" : ""}>
+                              {isGastos ? "-" : ""}
+                              <CurrencyValue amount={val} />
+                            </span>
                           </>
                         )}
                       </p>
@@ -1448,22 +1926,181 @@ function ChartTooltipContent({
   isAnual,
   selectedMonth,
   selectedYear,
+  chartType = "balance",
 }: {
   active?: boolean;
   payload?: Array<{
     value?: number;
-    payload?: { fullName?: string; weather?: DayWeather | null };
+    dataKey?: string | number;
+    payload?: {
+      fullName?: string;
+      weather?: DayWeather | null;
+      total?: number;
+      gastos?: number;
+      balance?: number;
+    };
   }>;
   label?: string;
   isAnual: boolean;
   selectedMonth: number;
   selectedYear: number;
+  chartType?: "balance" | "ingresos" | "gastos" | "barras" | "lineas";
 }) {
   if (!active || !payload?.length) return null;
 
-  const value = Number(payload[0]?.value || 0);
-  const weather = payload[0]?.payload?.weather;
-  const fullName = payload[0]?.payload?.fullName;
+  const firstEntry = payload[0];
+  const itemData = firstEntry?.payload;
+  const weather = itemData?.weather;
+  const fullName = itemData?.fullName;
+
+  if (chartType === "balance" || chartType === "lineas") {
+    const totalVentas = Number(itemData?.total ?? 0);
+    const totalGastos = Number(itemData?.gastos ?? 0);
+    const balance = Number(itemData?.balance ?? (totalVentas - totalGastos));
+
+    return (
+      <div className="bg-zinc-950/95 backdrop-blur-md border border-white/15 rounded-2xl px-5 py-4 shadow-2xl min-w-[270px] max-w-[320px]">
+        <div className="text-xs font-bold uppercase tracking-wide text-white/60 mb-2.5 pb-2 border-b border-white/10 flex items-center justify-between">
+          <span>
+            {isAnual
+              ? `Mes: ${fullName || label} ${selectedYear}`
+              : `Día ${label} de ${MONTHS[selectedMonth]}`}
+          </span>
+          <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full text-white/80 font-semibold">
+            balance
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="size-2.5 rounded-full bg-[#10B981] ring-2 ring-[#10B981]/30" />
+              <span className="text-xs text-white/70 font-medium">Ingresos (Ventas)</span>
+            </div>
+            <span className="text-sm font-bold tabular-nums text-[#10B981]">
+              Q{formatMoneyAmount(totalVentas)}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="size-2.5 rounded-full bg-[#F97316] ring-2 ring-[#F97316]/30" />
+              <span className="text-xs text-white/70 font-medium">Egresos (Gastos)</span>
+            </div>
+            <span className="text-sm font-bold tabular-nums text-[#F97316]">
+              Q{formatMoneyAmount(totalGastos)}
+            </span>
+          </div>
+
+          <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+            <span className="text-xs font-semibold text-white/90">Balance Neto</span>
+            <span
+              className={cn(
+                "text-sm font-black tabular-nums",
+                balance > 0
+                  ? "text-blue-400"
+                  : balance < 0
+                    ? "text-orange-400"
+                    : "text-white/60",
+              )}
+            >
+              {balance > 0 ? "+" : ""}Q{formatMoneyAmount(balance)}
+            </span>
+          </div>
+        </div>
+
+        {weather && (
+          <div className="mt-3 pt-3 border-t border-white/10 flex items-center gap-3">
+            {(() => {
+              const Icon = getWeatherIcon(weather.code);
+              return (
+                <>
+                  <div className="size-9 rounded-xl bg-sky-500/15 flex items-center justify-center shrink-0">
+                    <Icon className="size-5 text-sky-400" strokeWidth={2.25} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-white/95">
+                      {weather.label}
+                      {weather.isForecast && (
+                        <span className="text-amber-400/90 text-[9px] ml-1.5 uppercase">
+                          {weather.isExtendedForecast
+                            ? "pronóstico extendido"
+                            : "pronóstico"}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-white/55 font-medium mt-0.5">
+                      {weather.tempMin.toFixed(0)}° — {weather.tempMax.toFixed(0)}°C
+                      {weather.precipitation > 0 &&
+                        ` · ${weather.precipitation.toFixed(1)} mm`}
+                    </p>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (chartType === "gastos") {
+    const totalGastos = Number(itemData?.gastos ?? firstEntry?.value ?? 0);
+
+    return (
+      <div className="bg-zinc-950/95 backdrop-blur-md border border-white/15 rounded-2xl px-5 py-4 shadow-2xl min-w-[260px] max-w-[300px] text-white">
+        <p className="text-sm font-bold uppercase tracking-wide text-white/60 mb-2">
+          {isAnual
+            ? `Mes: ${fullName || label} ${selectedYear}`
+            : `Día ${label} de ${MONTHS[selectedMonth]}`}
+        </p>
+        <p className="text-xl font-bold text-[#F97316] tabular-nums">
+          <span className="text-[0.6em] font-black opacity-75 align-top mr-0.5">
+            -Q
+          </span>
+          {formatMoneyAmount(totalGastos)}
+        </p>
+        <p className="text-sm text-white/50 font-medium mt-0.5">Egresos (Gastos)</p>
+        {weather && (
+          <div className="mt-3 pt-3 border-t border-white/10 flex items-center gap-3">
+            {(() => {
+              const Icon = getWeatherIcon(weather.code);
+              return (
+                <>
+                  <div className="size-10 rounded-xl bg-sky-500/15 flex items-center justify-center shrink-0">
+                    <Icon className="size-5 text-sky-400" strokeWidth={2.25} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white/95">
+                      {weather.label}
+                      {weather.isForecast && (
+                        <span className="text-amber-400/90 text-[10px] ml-1.5 uppercase">
+                          {weather.isExtendedForecast
+                            ? "pronóstico extendido"
+                            : "pronóstico"}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-sm text-white/55 font-medium mt-0.5">
+                      {weather.tempMin.toFixed(0)}° — {weather.tempMax.toFixed(0)}
+                      °C
+                      {weather.precipitation > 0 &&
+                        ` · ${weather.precipitation.toFixed(1)} mm`}
+                    </p>
+                    <p className="text-xs text-white/40 mt-1">
+                      {LA_ARADA_LOCATION}
+                    </p>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const value = Number(firstEntry?.value || 0);
 
   return (
     <div className="bg-zinc-950 border border-white/15 rounded-2xl px-5 py-4 shadow-2xl min-w-[260px] max-w-[300px]">

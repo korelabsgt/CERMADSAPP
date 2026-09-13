@@ -32,7 +32,7 @@ export default function Header() {
         <div className="mx-auto flex h-14 md:h-16 items-center justify-between px-4 md:px-8 gap-4">
           <div className="flex items-center">
             <Link
-              href={user ? "/cermadsa" : "/"}
+              href={!user ? "/" : role === "user" ? "/cermadsa/laarada/ventas" : "/cermadsa"}
               className="flex items-center shrink-0"
             >
               <span className="font-serif font-bold text-lg md:text-2xl tracking-tight">
@@ -43,7 +43,7 @@ export default function Header() {
                 </AuroraText>
               </span>
             </Link>
-            {user && (
+            {user && role !== "user" && (
               <div className="hidden md:flex ml-8 border-l border-border/30 h-10 items-center pl-4">
                 <BreadcrumbNav />
               </div>

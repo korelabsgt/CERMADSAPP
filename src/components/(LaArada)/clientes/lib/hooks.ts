@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import {
   getClients,
   createClientAction,
@@ -25,7 +25,8 @@ export function useClients() {
     queryKey: ["clientes"],
     queryFn: () => getClients(),
     staleTime: 1000 * 60 * 5,
-});
+    placeholderData: keepPreviousData,
+  });
 }
 
 export function useClientSales(clientId: string | null) {

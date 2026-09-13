@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import {
   getProducts,
   createProduct,
@@ -19,6 +19,7 @@ export function useProducts() {
     queryKey: ["productos"],
     queryFn: () => getProducts(),
     staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
   });
 }
 

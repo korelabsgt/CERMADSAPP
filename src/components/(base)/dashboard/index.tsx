@@ -1,18 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/components/(base)/providers/UserProvider";
+import { readLaAradaSimulatedRole } from "@/components/(LaArada)/lib/simulated-role";
 
 export function Dashboard() {
+  const router = useRouter();
+  const user = useUser();
+  const metadata = user?.user_metadata || {};
+  const realRole = metadata.rol || user?.role || "user";
+  const [effectiveRole, setEffectiveRole] = useState(realRole);
+
+  useEffect(() => {
+    if (realRole === "super") {
+      setEffectiveRole(readLaAradaSimulatedRole(realRole));
+      const syncRole = () => setEffectiveRole(readLaAradaSimulatedRole(realRole));
+      window.addEventListener("laarada-simulated-role-change", syncRole);
+      return () => window.removeEventListener("laarada-simulated-role-change", syncRole);
+    } else {
+      setEffectiveRole(realRole);
+    }
+  }, [realRole]);
+
+  useEffect(() => {
+    if (effectiveRole === "user") {
+      router.replace("/cermadsa/laarada/ventas");
+    }
+  }, [effectiveRole, router]);
+
+  const laAradaHref = effectiveRole === "user" ? "/cermadsa/laarada/ventas" : "/cermadsa/laarada";
+
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const handleNavigation = (id: string) => {
     if (activeId) return;
     setActiveId(id);
   };
+
+  if (effectiveRole === "user") {
+    return null;
+  }
 
   return (
     <div className="flex-1 w-full px-4 lg:px-12 space-y-10 mx-auto pb-10 pt-2">
@@ -79,7 +111,7 @@ export function Dashboard() {
               "hover:bg-orange-500/5",
             )}
           >
-            <Link href="/cermadsa/laarada" className="w-full h-full flex items-center p-5 sm:p-6 md:p-8 outline-none text-left">
+            <Link href={laAradaHref} className="w-full h-full flex items-center p-5 sm:p-6 md:p-8 outline-none text-left">
               <div className="relative z-10 shrink-0 mr-4 sm:mr-6">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 p-2 sm:p-3 bg-white rounded-xl sm:rounded-2xl border border-orange-500/20 group-hover:scale-110 transition-transform duration-500 shadow-sm flex items-center justify-center">
                   <div className="relative w-full h-full">

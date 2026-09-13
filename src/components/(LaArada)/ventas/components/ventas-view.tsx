@@ -481,16 +481,16 @@ export default function ListView({
 
   if (isLoading && data.length === 0)
     return (
-      <div className="p-8 text-center border rounded-xl bg-card italic">
-        Cargando...
+      <div className="space-y-3 animate-pulse">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-28 rounded-xl bg-card border border-border/50" />
+        ))}
       </div>
     );
 
   return (
     <div className="flex flex-col gap-4 animate-in fade-in duration-300">
-      {/* Top filter bar */}
       <div className="flex flex-col gap-3 p-4 bg-card border rounded-xl shadow-sm">
-        {/* Fila 1: búsqueda + fecha + acciones */}
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between w-full">
           <div className="flex items-center gap-2 bg-background border rounded-lg px-3 py-2 w-full sm:max-w-xs lg:max-w-sm focus-within:ring-2 focus-within:ring-orange-500/20 transition-all h-10 shrink-0">
             <Search className="size-4 text-muted-foreground shrink-0" />

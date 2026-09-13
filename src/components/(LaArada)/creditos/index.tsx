@@ -26,6 +26,7 @@ import {
 } from "./lib/zod";
 import CreditosList from "./components/creditos-list";
 import ReciboAbonoPrint from "./components/recibo-abono-print";
+import { CreditosSkeleton } from "./creditos-skeleton";
 import { useUser } from "@/components/(base)/providers/UserProvider";
 import { showConfirm, showToast } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
@@ -162,14 +163,7 @@ export default function Creditos() {
   };
 
   if (isLoading) {
-    return (
-      <div className="w-full h-[50vh] flex flex-col items-center justify-center text-muted-foreground gap-4">
-        <Loader2 className="size-8 animate-spin text-red-500" />
-        <p className="font-bold uppercase tracking-widest text-sm">
-          Cargando créditos...
-        </p>
-      </div>
-    );
+    return <CreditosSkeleton />;
   }
 
   const dteFel = pagoEncontrado
@@ -198,19 +192,34 @@ export default function Creditos() {
       </div>
 
       {!pagoEncontrado && (
-        <div className="relative min-w-0 w-full">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar por cliente, NIT o pago..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-10 w-full rounded-xl border-2 border-celeste-trifinio bg-transparent pl-9 pr-3 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-celeste-trifinio/30"
-          />
+        <div className="space-y-2">
+          <p className="text-sm font-bold">
+            <span className="text-foreground">Total: </span>
+            <span className="text-zinc-600 dark:text-zinc-300">
+              {filtrados.length}
+            </span>
+          </p>
+
+          <div className="overflow-hidden rounded-2xl border border-zinc-200 border-t-4 border-t-rose-600 bg-white shadow-sm dark:border-zinc-700 dark:border-t-rose-500 dark:bg-zinc-900">
+            <div className="flex flex-col gap-3 border-b border-zinc-200 p-4 dark:border-zinc-700 lg:flex-row lg:items-center">
+              <div className="relative min-w-0 flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Buscar por cliente, NIT o pago..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-11 w-full rounded-xl border border-zinc-200 bg-white pl-10 pr-4 text-sm text-foreground outline-none transition-colors focus:border-zinc-400 focus:ring-2 focus:ring-zinc-400/20 dark:border-zinc-700 dark:bg-zinc-900"
+                />
+              </div>
+            </div>
+
+            <CreditosList clientes={filtrados} />
+          </div>
         </div>
       )}
 
-      {pagoEncontrado ? (
+      {pagoEncontrado && (
         <div className="bg-card border-2 border-emerald-500/50 rounded-3xl p-8 animate-in zoom-in duration-300 shadow-2xl shadow-emerald-500/10">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
@@ -555,8 +564,6 @@ export default function Creditos() {
             </div>
           </div>
         </div>
-      ) : (
-        <CreditosList clientes={filtrados} />
       )}
 
       <ReciboAbonoPrint />

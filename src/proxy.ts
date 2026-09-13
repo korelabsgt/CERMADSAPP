@@ -55,9 +55,17 @@ if (user) {
       }
     }
 
+    if (pathname === "/laarada" || pathname.startsWith("/laarada/")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/cermadsa/laarada/ventas";
+      return NextResponse.redirect(url);
+    }
+
     if (pathname === "/login") {
       const url = request.nextUrl.clone();
-      url.pathname = "/cermadsa";
+      const metadata = user.user_metadata || {};
+      const realRole = (metadata.rol || user.role || "user") as string;
+      url.pathname = realRole === "user" ? "/cermadsa/laarada/ventas" : "/cermadsa";
       return NextResponse.redirect(url);
     }
 
@@ -65,23 +73,35 @@ if (user) {
       const metadata = user.user_metadata || {};
       const realRole = (metadata.rol || user.role || "user") as string;
 
+      if (realRole === "user") {
+        if (
+          pathname === "/cermadsa" ||
+          pathname === "/cermadsa/" ||
+          pathname === "/cermadsa/laarada" ||
+          pathname === "/cermadsa/laarada/"
+        ) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/cermadsa/laarada/ventas";
+          return NextResponse.redirect(url);
+        }
+
+        if (
+          pathname.startsWith("/cermadsa/laarada/") &&
+          pathname !== "/cermadsa/laarada/ventas" &&
+          !pathname.startsWith("/cermadsa/laarada/ventas/")
+        ) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/cermadsa/laarada/ventas";
+          return NextResponse.redirect(url);
+        }
+      }
+
       if (
         pathname.startsWith("/cermadsa/admin") &&
         !["super", "admin", "rrhh"].includes(realRole)
       ) {
         const url = request.nextUrl.clone();
         url.pathname = "/sin-acceso";
-        return NextResponse.redirect(url);
-      }
-
-      if (
-        realRole === "user" &&
-        pathname.startsWith("/cermadsa/laarada/") &&
-        pathname !== "/cermadsa/laarada/ventas" &&
-        !pathname.startsWith("/cermadsa/laarada/ventas/")
-      ) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/not-found";
         return NextResponse.redirect(url);
       }
 

@@ -61,7 +61,7 @@ export default function TablePagination({
   className,
 }: TablePaginationProps) {
   const totalPages =
-    pageSize === "all" ? 1 : Math.max(1, Math.ceil(totalItems / pageSize));
+    pageSize === "all" ? 1 : Math.max(1, Math.ceil(totalItems / (pageSize || 15)));
   const safeCurrentPage = Math.min(currentPage, totalPages);
 
   if (totalItems === 0) return null;
@@ -69,33 +69,15 @@ export default function TablePagination({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 px-4 pb-4 sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-3 px-4 pb-4 sm:flex-row sm:items-center sm:justify-end",
         className,
       )}
     >
-      <select
-        value={pageSize}
-        onChange={(e) => {
-          const value = e.target.value;
-          onPageSizeChange(
-            value === "all" ? "all" : (Number(value) as PageSize),
-          );
-        }}
-        className="h-8 rounded-lg border border-zinc-200 bg-transparent px-2 text-xs font-bold text-foreground outline-none cursor-pointer dark:border-zinc-700"
-        aria-label="Filas por página"
-      >
-        {PAGE_SIZE_OPTIONS.map((opt) => (
-          <option key={String(opt.value)} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-
       <div className="flex items-center justify-center gap-1 sm:justify-end">
         <button
           type="button"
           onClick={() => onPageChange(Math.max(1, safeCurrentPage - 1))}
-          disabled={pageSize === "all" || safeCurrentPage === 1}
+          disabled={pageSize === "all" || safeCurrentPage <= 1}
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-muted-foreground transition-colors hover:bg-zinc-100 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer dark:hover:bg-zinc-800"
           aria-label="Página anterior"
         >

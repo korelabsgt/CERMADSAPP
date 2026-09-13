@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 
 export function useVentas(vendedorId?: string) {
   const queryClient = useQueryClient();
+  const normalizedKey = vendedorId || "all";
 
   useEffect(() => {
     const supabase = createClient();
@@ -16,12 +17,12 @@ export function useVentas(vendedorId?: string) {
     const invalidate = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["ventas", vendedorId] });
+        queryClient.invalidateQueries({ queryKey: ["ventas", normalizedKey] });
       }, 500);
     };
 
     const channel = supabase
-      .channel(`realtime-ventas-${vendedorId || 'all'}`)
+      .channel(`realtime-ventas-${normalizedKey}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "ven_ventas" },
@@ -38,11 +39,12 @@ export function useVentas(vendedorId?: string) {
       clearTimeout(timeoutId);
       supabase.removeChannel(channel);
     };
-  }, [queryClient, vendedorId]);
+  }, [queryClient, normalizedKey]);
 
   return useQuery({
-    queryKey: ["ventas", vendedorId],
-    queryFn: () => getVentas(vendedorId),
+    queryKey: ["ventas", normalizedKey],
+    queryFn: () => getVentas(normalizedKey === "all" ? undefined : normalizedKey),
+    staleTime: 1000 * 60 * 5,
     placeholderData: keepPreviousData,
   });
 }

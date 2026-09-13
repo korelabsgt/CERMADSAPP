@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import {
   Download,
   Search,
@@ -14,14 +15,22 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldAlert,
+  ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useVentas } from "@/components/(LaArada)/ventas/lib/hooks";
 import ReceiptModal from "@/components/(LaArada)/ventas/modals/receipt-modal";
+import { ContabilidadSkeleton } from "./contabilidad-skeleton";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useUser } from "@/components/(base)/providers/UserProvider";
+import {
+  readLaAradaSimulatedRole,
+  writeLaAradaSimulatedRole,
+  canUsePreventasSimular,
+} from "@/components/(LaArada)/lib/simulated-role";
+import TablePagination, { PageSizeOption } from "@/components/(LaArada)/lib/pagination";
 
 function getFileName(ext: string) {
   const now = new Date();
@@ -41,10 +50,26 @@ export default function ContabilidadView() {
   const realRole: string = metadata.rol || user?.role || "user";
 
   // Role simulator — only available to super
-  const [effectiveRole, setEffectiveRole] = useState(realRole);
+  const [effectiveRole, setEffectiveRole] = useState(() =>
+    readLaAradaSimulatedRole(realRole)
+  );
   useEffect(() => {
-    if (realRole) setEffectiveRole(realRole);
+    setEffectiveRole(readLaAradaSimulatedRole(realRole));
+    const syncRole = (e?: any) => {
+      const newRole = e?.detail || readLaAradaSimulatedRole(realRole);
+      setEffectiveRole(newRole);
+    };
+    window.addEventListener("laarada-simulated-role-change", syncRole);
+    window.addEventListener("storage", syncRole);
+    window.addEventListener("focus", syncRole);
+    return () => {
+      window.removeEventListener("laarada-simulated-role-change", syncRole);
+      window.removeEventListener("storage", syncRole);
+      window.removeEventListener("focus", syncRole);
+    };
   }, [realRole]);
+
+  const isSuper = canUsePreventasSimular(realRole, effectiveRole);
 
   const { data: ventas = [], isLoading } = useVentas();
 
@@ -60,7 +85,7 @@ export default function ContabilidadView() {
   const [selectedVentaId, setSelectedVentaId] = useState<string | null>(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
 
-  const [pageSize, setPageSize] = useState<number | string>(10);
+  const [pageSize, setPageSize] = useState<PageSizeOption>(15);
   const [currentPage, setCurrentPage] = useState(1);
 
   // ─── Role-based filtering ────────────────────────────────────────────────────
@@ -142,16 +167,16 @@ export default function ContabilidadView() {
   }, [filteredOrders, pageSize]);
 
   const totalPages = useMemo(() => {
-    const size = typeof pageSize === "string" ? filteredOrders.length : pageSize;
-    return Math.max(1, Math.ceil(filteredOrders.length / (size || 1)));
-  }, [filteredOrders, pageSize]);
+    if (pageSize === "all") return 1;
+    return Math.max(1, Math.ceil(filteredOrders.length / (Number(pageSize) || 15)));
+  }, [filteredOrders.length, pageSize]);
 
   const paginatedOrders = useMemo(() => {
     if (pageSize === "all") return filteredOrders;
-    const size = Number(pageSize);
+    const size = Number(pageSize) || 15;
     const start = (currentPage - 1) * size;
     return filteredOrders.slice(start, start + size);
-  }, [filteredOrders, pageSize, currentPage]);
+  }, [filteredOrders, currentPage, pageSize]);
 
   const stats = useMemo(() => {
     let totalEntregado = 0;
@@ -324,18 +349,23 @@ export default function ContabilidadView() {
   };
 
   if (isLoading) {
-    return (
-      <div className="p-6 text-center text-muted-foreground font-bold uppercase text-xs animate-pulse">
-        Cargando datos contables...
-      </div>
-    );
+    return <ContabilidadSkeleton />;
   }
 
   return (
     <div className="p-4 md:p-6 w-full lg:max-w-[95%] mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
+        <div className="flex flex-col gap-1">
+          <Link
+            href="/cermadsa/laarada"
+            className="group inline-flex shrink-0 items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground cursor-pointer w-fit mb-0.5"
+          >
+            <ArrowLeft className="size-4.5 transition-transform group-hover:-translate-x-0.5" />
+            <span className="text-xs font-bold uppercase tracking-widest">
+              Volver
+            </span>
+          </Link>
           <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
             <Calculator className="size-5 md:size-6 text-emerald-500" />
             Módulo Contable
@@ -356,7 +386,7 @@ export default function ContabilidadView() {
         </div>
 
         {/* Role simulator — super only */}
-        {realRole === "super" && (
+        {isSuper && (
           <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/50 px-3 py-1.5 rounded-lg shadow-sm h-10 w-full sm:w-auto justify-center">
             <ShieldAlert className="size-4 text-yellow-600 shrink-0" />
             <span className="text-[10px] font-bold text-yellow-600 uppercase hidden sm:inline whitespace-nowrap">
@@ -364,7 +394,11 @@ export default function ContabilidadView() {
             </span>
             <select
               value={effectiveRole}
-              onChange={(e) => setEffectiveRole(e.target.value)}
+              onChange={(e) => {
+                const role = e.target.value;
+                setEffectiveRole(role);
+                writeLaAradaSimulatedRole(role);
+              }}
               className="bg-transparent text-xs font-bold text-yellow-700 outline-none cursor-pointer"
             >
               <option value="super">SUPER (Real)</option>
@@ -375,112 +409,6 @@ export default function ContabilidadView() {
             </select>
           </div>
         )}
-      </div>
-
-      {/* Filters + Export Buttons */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 bg-card p-4 rounded-xl border shadow-sm">
-        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto overflow-x-auto pb-2">
-          <div className="space-y-1.5 min-w-[140px]">
-            <label className="text-[10px] font-bold uppercase text-muted-foreground whitespace-nowrap">
-              Mes / Año
-            </label>
-            <input
-              type="month"
-              value={monthYear}
-              onChange={(e) => {
-                setMonthYear(e.target.value);
-                if (e.target.value) {
-                  setStartDate("");
-                  setEndDate("");
-                }
-              }}
-              className="w-full h-10 px-3 border rounded-lg bg-background text-sm outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          <div className="space-y-1.5 min-w-[130px]">
-            <label className="text-[10px] font-bold uppercase text-muted-foreground">
-              Desde
-            </label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                if (e.target.value) setMonthYear("");
-              }}
-              className="w-full h-10 px-3 border rounded-lg bg-background text-sm outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          <div className="space-y-1.5 min-w-[130px]">
-            <label className="text-[10px] font-bold uppercase text-muted-foreground">
-              Hasta
-            </label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                if (e.target.value) setMonthYear("");
-              }}
-              className="w-full h-10 px-3 border rounded-lg bg-background text-sm outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          {hasFullAccess && (
-            <div className="space-y-1.5 min-w-[130px]">
-              <label className="text-[10px] font-bold uppercase text-muted-foreground">
-                Tipo
-              </label>
-              <select
-                value={tipoComprobante}
-                onChange={(e) => setTipoComprobante(e.target.value as any)}
-                className="w-full h-10 px-3 border rounded-lg bg-background text-sm outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                <option value="TODO">Todo</option>
-                <option value="FEL">FEL</option>
-                <option value="RECIBO">Recibo</option>
-              </select>
-            </div>
-          )}
-          <div className="space-y-1.5 min-w-[200px] flex-1">
-            <label className="text-[10px] font-bold uppercase text-muted-foreground">
-              Buscar
-            </label>
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Cliente o No. Venta"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full h-10 pl-9 pr-3 border rounded-lg bg-background text-sm outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-          <button
-            onClick={exportCSV}
-            disabled={filteredOrders.length === 0}
-            className="flex items-center justify-center gap-2 px-4 py-2 h-10 bg-zinc-600 text-white rounded-lg hover:bg-zinc-700 font-bold text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
-          >
-            <Download className="size-4" /> CSV
-          </button>
-          <button
-            onClick={exportExcel}
-            disabled={filteredOrders.length === 0}
-            className="flex items-center justify-center gap-2 px-4 py-2 h-10 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
-          >
-            <FileSpreadsheet className="size-4" /> EXCEL
-          </button>
-          <button
-            onClick={exportPDF}
-            disabled={filteredOrders.length === 0}
-            className="flex items-center justify-center gap-2 px-4 py-2 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
-          >
-            <FileText className="size-4" /> PDF
-          </button>
-        </div>
       </div>
 
       {/* Stats Cards */}
@@ -508,25 +436,98 @@ export default function ContabilidadView() {
         />
       </div>
 
-      {/* Table */}
-      <div className="lg:max-w-[80%] mx-auto w-full">
-        <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-muted/50 border-b">
-                <tr className="text-[10px] uppercase text-muted-foreground font-black tracking-wider">
-                  <th className="p-4 w-[1%] whitespace-nowrap text-center">No.</th>
-                  <th className="p-4 w-[1%] whitespace-nowrap">Fecha</th>
-                  <th className="p-4 w-[1%] whitespace-nowrap">No. Venta</th>
-                  <th className="p-4 w-full text-left">Cliente</th>
-                  <th className="p-4">Estado</th>
-                  <th className="p-4 text-right">Venta</th>
-                  <th className="p-4 text-right">IVA</th>
-                  <th className="p-4 text-right">Total</th>
-                  <th className="p-4 text-center">Ver Comprobante</th>
+      {/* Table Shell with Integrated Filters and Search */}
+      <div className="space-y-2">
+        <p className="text-sm font-bold">
+          <span className="text-foreground">Total: </span>
+          <span className="text-zinc-600 dark:text-zinc-300">
+            {filteredOrders.length}
+          </span>
+        </p>
+
+        <div className="overflow-hidden rounded-t-2xl border border-zinc-200 border-t-4 border-t-emerald-600 bg-white shadow-sm dark:border-zinc-700 dark:border-t-emerald-500 dark:bg-zinc-900">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-200 p-4 dark:border-zinc-700">
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
+              <div className="relative min-w-[220px] flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Buscar por cliente o No. Venta..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-11 w-full rounded-xl border border-zinc-200 bg-white pl-10 pr-4 text-sm text-foreground outline-none transition-colors focus:border-zinc-400 focus:ring-2 focus:ring-zinc-400/20 dark:border-zinc-700 dark:bg-zinc-900"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="month"
+                  value={monthYear}
+                  onChange={(e) => {
+                    setMonthYear(e.target.value);
+                    if (e.target.value) {
+                      setStartDate("");
+                      setEndDate("");
+                    }
+                  }}
+                  className="h-11 px-3 border border-zinc-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-800 text-xs md:text-sm font-bold outline-none"
+                />
+
+                {hasFullAccess && (
+                  <select
+                    value={tipoComprobante}
+                    onChange={(e) => setTipoComprobante(e.target.value as any)}
+                    className="h-11 px-3 border border-zinc-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-800 text-xs md:text-sm font-bold outline-none cursor-pointer"
+                  >
+                    <option value="TODO">Todo</option>
+                    <option value="FEL">FEL</option>
+                    <option value="RECIBO">Recibo</option>
+                  </select>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+              <button
+                onClick={exportCSV}
+                disabled={filteredOrders.length === 0}
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-zinc-300 bg-zinc-100 px-3 text-xs font-bold uppercase text-zinc-700 transition-colors hover:bg-zinc-200 cursor-pointer dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 disabled:opacity-50"
+              >
+                <Download className="size-4" /> CSV
+              </button>
+              <button
+                onClick={exportExcel}
+                disabled={filteredOrders.length === 0}
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-emerald-600 bg-emerald-100 px-4 text-xs font-bold uppercase text-emerald-700 transition-colors hover:bg-emerald-200 cursor-pointer dark:border-emerald-400 dark:bg-emerald-950 dark:text-emerald-400 dark:hover:bg-emerald-900 disabled:opacity-50"
+              >
+                <FileSpreadsheet className="size-4" /> EXCEL
+              </button>
+              <button
+                onClick={exportPDF}
+                disabled={filteredOrders.length === 0}
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-red-500 bg-red-100 px-4 text-xs font-bold uppercase text-red-600 transition-colors hover:bg-red-200 cursor-pointer dark:border-red-400 dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900 disabled:opacity-50"
+              >
+                <FileText className="size-4" /> PDF
+              </button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto overscroll-x-contain">
+            <table className="w-full text-left text-xs md:text-sm whitespace-nowrap">
+              <thead className="border-b border-zinc-200 bg-zinc-50 font-bold text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300">
+                <tr className="text-[10px] md:text-xs uppercase font-black tracking-wider">
+                  <th className="p-3 md:p-4 w-12 text-center">No.</th>
+                  <th className="p-3 md:p-4">Fecha</th>
+                  <th className="p-3 md:p-4">No. Venta</th>
+                  <th className="p-3 md:p-4">Cliente</th>
+                  <th className="p-3 md:p-4 text-center">Estado</th>
+                  <th className="p-3 md:p-4 text-right">Venta</th>
+                  <th className="p-3 md:p-4 text-right">IVA</th>
+                  <th className="p-3 md:p-4 text-right">Total</th>
+                  <th className="p-3 md:p-4 text-center">Comprobante</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
                 {paginatedOrders.length === 0 ? (
                   <tr>
                     <td
@@ -538,10 +539,12 @@ export default function ContabilidadView() {
                   </tr>
                 ) : (
                   paginatedOrders.map((order: any, idx: number) => {
-                    const sequenceNumber =
+                    const sizeNum =
                       pageSize === "all"
-                        ? idx + 1
-                        : (currentPage - 1) * Number(pageSize) + idx + 1;
+                        ? filteredOrders.length
+                        : Number(pageSize) || 15;
+                    const sequenceNumber =
+                      (currentPage - 1) * sizeNum + idx + 1;
                     const dteCertificado = (order.dte_documentos || []).find(
                       (d: any) => d.estado === "certificado",
                     );
@@ -553,47 +556,47 @@ export default function ContabilidadView() {
                     return (
                       <tr
                         key={order.id}
-                        className="hover:bg-muted/30 transition-colors"
+                        className="cursor-pointer transition-colors hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40"
                       >
-                        <td className="p-4 text-center font-bold text-muted-foreground text-[10px] w-[1%]">
+                        <td className="p-3 md:p-4 text-center font-bold text-muted-foreground text-xs">
                           {sequenceNumber}
                         </td>
-                        <td className="p-4 font-bold whitespace-nowrap text-xs">
+                        <td className="p-3 md:p-4 font-bold whitespace-nowrap text-xs">
                           {formatDate(order.created_at)}
                         </td>
-                        <td className="p-4 font-mono font-bold text-orange-500 whitespace-nowrap text-xs">
+                        <td className="p-3 md:p-4 font-mono font-bold text-orange-500 whitespace-nowrap text-xs">
                           #{order.id?.substring(0, 3).toUpperCase()}-
                           {order.id?.substring(3, 6).toUpperCase()}
                         </td>
-                        <td className="p-4 font-bold text-xs">
+                        <td className="p-3 md:p-4 font-bold text-xs">
                           {order.ven_clientes?.nombre}
                         </td>
-                        <td className="p-4">
+                        <td className="p-3 md:p-4 text-center">
                           <span
                             className={cn(
-                              "px-2 py-1 rounded-full text-[9px] font-black uppercase",
+                              "px-2 py-0.5 rounded-full text-[9px] font-black uppercase inline-flex",
                               String(order.estado).toLowerCase() === "entregado"
-                                ? "bg-green-500/10 text-green-600"
+                                ? "bg-green-500/10 text-green-600 dark:text-green-400"
                                 : String(order.estado).toLowerCase() === "anulado"
-                                  ? "bg-red-500/10 text-red-600"
-                                  : "bg-amber-500/10 text-amber-600",
+                                  ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                                  : "bg-amber-500/10 text-amber-600 dark:text-amber-400",
                             )}
                           >
                             {order.estado || "Pendiente"}
                           </span>
                         </td>
-                        <td className="p-4 text-right font-mono text-gray-600 text-xs">
+                        <td className="p-3 md:p-4 text-right font-mono text-gray-600 dark:text-gray-300 text-xs">
                           Q{isFactura ? formatMoney(total / 1.12) : formatMoney(total)}
                         </td>
-                        <td className="p-4 text-right font-mono text-gray-500 text-[10px]">
+                        <td className="p-3 md:p-4 text-right font-mono text-gray-500 dark:text-gray-400 text-[10px]">
                           {isFactura ? `Q${formatMoney(total - total / 1.12)}` : "---"}
                         </td>
-                        <td className="p-4 text-right font-black text-xs">
+                        <td className="p-3 md:p-4 text-right font-black text-xs">
                           Q{formatMoney(total)}
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="p-3 md:p-4 text-center">
                           {isAnulado ? (
-                            <span className="w-24 inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md bg-red-50 text-red-500 font-bold text-[10px] uppercase border border-red-100 cursor-not-allowed">
+                            <span className="w-20 inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md bg-red-50 text-red-500 font-bold text-[10px] uppercase border border-red-100 cursor-not-allowed dark:bg-red-950 dark:text-red-400 dark:border-red-900">
                               <Ban className="size-3 shrink-0" />
                               <span>Anulado</span>
                             </span>
@@ -604,17 +607,13 @@ export default function ContabilidadView() {
                                 setIsReceiptModalOpen(true);
                               }}
                               className={cn(
-                                "w-24 inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md transition-colors font-bold text-[10px] uppercase cursor-pointer",
+                                "w-20 inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md transition-colors font-bold text-[10px] uppercase cursor-pointer",
                                 isFactura
-                                  ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200",
+                                  ? "bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800"
+                                  : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700",
                               )}
                             >
-                              {isFactura ? (
-                                <FileCheck2 className="size-3 shrink-0" />
-                              ) : (
-                                <Eye className="size-3 shrink-0" />
-                              )}
+                              <Eye className="size-3 shrink-0" />
                               <span>{isFactura ? "FEL" : "Recibo"}</span>
                             </button>
                           )}
@@ -628,45 +627,16 @@ export default function ContabilidadView() {
           </div>
 
           {/* Pagination */}
-          <div className="bg-card border-t p-2 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="p-1.5 rounded-md hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-              >
-                <ChevronLeft className="size-5" />
-              </button>
-              <div className="text-sm font-bold bg-muted/50 px-3 py-1 rounded-md min-w-[60px] text-center">
-                {currentPage} / {totalPages}
-              </div>
-              <button
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(totalPages, p + 1))
-                }
-                disabled={currentPage === totalPages}
-                className="p-1.5 rounded-md hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-              >
-                <ChevronRight className="size-5" />
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              <select
-                value={pageSize}
-                onChange={(e) =>
-                  setPageSize(
-                    e.target.value === "all" ? "all" : Number(e.target.value),
-                  )
-                }
-                className="h-8 px-2 text-[10px] font-bold uppercase bg-background border rounded-md outline-none focus:ring-1 focus:ring-primary/20"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value="all">Todos</option>
-              </select>
-            </div>
-          </div>
+          {filteredOrders.length > 0 && (
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredOrders.length}
+              pageSize={pageSize}
+              onPageSizeChange={setPageSize}
+              onPageChange={setCurrentPage}
+            />
+          )}
         </div>
       </div>
 
