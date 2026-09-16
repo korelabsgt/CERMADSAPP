@@ -38,7 +38,7 @@
   "36": "eslint.config.mjs",
   "37": "jspdf",
   "38": "framer-motion",
-  "39": "date-fns",
+  "39": "@hookform/resolvers",
   "40": "jspdf-autotable",
   "41": "select.tsx",
   "42": "motion",

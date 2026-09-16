@@ -280,8 +280,8 @@
     "semantic_hash": ""
   },
   "src/components/(LaArada)/dashboard.tsx": {
-    "mtime": 1789590189.5973234,
-    "ast_hash": "582c3dc77b9e31cb481242ec564332ca",
+    "mtime": 1789589897.409158,
+    "ast_hash": "ddb2cc1d50699819fec41395535db582",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/estadisticas/estadisticas-skeleton.tsx": {
@@ -575,8 +575,8 @@
     "semantic_hash": "d1f0e417277502c391f6bdbfc93a7a99"
   },
   "src/components/(base)/layout/Menu.tsx": {
-    "mtime": 1789590190.6912758,
-    "ast_hash": "809905065600cacefdb8b775bac718c7",
+    "mtime": 1789253878.1034777,
+    "ast_hash": "1b7ee276e09d51e720c03a0fd33bad56",
     "semantic_hash": ""
   },
   "src/components/(base)/layout/header.tsx": {
@@ -1190,8 +1190,8 @@
     "semantic_hash": ""
   },
   "src/components/(LaArada)/gastos/index.tsx": {
-    "mtime": 1789590199.413463,
-    "ast_hash": "64c7a78daf4bf504cf860fa49b25e98a",
+    "mtime": 1789269211.7530086,
+    "ast_hash": "2d335c6cbb7d585a08e33bae7e6f45e0",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/gastos/lib/actions.ts": {
@@ -1230,8 +1230,8 @@
     "semantic_hash": ""
   },
   "src/components/(LaArada)/layout/LaAradaSidebar.tsx": {
-    "mtime": 1789590188.9807854,
-    "ast_hash": "3bb43cdbf3eb99ecaf9e23a17cff486b",
+    "mtime": 1789589894.1612577,
+    "ast_hash": "476d4334e05d691262fd67edaf5acf18",
     "semantic_hash": ""
   },
   "src/components/(LaArada)/lib/pagination.tsx": {

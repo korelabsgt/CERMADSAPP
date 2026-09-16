@@ -287,7 +287,7 @@ export default function DashboardLaArada() {
       borderColor: "border-purple-500/30 hover:border-purple-500/60",
       iconBg: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
       badge: null,
-      allowedRoles: ["super", "admin", "contabilidad", "ventas", "tec-admin"],
+      allowedRoles: ["super", "admin"],
     },
     {
       id: "gastos",
@@ -301,7 +301,7 @@ export default function DashboardLaArada() {
       borderColor: "border-emerald-500/30 hover:border-emerald-500/60",
       iconBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
       badge: null,
-      allowedRoles: ["super", "admin", "ventas"],
+      allowedRoles: ["super", "admin"],
     },
     {
       id: "contabilidad",

@@ -98,14 +98,15 @@ export default function Gastos() {
     };
   }, [realRole]);
 
-  // Roles con acceso al área de gastos: super, admin, ventas
-  const allowedRoles = ["super", "admin", "ventas"];
+  const allowedRoles = ["super", "admin"];
   const hasAccess = allowedRoles.includes(effectiveRole);
 
-  // Permisos:
-  // - Super: acceso a todo (ver, crear, editar, eliminar, simular)
-  // - Admin: ver, crear y editar (NO eliminar)
-  // - Ventas: solo ver y crear (NO editar, NO eliminar)
+  useEffect(() => {
+    if (!hasAccess) {
+      router.replace("/cermadsa/laarada");
+    }
+  }, [hasAccess, router]);
+
   const canCrear = allowedRoles.includes(effectiveRole);
   const canEditar = effectiveRole === "super" || effectiveRole === "admin";
   const canEliminar = effectiveRole === "super";
@@ -272,29 +273,12 @@ export default function Gastos() {
     await deleteMutation.mutateAsync(gasto.id);
   };
 
-  if (isLoading) {
-    return <GastosSkeleton />;
+  if (!hasAccess) {
+    return null;
   }
 
-  if (!hasAccess) {
-    return (
-      <div className="mx-auto max-w-md p-8 my-16 rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 text-center space-y-4 shadow-sm">
-        <div className="mx-auto size-12 rounded-xl bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center">
-          <TrendingDown className="size-6" />
-        </div>
-        <h2 className="text-base font-bold text-foreground">Acceso No Autorizado</h2>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          El módulo de Gastos solo está habilitado para usuarios con rol <strong>Super</strong>, <strong>Admin</strong> y <strong>Ventas</strong>.
-        </p>
-        <button
-          type="button"
-          onClick={() => router.push("/cermadsa/laarada")}
-          className="inline-flex h-10 items-center justify-center rounded-xl bg-zinc-900 px-5 text-xs font-bold text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 cursor-pointer"
-        >
-          Volver al Dashboard
-        </button>
-      </div>
-    );
+  if (isLoading) {
+    return <GastosSkeleton />;
   }
 
   return (

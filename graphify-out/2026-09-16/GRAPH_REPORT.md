@@ -1,7 +1,7 @@
 # Graph Report - cermadsapp  (2026-09-16)
 
 ## Corpus Check
-- 242 files · ~137,082 words
+- 242 files · ~137,200 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -53,7 +53,7 @@
 - eslint.config.mjs
 - jspdf
 - framer-motion
-- date-fns
+- @hookform/resolvers
 - jspdf-autotable
 - select.tsx
 - motion
@@ -217,7 +217,7 @@ Nodes (29): DteDocumentoCredito, PagoCreditoHistorial, DetalleCreditoModal(), DI
 
 ### Community 19 - "dependencies"
 Cohesion: 0.18
-Nodes (11): browser-image-compression, @hookform/resolvers, html-to-image, lucide-react, next, dependencies, browser-image-compression, @hookform/resolvers (+3 more)
+Nodes (11): browser-image-compression, date-fns, html-to-image, lucide-react, next, dependencies, browser-image-compression, date-fns (+3 more)
 
 ### Community 20 - "(settings)/hooks.ts"
 Cohesion: 0.31
@@ -320,8 +320,8 @@ Cohesion: 0.15
 Nodes (36): MovimientoCard(), MovimientoCardProps, AccionesCell(), DocumentoCell(), MovimientosTable(), MovimientosTableProps, useTablePagination(), AnularFactura() (+28 more)
 
 ### Community 76 - "contabilidad/index.tsx"
-Cohesion: 0.16
-Nodes (15): xlsx, LA_ARADA_LINKS, Menu(), MenuProps, ContabilidadSkeleton(), ContabilidadView(), FEL_ONLY_ROLES, FULL_ACCESS_ROLES (+7 more)
+Cohesion: 0.15
+Nodes (14): xlsx, LA_ARADA_LINKS, Menu(), MenuProps, ContabilidadSkeleton(), ContabilidadView(), FEL_ONLY_ROLES, FULL_ACCESS_ROLES (+6 more)
 
 ### Community 77 - "AnimatedIcon.tsx"
 Cohesion: 0.23
@@ -329,7 +329,7 @@ Nodes (7): AdminCards(), adminOptions, AnimatedThemeToggler(), AnimatedThemeTogg
 
 ### Community 78 - "dashboard.tsx"
 Cohesion: 0.25
-Nodes (11): getClients(), getVentasCredito(), DashboardLaArada(), DashboardSkeleton(), WELCOME_PHRASES, LaAradaSidebar(), NavItem, getProducts() (+3 more)
+Nodes (12): getClients(), getVentasCredito(), DashboardLaArada(), DashboardSkeleton(), WELCOME_PHRASES, LaAradaSidebar(), NavItem, readLaAradaSimulatedRole() (+4 more)
 
 ### Community 79 - "CargarSaldo.tsx"
 Cohesion: 0.18
@@ -369,7 +369,7 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `cn` to `gastos/index.tsx`, `ventas/lib/actions.ts`, `client-sales-modal.tsx`, `InfoUser.tsx`, `productos/lib/actions.ts`, `estadisticas/stats.tsx`, `creditos/index.tsx`, `dropdown-menu.tsx`, `dialog.tsx`, `recibo-preventa-print.tsx`, `form.tsx`, `DevicesAccordion.tsx`, `detalle-credito-modal.tsx`, `dock.tsx`, `particles.tsx`, `ConnectivityShell.tsx`, `select.tsx`, `ventas-view.tsx`, `LogIn.tsx`, `table.tsx`, `useUser`, `agregar-producto-preventa.tsx`, `components/stats.tsx`, `preventas/lib/zod.ts`, `border-beam.tsx`, `utils.ts`, `contabilidad/index.tsx`, `AnimatedIcon.tsx`, `dashboard.tsx`, `CargarSaldo.tsx`, `stats-accordion.tsx`, `shiny-button.tsx`, `typing-animation.tsx`, `badge.tsx`, `constancia-thumb.tsx`, `table-pagination.tsx`?**
   _High betweenness centrality (0.359) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `dependencies` to `devDependencies`, `recibo-preventa-print.tsx`, `form.tsx`, `@sweetalert2/theme-dark`, `jspdf`, `framer-motion`, `date-fns`, `jspdf-autotable`, `motion`, `@radix-ui/react-avatar`, `@radix-ui/react-dialog`, `@radix-ui/react-label`, `@radix-ui/react-popover`, `@radix-ui/react-select`, `web-push`, `react-easy-crop`, `react-hook-form`, `@supabase/supabase-js`, `react-toastify`, `@simplewebauthn/server`, `sweetalert2`, `tailwind-merge`, `file-saver`, `contabilidad/index.tsx`, `@radix-ui/react-separator`, `zod`, `@radix-ui/react-dropdown-menu`, `class-variance-authority`, `clsx`, `@radix-ui/react-slot`, `@tanstack/react-query`, `react-dom`, `next-themes`, `@simplewebauthn/browser`, `@supabase/ssr`, `html2canvas`, `lucide`, `morphicons`, `@react-pdf/renderer`, `recharts`?**
+- **Why does `dependencies` connect `dependencies` to `devDependencies`, `recibo-preventa-print.tsx`, `form.tsx`, `@sweetalert2/theme-dark`, `jspdf`, `framer-motion`, `@hookform/resolvers`, `jspdf-autotable`, `motion`, `@radix-ui/react-avatar`, `@radix-ui/react-dialog`, `@radix-ui/react-label`, `@radix-ui/react-popover`, `@radix-ui/react-select`, `web-push`, `react-easy-crop`, `react-hook-form`, `@supabase/supabase-js`, `react-toastify`, `@simplewebauthn/server`, `sweetalert2`, `tailwind-merge`, `file-saver`, `contabilidad/index.tsx`, `@radix-ui/react-separator`, `zod`, `@radix-ui/react-dropdown-menu`, `class-variance-authority`, `clsx`, `@radix-ui/react-slot`, `@tanstack/react-query`, `react-dom`, `next-themes`, `@simplewebauthn/browser`, `@supabase/ssr`, `html2canvas`, `lucide`, `morphicons`, `@react-pdf/renderer`, `recharts`?**
   _High betweenness centrality (0.156) - this node is a cross-community bridge._
 - **Why does `createClient()` connect `createClient` to `gastos/index.tsx`, `preventas/lib/zod.ts`, `preventas/lib/actions.ts`, `lib/infile.ts`, `client-sales-modal.tsx`, `InfoUser.tsx`, `app/layout.tsx`, `ventas/lib/actions.ts`, `productos/lib/actions.ts`, `creditos/index.tsx`, `constancia-thumb.tsx`, `dashboard.tsx`, `LogIn.tsx`, `stats-accordion.tsx`, `(settings)/hooks.ts`, `useUser`, `usuarios/lib/actions.ts`?**
   _High betweenness centrality (0.077) - this node is a cross-community bridge._

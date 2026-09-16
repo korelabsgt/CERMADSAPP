@@ -200,7 +200,7 @@ export default function LaAradaSidebar({
       label: "Estadísticas & Reportes",
       baseIcon: LineChart,
       activeIcon: BarChart3,
-      allowedRoles: ["super", "admin", "contabilidad", "ventas", "tec-admin"],
+      allowedRoles: ["super", "admin"],
     },
     {
       id: "gastos",
@@ -208,7 +208,7 @@ export default function LaAradaSidebar({
       label: "Control de Gastos",
       baseIcon: Banknote,
       activeIcon: TrendingDown,
-      allowedRoles: ["super", "admin", "ventas"],
+      allowedRoles: ["super", "admin"],
     },
     {
       id: "contabilidad",
