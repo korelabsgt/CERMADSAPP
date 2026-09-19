@@ -208,7 +208,7 @@ export default function LaAradaSidebar({
       label: "Control de Gastos",
       baseIcon: Banknote,
       activeIcon: TrendingDown,
-      allowedRoles: ["super", "admin"],
+      allowedRoles: ["super", "admin", "ventas"],
     },
     {
       id: "contabilidad",

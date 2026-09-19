@@ -301,7 +301,7 @@ export default function DashboardLaArada() {
       borderColor: "border-emerald-500/30 hover:border-emerald-500/60",
       iconBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
       badge: null,
-      allowedRoles: ["super", "admin"],
+      allowedRoles: ["super", "admin", "ventas"],
     },
     {
       id: "contabilidad",

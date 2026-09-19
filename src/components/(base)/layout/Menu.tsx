@@ -71,7 +71,7 @@ const LA_ARADA_LINKS = [
     href: "/cermadsa/laarada/gastos",
     label: "Gastos",
     icon: TrendingDown,
-    roles: ["super", "admin"],
+    roles: ["super", "admin", "ventas"],
   },
   {
     href: "/cermadsa/laarada/proveedores",

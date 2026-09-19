@@ -98,7 +98,7 @@ export default function Gastos() {
     };
   }, [realRole]);
 
-  const allowedRoles = ["super", "admin"];
+  const allowedRoles = ["super", "admin", "ventas"];
   const hasAccess = allowedRoles.includes(effectiveRole);
 
   useEffect(() => {
