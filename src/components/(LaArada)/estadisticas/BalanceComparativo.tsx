@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GastoItem } from "@/components/(LaArada)/gastos/lib/zod";
+import { fechaConteoVenta } from "@/components/(LaArada)/lib/fecha-venta";
 
 interface BalanceComparativoProps {
   viewMode: "mensual" | "anual";
@@ -74,12 +75,8 @@ export default function BalanceComparativo({
 
     // Sumar ventas por día
     validOrders.forEach((item: any) => {
-      let dateString = item.fecha_entrega || item.created_at;
-      if (!dateString) return;
-      if (typeof dateString === "string" && dateString.length === 10) {
-        dateString = `${dateString}T12:00:00`;
-      }
-      const date = new Date(dateString);
+      const date = fechaConteoVenta(item);
+      if (!date) return;
       if (
         date.getMonth() === selectedMonth &&
         date.getFullYear() === selectedYear
@@ -200,12 +197,8 @@ export default function BalanceComparativo({
     }
 
     validOrders.forEach((item: any) => {
-      let dateString = item.fecha_entrega || item.created_at;
-      if (!dateString) return;
-      if (typeof dateString === "string" && dateString.length === 10) {
-        dateString = `${dateString}T12:00:00`;
-      }
-      const date = new Date(dateString);
+      const date = fechaConteoVenta(item);
+      if (!date) return;
       if (date.getFullYear() === selectedYear) {
         const m = date.getMonth();
         const amount = Number(item.total || 0);

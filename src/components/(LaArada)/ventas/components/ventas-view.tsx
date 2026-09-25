@@ -17,6 +17,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import {
+  claveFechaConteo,
+  claveFechaFactura,
+  claveFechaVenta,
+  formatearFechaClave,
+} from "@/components/(LaArada)/lib/fecha-venta";
 
 const MONTH_SHORT = [
   "Ene",
@@ -188,11 +194,7 @@ const getGuatemalaDateParts = (dateInput?: string | Date) => {
   return { year, month, week };
 };
 
-const getOrderDateString = (order: any) => {
-  if (order.fecha_entrega) return String(order.fecha_entrega).substring(0, 10);
-  if (order.created_at) return String(order.created_at).substring(0, 10);
-  return "Sin Fecha";
-};
+const getOrderDateString = (order: any) => claveFechaConteo(order);
 
 const getWeeksLabels = (year: number, month: number) => {
   const labels = [];
@@ -704,6 +706,22 @@ export default function ListView({
                               <span className="text-xs font-semibold text-muted-foreground">
                                 {venta.vendedor?.nombre || "-"}
                               </span>
+                              <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5">
+                                Venta
+                              </span>
+                              <span className="text-xs font-semibold text-foreground">
+                                {formatearFechaClave(claveFechaVenta(venta))}
+                              </span>
+                              {claveFechaFactura(venta) && (
+                                <>
+                                  <span className="text-[10px] uppercase font-bold text-sky-600 mt-1">
+                                    Factura
+                                  </span>
+                                  <span className="text-xs font-semibold text-sky-700 dark:text-sky-400">
+                                    {formatearFechaClave(claveFechaFactura(venta))}
+                                  </span>
+                                </>
+                              )}
                               <span className="text-[10px] italic text-muted-foreground mt-0.5">
                                 {venta.created_at
                                   ? new Date(

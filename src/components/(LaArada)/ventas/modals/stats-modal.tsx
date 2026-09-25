@@ -20,6 +20,7 @@ import {
   LineChart,
 } from "recharts";
 import { useMemo } from "react";
+import { fechaConteoVenta } from "@/components/(LaArada)/lib/fecha-venta";
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -62,8 +63,9 @@ export default function StatsModal({ isOpen, onClose, allVentas }: StatsModalPro
       .forEach((v) => {
         const id = v.usuario_id || "unknown";
         if (!monthly[id]) return;
-        const month = new Date(v.created_at).getMonth();
-        monthly[id][month] += v.total || 0;
+        const date = fechaConteoVenta(v);
+        if (!date) return;
+        monthly[id][date.getMonth()] += v.total || 0;
       });
 
     // Build chart data: [{name: "Ene", "Juan": 1200, "Pedro": 900}, ...]

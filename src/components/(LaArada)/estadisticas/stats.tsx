@@ -43,6 +43,7 @@ import { EstadisticasDataSkeleton } from "./estadisticas-skeleton";
 import { PeriodPicker, toPeriodKey } from "./PeriodPicker";
 import BalanceComparativo from "./BalanceComparativo";
 import type { GastoItem } from "@/components/(LaArada)/gastos/lib/zod";
+import { fechaConteoVenta } from "@/components/(LaArada)/lib/fecha-venta";
 
 const CHART_COLORS = {
   default: "#4D9FE8",
@@ -356,12 +357,8 @@ export default function Stats({
   const periodsWithData = useMemo(() => {
     const periods = new Set<string>();
     validOrders.forEach((item: any) => {
-      let dateString = item.fecha_entrega || item.created_at;
-      if (!dateString) return;
-      if (typeof dateString === "string" && dateString.length === 10) {
-        dateString = `${dateString}T12:00:00`;
-      }
-      const date = new Date(dateString);
+      const date = fechaConteoVenta(item);
+      if (!date) return;
       periods.add(toPeriodKey(date.getFullYear(), date.getMonth()));
     });
     gastos.forEach((g: GastoItem) => {
@@ -405,20 +402,14 @@ export default function Stats({
     }
 
     validOrders.forEach((item: any) => {
-      let dateString = item.fecha_entrega || item.created_at;
-      if (dateString) {
-        if (typeof dateString === "string" && dateString.length === 10) {
-          dateString = `${dateString}T12:00:00`;
-        }
-
-        const date = new Date(dateString);
-        if (
-          date.getMonth() === selectedMonth &&
-          date.getFullYear() === selectedYear
-        ) {
-          const day = date.getDate();
-          dayMap[day] += Number(item.total || 0);
-        }
+      const date = fechaConteoVenta(item);
+      if (!date) return;
+      if (
+        date.getMonth() === selectedMonth &&
+        date.getFullYear() === selectedYear
+      ) {
+        const day = date.getDate();
+        dayMap[day] += Number(item.total || 0);
       }
     });
 
@@ -455,10 +446,8 @@ export default function Stats({
     if (validOrders.length === 0) return null;
 
     const yearData = validOrders.filter((item: any) => {
-      let d = item.fecha_entrega || item.created_at;
-      if (!d) return false;
-      if (typeof d === "string" && d.length === 10) d += "T12:00:00";
-      return new Date(d).getFullYear() === selectedYear;
+      const date = fechaConteoVenta(item);
+      return date?.getFullYear() === selectedYear;
     });
 
     const monthsData = Array.from({ length: 12 }, () => ({
@@ -467,9 +456,8 @@ export default function Stats({
     }));
 
     yearData.forEach((item: any) => {
-      let d = item.fecha_entrega || item.created_at;
-      if (typeof d === "string" && d.length === 10) d += "T12:00:00";
-      const date = new Date(d);
+      const date = fechaConteoVenta(item);
+      if (!date) return;
       const m = date.getMonth();
       const day = date.getDate();
       const amount = Number(item.total || 0);
