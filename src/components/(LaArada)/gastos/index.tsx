@@ -73,7 +73,7 @@ export default function Gastos() {
   const [viewingMovimientosGasto, setViewingMovimientosGasto] = useState<GastoItem | null>(null);
   const [anularGastoTarget, setAnularGastoTarget] = useState<GastoItem | null>(null);
   const [pageSize, setPageSize] = useState<PageSizeOption>(15);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [pageByFilterKey, setPageByFilterKey] = useState<Record<string, number>>({});
 
   // Filtro por Fechas: Inicializado por defecto en el mes actual ("DD / MM / AA")
   const currentMonthRange = useMemo(() => getCurrentMonthSlashRange(), []);
@@ -82,16 +82,14 @@ export default function Gastos() {
 
   const metadata = user?.user_metadata || {};
   const realRole = (metadata.rol || user?.role || "user") as string;
-  const [effectiveRole, setEffectiveRole] = useState(() =>
-    readLaAradaSimulatedRole(realRole)
-  );
+  const [roleSyncTick, setRoleSyncTick] = useState(0);
+  const effectiveRole = useMemo(() => {
+    void roleSyncTick;
+    return readLaAradaSimulatedRole(realRole);
+  }, [realRole, roleSyncTick]);
 
   useEffect(() => {
-    setEffectiveRole(readLaAradaSimulatedRole(realRole));
-    const syncRole = (e?: any) => {
-      const newRole = e?.detail || readLaAradaSimulatedRole(realRole);
-      setEffectiveRole(newRole);
-    };
+    const syncRole = () => setRoleSyncTick((t) => t + 1);
     window.addEventListener("laarada-simulated-role-change", syncRole);
     window.addEventListener("storage", syncRole);
     window.addEventListener("focus", syncRole);
@@ -118,25 +116,25 @@ export default function Gastos() {
   const showAccionesColumn = canEditar || canEliminar;
   const isSuper = canUsePreventasSimular(realRole, effectiveRole);
 
-  // Estado de simulación para Super
-  const [simular, setSimular] = useState(false);
+  const [simularRevision, setSimularRevision] = useState(0);
+  const simular = useMemo(() => {
+    void simularRevision;
+    if (!isSuper) return false;
+    if (typeof sessionStorage === "undefined") return false;
+    return sessionStorage.getItem(SIMULAR_KEY) === "1";
+  }, [isSuper, simularRevision]);
 
   useEffect(() => {
     if (!isSuper) {
-      setSimular(false);
       sessionStorage.removeItem(SIMULAR_KEY);
-      return;
     }
-    setSimular(sessionStorage.getItem(SIMULAR_KEY) === "1");
   }, [isSuper]);
 
   const toggleSimular = () => {
     if (!isSuper) return;
-    setSimular((prev) => {
-      const next = !prev;
-      sessionStorage.setItem(SIMULAR_KEY, next ? "1" : "0");
-      return next;
-    });
+    const next = sessionStorage.getItem(SIMULAR_KEY) !== "1";
+    sessionStorage.setItem(SIMULAR_KEY, next ? "1" : "0");
+    setSimularRevision((n) => n + 1);
   };
 
   // Conjunto de datos a mostrar (reales o simulados)
@@ -177,6 +175,16 @@ export default function Gastos() {
     });
   }, [displayGastos, searchTerm, selectedCategoria, fechaDesde, fechaHasta]);
 
+  const paginationKey = useMemo(
+    () =>
+      [searchTerm, selectedCategoria, fechaDesde, fechaHasta, simular, pageSize].join(
+        "\u0001"
+      ),
+    [searchTerm, selectedCategoria, fechaDesde, fechaHasta, simular, pageSize]
+  );
+
+  const currentPage = pageByFilterKey[paginationKey] ?? 1;
+
   // Paginación con selector 15 / 30 / 45 / Todos
   const totalPages =
     pageSize === "all"
@@ -184,9 +192,9 @@ export default function Gastos() {
       : Math.max(1, Math.ceil(filtrados.length / (Number(pageSize) || 15)));
   const safeCurrentPage = Math.min(currentPage, totalPages);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, selectedCategoria, fechaDesde, fechaHasta, simular, pageSize]);
+  const handlePageChange = (page: number) => {
+    setPageByFilterKey((prev) => ({ ...prev, [paginationKey]: page }));
+  };
 
   const paginatedGastos = useMemo(() => {
     if (pageSize === "all") return filtrados;
@@ -791,7 +799,7 @@ export default function Gastos() {
               totalItems={filtrados.length}
               pageSize={pageSize}
               onPageSizeChange={setPageSize}
-              onPageChange={setCurrentPage}
+              onPageChange={handlePageChange}
             />
           )}
         </div>
