@@ -10,8 +10,9 @@ import {
   createGastoCategoria,
   updateGasto,
   deleteGasto,
+  anularGasto,
 } from "./actions";
-import { GastoFormValues } from "./zod";
+import { AnularGastoValues, GastoFormValues } from "./zod";
 import { toast } from "react-toastify";
 
 export function useGastos() {
@@ -112,6 +113,25 @@ export function useUpdateGasto() {
       }
     },
     onError: (err: any) => {
+      toast.error(`Error inesperado: ${err.message}`);
+    },
+  });
+}
+
+export function useAnularGasto() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: AnularGastoValues) => anularGasto(payload),
+    onSuccess: (res) => {
+      if (res.error) {
+        toast.error(`Error: ${res.error}`);
+      } else {
+        toast.success("Gasto anulado correctamente");
+        queryClient.invalidateQueries({ queryKey: ["gastos"] });
+      }
+    },
+    onError: (err: Error) => {
       toast.error(`Error inesperado: ${err.message}`);
     },
   });

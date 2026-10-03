@@ -1,9 +1,41 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { GastoSchema, GastoFormValues, GastoItem, GastoCategoriaItem, GastoMovimiento } from "./zod";
+import {
+  GastoSchema,
+  GastoFormValues,
+  GastoItem,
+  GastoCategoriaItem,
+  GastoMovimiento,
+  AnularGastoSchema,
+  GASTO_CATEGORIA_ANULADO,
+  isGastoCategoriaAnulada,
+} from "./zod";
 import { formatFechaHora, formatNombreCorto } from "./ui";
 import { revalidatePath } from "next/cache";
+
+async function getGastosActorRole(
+  supabase: Awaited<ReturnType<typeof createClient>>
+): Promise<{ userName: string; role: string } | { error: string }> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "No hay sesión de usuario activa." };
+  }
+
+  const meta = user.user_metadata || {};
+  const rawUserName =
+    meta.name || meta.nombre || meta.username || user.email?.split("@")[0] || "Usuario";
+  const role = (meta.rol || user.role || "user") as string;
+
+  return { userName: formatNombreCorto(rawUserName), role };
+}
+
+function isGastosAdminRole(role: string) {
+  return role === "super" || role === "admin";
+}
 
 export async function getGastos(): Promise<GastoItem[]> {
   const supabase = await createClient();
@@ -43,6 +75,10 @@ export async function createGastoCategoria(categoria: string) {
   const trimmed = (categoria || "").trim();
   if (!trimmed) {
     return { error: "El nombre de la categoría es requerido." };
+  }
+
+  if (isGastoCategoriaAnulada(trimmed)) {
+    return { error: "«Anulado» es una categoría reservada del sistema." };
   }
 
   const supabase = await createClient();
@@ -163,6 +199,10 @@ export async function updateGasto(id: string, raw: GastoFormValues) {
     return { error: "No se encontró el gasto a actualizar." };
   }
 
+  if (isGastoCategoriaAnulada(currentGasto.categoria || "")) {
+    return { error: "No se puede editar un gasto anulado." };
+  }
+
   const existingMovs = Array.isArray(currentGasto.movimientos)
     ? currentGasto.movimientos
     : [];
@@ -244,6 +284,74 @@ export async function updateGasto(id: string, raw: GastoFormValues) {
   }
 
   revalidatePath("/cermadsa/laarada/gastos");
+  return { success: true };
+}
+
+export async function anularGasto(raw: { id: string; razon: string }) {
+  const parsed = AnularGastoSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || "Datos inválidos" };
+  }
+
+  const { id, razon } = parsed.data;
+  const supabase = await createClient();
+  const actor = await getGastosActorRole(supabase);
+  if ("error" in actor) {
+    return { error: actor.error };
+  }
+  if (!isGastosAdminRole(actor.role)) {
+    return { error: "No tienes permiso para anular gastos." };
+  }
+
+  const { data: currentGasto, error: fetchErr } = await supabase
+    .from("arada_gastos")
+    .select("movimientos, cantidad, categoria, nombre")
+    .eq("id", id)
+    .single();
+
+  if (fetchErr || !currentGasto) {
+    return { error: "No se encontró el gasto a anular." };
+  }
+
+  if (isGastoCategoriaAnulada(currentGasto.categoria || "")) {
+    return { error: "Este gasto ya está anulado." };
+  }
+
+  const existingMovs = Array.isArray(currentGasto.movimientos)
+    ? currentGasto.movimientos
+    : [];
+
+  const monto = Number(currentGasto.cantidad || 0);
+  const categoriaAnterior = (currentGasto.categoria || "").trim();
+  const nombreGasto = (currentGasto.nombre || "").trim();
+
+  const anulacionMovement: GastoMovimiento = {
+    id: crypto.randomUUID(),
+    fecha: new Date().toISOString(),
+    usuario: actor.userName,
+    accion: "Anulación",
+    razon,
+    categoria_anterior: categoriaAnterior,
+    detalle: `Gasto anulado. Categoría cambiada de "${categoriaAnterior}" a "${GASTO_CATEGORIA_ANULADO}". Monto Q${monto.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+    })} — "${nombreGasto}" deja de contabilizarse en totales y reportes.`,
+  };
+
+  const { error } = await supabase
+    .from("arada_gastos")
+    .update({
+      categoria: GASTO_CATEGORIA_ANULADO,
+      movimientos: [anulacionMovement, ...existingMovs],
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error al anular gasto:", error.message);
+    return { error: error.message };
+  }
+
+  revalidatePath("/cermadsa/laarada/gastos");
+  revalidatePath("/cermadsa/laarada/estadisticas");
   return { success: true };
 }
 

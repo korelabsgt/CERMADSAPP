@@ -43,6 +43,7 @@ import { EstadisticasDataSkeleton } from "./estadisticas-skeleton";
 import { PeriodPicker, toPeriodKey } from "./PeriodPicker";
 import BalanceComparativo from "./BalanceComparativo";
 import type { GastoItem } from "@/components/(LaArada)/gastos/lib/zod";
+import { isGastoActivo } from "@/components/(LaArada)/gastos/lib/zod";
 import { fechaConteoVenta } from "@/components/(LaArada)/lib/fecha-venta";
 
 const CHART_COLORS = {
@@ -362,7 +363,7 @@ export default function Stats({
       periods.add(toPeriodKey(date.getFullYear(), date.getMonth()));
     });
     gastos.forEach((g: GastoItem) => {
-      if (!g.fecha) return;
+      if (!isGastoActivo(g) || !g.fecha) return;
       let dateString = g.fecha;
       if (typeof dateString === "string" && dateString.length === 10) {
         dateString = `${dateString}T12:00:00`;
@@ -562,7 +563,7 @@ export default function Stats({
     const map: Record<number, number> = {};
     if (!gastos || isAnual) return map;
     gastos.forEach((g) => {
-      if (!g.fecha) return;
+      if (!isGastoActivo(g) || !g.fecha) return;
       const parts = String(g.fecha).split("T")[0].split("-");
       if (parts.length === 3) {
         const y = Number(parts[0]);
@@ -580,7 +581,7 @@ export default function Stats({
     const map: Record<number, number> = {};
     if (!gastos) return map;
     gastos.forEach((g) => {
-      if (!g.fecha) return;
+      if (!isGastoActivo(g) || !g.fecha) return;
       const parts = String(g.fecha).split("T")[0].split("-");
       if (parts.length === 3) {
         const y = Number(parts[0]);

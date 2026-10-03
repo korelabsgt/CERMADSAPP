@@ -3,7 +3,14 @@
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { GastoSchema, GastoFormValues, GastoItem, GastoCategoriaItem } from "../lib/zod";
+import {
+  GastoSchema,
+  GastoFormValues,
+  GastoItem,
+  GastoCategoriaItem,
+  isGastoActivo,
+  isGastoCategoriaAnulada,
+} from "../lib/zod";
 import { useCreateGasto, useUpdateGasto, useCreateGastoCategoria } from "../lib/hooks";
 import { X, Save, TrendingDown, Tag, Calendar, DollarSign, AlignLeft, Plus, Check } from "lucide-react";
 import { toast } from "react-toastify";
@@ -91,7 +98,7 @@ export default function GastoModal({
       ...(categorias || []).map((c) => c.categoria),
       ...extraCategorias,
     ]),
-  );
+  ).filter((c) => !isGastoCategoriaAnulada(c));
 
   const handleSaveNewCategoria = async () => {
     const trimmed = newCategoriaName.trim();
@@ -160,6 +167,10 @@ export default function GastoModal({
     };
 
     if (isEditing && gastoToEdit) {
+      if (!isGastoActivo(gastoToEdit)) {
+        toast.error("No se puede guardar un gasto anulado.");
+        return;
+      }
       if (gastoToEdit.id.startsWith("simulado-")) {
         toast.info("Gasto simulado (los cambios no se guardan en base de datos)");
         onClose();

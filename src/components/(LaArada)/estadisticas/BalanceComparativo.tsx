@@ -17,7 +17,7 @@ import {
   Filter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GastoItem } from "@/components/(LaArada)/gastos/lib/zod";
+import { GastoItem, isGastoActivo } from "@/components/(LaArada)/gastos/lib/zod";
 import { fechaConteoVenta } from "@/components/(LaArada)/lib/fecha-venta";
 
 interface BalanceComparativoProps {
@@ -90,7 +90,7 @@ export default function BalanceComparativo({
 
     // Sumar gastos por día y por categoría
     (gastos || []).forEach((gasto) => {
-      if (!gasto.fecha) return;
+      if (!isGastoActivo(gasto) || !gasto.fecha) return;
       const date = new Date(gasto.fecha);
       if (
         date.getMonth() === selectedMonth &&
@@ -208,7 +208,7 @@ export default function BalanceComparativo({
     });
 
     (gastos || []).forEach((gasto) => {
-      if (!gasto.fecha) return;
+      if (!isGastoActivo(gasto) || !gasto.fecha) return;
       const date = new Date(gasto.fecha);
       if (date.getFullYear() === selectedYear) {
         const m = date.getMonth();

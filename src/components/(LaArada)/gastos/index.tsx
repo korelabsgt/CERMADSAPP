@@ -14,6 +14,7 @@ import {
   History,
   Pencil,
   Trash2,
+  Ban,
   Filter,
   Layers,
   Sparkles,
@@ -24,7 +25,7 @@ import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/components/(base)/providers/UserProvider";
 import { useGastos, useGastosCategorias, useDeleteGasto } from "./lib/hooks";
-import { GastoItem } from "./lib/zod";
+import { GastoItem, isGastoActivo } from "./lib/zod";
 import { MOCK_GASTOS_SIMULADOS } from "./lib/mock-simulados";
 import { readLaAradaSimulatedRole, canUsePreventasSimular } from "@/components/(LaArada)/lib/simulated-role";
 import TablePagination, { PageSizeOption } from "@/components/(LaArada)/lib/pagination";
@@ -53,6 +54,8 @@ import {
 import { GastosSkeleton } from "./gastos-skeleton";
 import GastoModal from "./modals/gasto-modal";
 import MovimientosModal from "./modals/movimientos-modal";
+import AnularGastoModal from "./modals/anular-gasto-modal";
+import { isGastoCategoriaAnulada } from "./lib/zod";
 
 const SIMULAR_KEY = "gastos-simular";
 
@@ -68,6 +71,7 @@ export default function Gastos() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingGasto, setEditingGasto] = useState<GastoItem | null>(null);
   const [viewingMovimientosGasto, setViewingMovimientosGasto] = useState<GastoItem | null>(null);
+  const [anularGastoTarget, setAnularGastoTarget] = useState<GastoItem | null>(null);
   const [pageSize, setPageSize] = useState<PageSizeOption>(15);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -109,7 +113,9 @@ export default function Gastos() {
 
   const canCrear = allowedRoles.includes(effectiveRole);
   const canEditar = effectiveRole === "super" || effectiveRole === "admin";
+  const canAnular = canEditar;
   const canEliminar = effectiveRole === "super";
+  const showAccionesColumn = canEditar || canEliminar;
   const isSuper = canUsePreventasSimular(realRole, effectiveRole);
 
   // Estado de simulación para Super
@@ -191,27 +197,36 @@ export default function Gastos() {
 
   // Resumen métricas
   const totalMonto = useMemo(() => {
-    return filtrados.reduce((acc, curr) => acc + (Number(curr.cantidad) || 0), 0);
+    return filtrados
+      .filter(isGastoActivo)
+      .reduce((acc, curr) => acc + (Number(curr.cantidad) || 0), 0);
   }, [filtrados]);
 
   const totalPlanilla = useMemo(() => {
     return filtrados
-      .filter((g) => g.categoria.toLowerCase() === "planilla")
+      .filter((g) => isGastoActivo(g) && g.categoria.toLowerCase() === "planilla")
       .reduce((acc, curr) => acc + (Number(curr.cantidad) || 0), 0);
   }, [filtrados]);
 
   const totalCompras = useMemo(() => {
     return filtrados
-      .filter((g) => g.categoria.toLowerCase().includes("compra"))
+      .filter((g) => isGastoActivo(g) && g.categoria.toLowerCase().includes("compra"))
       .reduce((acc, curr) => acc + (Number(curr.cantidad) || 0), 0);
   }, [filtrados]);
+
+  const registrosActivosCount = useMemo(
+    () => filtrados.filter(isGastoActivo).length,
+    [filtrados]
+  );
 
   // Lista de categorías únicas para el filtro
   const categoriasFilterList = useMemo(() => {
     const set = new Set<string>();
-    categorias.forEach((c) => set.add(c.categoria));
+    categorias.forEach((c) => {
+      if (!isGastoCategoriaAnulada(c.categoria)) set.add(c.categoria);
+    });
     displayGastos.forEach((g) => set.add(g.categoria));
-    return Array.from(set);
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
   }, [categorias, displayGastos]);
 
   // Acciones
@@ -224,6 +239,10 @@ export default function Gastos() {
   const handleOpenEdit = (gasto: GastoItem, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!canEditar) return;
+    if (!isGastoActivo(gasto)) {
+      toast.warn("Este gasto está anulado y no se puede editar.");
+      return;
+    }
     setEditingGasto(gasto);
     setModalOpen(true);
   };
@@ -271,6 +290,24 @@ export default function Gastos() {
     if (!result.isConfirmed) return;
 
     await deleteMutation.mutateAsync(gasto.id);
+  };
+
+  const handleOpenAnular = (gasto: GastoItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!canAnular) return;
+
+    if (!isGastoActivo(gasto)) {
+      toast.info("Este gasto ya está anulado.");
+      return;
+    }
+
+    if (gasto.id.startsWith("simulado-")) {
+      toast.info("En modo simulación no se anulan registros de base de datos.");
+      return;
+    }
+
+    setAnularGastoTarget(gasto);
   };
 
   if (!hasAccess) {
@@ -340,7 +377,10 @@ export default function Gastos() {
             Q{formatMoney(totalMonto)}
           </p>
           <p className="text-[11px] text-muted-foreground">
-            {filtrados.length} {filtrados.length === 1 ? "registro" : "registros"}
+            {registrosActivosCount} activos
+            {filtrados.length !== registrosActivosCount
+              ? ` · ${filtrados.length - registrosActivosCount} anulado(s)`
+              : ""}
           </p>
         </div>
 
@@ -578,7 +618,9 @@ export default function Gastos() {
                     <th className="w-[1%] px-3 py-3 whitespace-nowrap text-right">Monto</th>
                     <th className="w-[1%] px-3 py-3 whitespace-nowrap text-left">Registro / Fecha</th>
                     <th className="w-[1%] px-2 py-3 whitespace-nowrap text-center">Movs.</th>
-                    <th className="w-[1%] px-3 py-3 whitespace-nowrap text-right">Acciones</th>
+                    {showAccionesColumn && (
+                      <th className="w-[1%] px-3 py-3 whitespace-nowrap text-right">Acciones</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className={gastosTbodyClass}>
@@ -586,14 +628,28 @@ export default function Gastos() {
                     const movsCount = Array.isArray(gasto.movimientos)
                       ? gasto.movimientos.length
                       : 0;
+                    const anulado = !isGastoActivo(gasto);
                     const sizeNum = pageSize === "all" ? filtrados.length : Number(pageSize) || 15;
                     const rowNumber = (safeCurrentPage - 1) * sizeNum + index + 1;
 
                     return (
                       <tr
                         key={gasto.id}
-                        className={gastosRowClass}
-                        onClick={(e) => handleOpenEdit(gasto, e)}
+                        className={cn(
+                          canEditar ? gastosRowClass : "transition-colors",
+                          anulado && "opacity-60 bg-zinc-50/80 dark:bg-zinc-800/30"
+                        )}
+                        onClick={
+                          canEditar
+                            ? (e) => {
+                                if (anulado) {
+                                  e.stopPropagation();
+                                  return;
+                                }
+                                handleOpenEdit(gasto, e);
+                              }
+                            : undefined
+                        }
                       >
                         {/* No. */}
                         <td className="sticky left-0 z-10 w-12 bg-white px-2 py-2.5 text-center tabular-nums shadow-[2px_0_6px_-2px_rgba(0,0,0,0.15)] dark:bg-zinc-900 lg:py-3">
@@ -603,7 +659,11 @@ export default function Gastos() {
                         {/* Concepto (toma todo el espacio disponible) */}
                         <td className="px-4 py-2.5 lg:py-3 text-[12px] lg:text-sm font-bold uppercase leading-snug text-foreground">
                           <div className="flex flex-col">
-                            <span>{gasto.nombre}</span>
+                            <span className="flex flex-wrap items-center gap-2">
+                              <span className={cn(anulado && "line-through text-muted-foreground")}>
+                                {gasto.nombre}
+                              </span>
+                            </span>
                             {gasto.descripcion && (
                               <span className="text-[10px] text-muted-foreground font-normal normal-case mt-0.5">
                                 {gasto.descripcion}
@@ -617,7 +677,9 @@ export default function Gastos() {
                           <span
                             className={cn(
                               "inline-flex w-36 items-center justify-center gap-1.5 px-2 py-1 text-xs font-bold rounded-md",
-                              gasto.categoria.toLowerCase() === "planilla"
+                              isGastoCategoriaAnulada(gasto.categoria)
+                                ? "border border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+                                : gasto.categoria.toLowerCase() === "planilla"
                                 ? "border border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300"
                                 : gasto.categoria.toLowerCase().includes("compra")
                                 ? "border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300"
@@ -636,7 +698,14 @@ export default function Gastos() {
                         </td>
 
                         {/* Monto */}
-                        <td className="w-[1%] px-3 py-3 text-right font-bold tabular-nums text-red-600 dark:text-red-400 whitespace-nowrap text-sm">
+                        <td
+                          className={cn(
+                            "w-[1%] px-3 py-3 text-right font-bold tabular-nums whitespace-nowrap text-sm",
+                            anulado
+                              ? "text-muted-foreground line-through"
+                              : "text-red-600 dark:text-red-400"
+                          )}
+                        >
                           Q{formatMoney(gasto.cantidad)}
                         </td>
 
@@ -668,33 +737,45 @@ export default function Gastos() {
                           </button>
                         </td>
 
-                        {/* Acciones */}
-                        <td className="w-[1%] px-3 py-3 text-right whitespace-nowrap">
-                          <div className="inline-flex items-center gap-1">
-                            {canEditar && (
-                              <button
-                                type="button"
-                                onClick={(e) => handleOpenEdit(gasto, e)}
-                                className="inline-flex size-8 items-center justify-center rounded-lg text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
-                                title="Editar gasto"
-                              >
-                                <Pencil className="size-3.5" />
-                              </button>
-                            )}
+                        {showAccionesColumn && (
+                          <td className="w-[1%] px-3 py-3 text-right whitespace-nowrap">
+                            <div className="inline-flex items-center gap-1">
+                              {canEditar && !anulado && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleOpenEdit(gasto, e)}
+                                  className="inline-flex size-8 items-center justify-center rounded-lg text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+                                  title="Editar gasto"
+                                >
+                                  <Pencil className="size-3.5" />
+                                </button>
+                              )}
 
-                            {canEliminar && (
-                              <button
-                                type="button"
-                                disabled={deleteMutation.isPending}
-                                onClick={(e) => void handleConfirmDelete(gasto, e)}
-                                className="inline-flex size-8 items-center justify-center rounded-lg text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-950/60 cursor-pointer transition-colors disabled:opacity-50"
-                                title="Eliminar gasto"
-                              >
-                                <Trash2 className="size-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        </td>
+                              {canAnular && !anulado && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleOpenAnular(gasto, e)}
+                                  className="inline-flex size-8 items-center justify-center rounded-lg text-amber-700 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-950/60 cursor-pointer transition-colors"
+                                  title="Anular gasto"
+                                >
+                                  <Ban className="size-3.5" />
+                                </button>
+                              )}
+
+                              {canEliminar && (
+                                <button
+                                  type="button"
+                                  disabled={deleteMutation.isPending}
+                                  onClick={(e) => void handleConfirmDelete(gasto, e)}
+                                  className="inline-flex size-8 items-center justify-center rounded-lg text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-950/60 cursor-pointer transition-colors disabled:opacity-50"
+                                  title="Eliminar gasto"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
@@ -732,6 +813,12 @@ export default function Gastos() {
         isOpen={!!viewingMovimientosGasto}
         onClose={() => setViewingMovimientosGasto(null)}
         gasto={viewingMovimientosGasto}
+      />
+
+      <AnularGastoModal
+        isOpen={!!anularGastoTarget}
+        onClose={() => setAnularGastoTarget(null)}
+        gasto={anularGastoTarget}
       />
     </div>
   );

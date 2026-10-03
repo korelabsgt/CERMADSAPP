@@ -76,6 +76,7 @@ export default function MovimientosModal({
                 const accionNormalized = (m.accion || "").toUpperCase();
                 const isCreacion = accionNormalized.includes("CREA");
                 const isEdicion = accionNormalized.includes("EDIC");
+                const isAnulacion = accionNormalized.includes("ANUL");
 
                 return (
                   <div key={idx} className="relative group">
@@ -86,6 +87,8 @@ export default function MovimientosModal({
                           ? "bg-emerald-500 text-white"
                           : isEdicion
                           ? "bg-amber-500 text-white"
+                          : isAnulacion
+                          ? "bg-zinc-500 text-white"
                           : "bg-red-500 text-white"
                       }`}
                     >
@@ -100,6 +103,8 @@ export default function MovimientosModal({
                               ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
                               : isEdicion
                               ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+                              : isAnulacion
+                              ? "bg-zinc-200 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200"
                               : "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400"
                           }`}
                         >
@@ -115,9 +120,27 @@ export default function MovimientosModal({
                         {m.detalle}
                       </p>
 
+                      {isAnulacion && m.razon && (
+                        <p className="text-xs text-foreground leading-relaxed rounded-lg bg-zinc-50 dark:bg-zinc-900/80 px-2.5 py-2 border border-zinc-100 dark:border-zinc-700">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Razón:{" "}
+                          </span>
+                          {m.razon}
+                        </p>
+                      )}
+
+                      {isAnulacion && m.categoria_anterior && (
+                        <p className="text-[11px] text-muted-foreground">
+                          Categoría anterior:{" "}
+                          <span className="font-semibold text-foreground">
+                            {m.categoria_anterior}
+                          </span>
+                        </p>
+                      )}
+
                       <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground pt-1 border-t border-zinc-100 dark:border-zinc-700/60">
                         <User className="size-3 text-red-500" />
-                        <span>Realizado por:</span>
+                        <span>{isAnulacion ? "Anulado por:" : "Realizado por:"}</span>
                         <span className="font-semibold text-foreground">
                           {m.usuario || "Sistema"}
                         </span>
